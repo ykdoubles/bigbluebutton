@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <config>
-    <localeversion suppressWarning="false">0.71</localeversion>
+    <localeversion suppressWarning="false">0.8-beta2</localeversion>
     <version>VERSION</version>
     <help url="http://HOST/help.html"/>
     <porttest host="HOST" application="video"/>    
@@ -17,6 +17,7 @@
 			translationOn="true"
 			translationEnabled="true"	
 			privateEnabled="true"  
+			position="top-right"
 		/>
 		
 		<module name="ViewersModule" url="ViewersModule.swf?v=VERSION" 
@@ -42,6 +43,7 @@
 			autoJoin="false"
 			skipCheck="false"
 			showButton="true"
+			enabledEchoCancel="true"
 			dependsOn="ViewersModule"
 		/>
 
@@ -59,7 +61,7 @@
 			camKeyFrameInterval="5"
 			camModeFps="15"
 			camQualityBandwidth="0"
-			camQualityPicture="100"
+			camQualityPicture="50"
 			h264Level="4.1"
 			h264Profile="main"			
 		/>
@@ -81,6 +83,9 @@
 			dependsOn="VideoconfModule, ViewersModule"
 			autoDock="true"
 			maximizeWindow="false"
+			position="bottom-right"
+			width="172"
+			height="179"
 		/>
 		
 		<!-- new module in development: 

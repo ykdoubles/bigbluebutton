@@ -29,13 +29,11 @@ package org.bigbluebutton.modules.videoconf.business
 	import flash.media.H264VideoStreamSettings;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
-	import flash.system.Capabilities;
-	
-	import mx.collections.ArrayCollection;
-	
+	import flash.system.Capabilities;	
+	import mx.collections.ArrayCollection;	
 	import org.bigbluebutton.common.LogUtil;
-	import org.bigbluebutton.common.UserManager;
 	import org.bigbluebutton.core.BBB;
+	import org.bigbluebutton.core.managers.UserManager;
 	import org.bigbluebutton.main.model.users.BBBUser;
 	import org.bigbluebutton.main.model.users.events.StreamStartedEvent;
 	import org.bigbluebutton.modules.videoconf.events.StartBroadcastEvent;
