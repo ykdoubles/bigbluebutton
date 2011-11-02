@@ -6,7 +6,7 @@ Application {
 }
 
 MDICanvas {
-	backgroundColor: #303030;
+	backgroundColor: #000000;
 }
 
 Button {
@@ -20,12 +20,12 @@ Button {
 }
 
 .mypanelTitle {
-   color: #d0d0d0; /* windows title */
+   color: #000000; /* windows title */
 }
 
 /* it will modify the microphone settings and the logout window */
 TitleWindow {
-	backgroundColor: #252525;
+	backgroundColor: #000000;
 	borderColor: #000000;
 }
 
@@ -36,16 +36,35 @@ List {
 }
 
 .mdiWindowFocus {
+	borderStyle: solid;
+	borderColor: #000000;
+	borderAlpha: 0;
+	borderThickness: 0;
+	cornerRadius: 0;
+	headerHeight: 0;
+	backgroundAlpha: 1;
+	highlightAlphas: 1, 0;
+	headerColors: #000000, #d9d9d9;
+	footerColors: #000000, #c7c7c7;
 	backgroundColor: #000000;
-	borderColor: #252525;
+	shadowDirection: left;
 	titleStyleName: "mypanelTitle";
 }
 
 .mdiWindowNoFocus {
-	backgroundColor: #000000; 
-	borderColor: #252525;
+	borderStyle: solid;
+	borderColor: #000000;
+	borderAlpha: 0;
+	borderThickness: 0;
+	cornerRadius: 0;
+	headerHeight: 0;
+	backgroundAlpha: 1;
+	highlightAlphas: 1, 0;
+	headerColors: #000000, #d9d9d9;
+	footerColors: #000000, #c7c7c7;
+	backgroundColor: #000000;
+	shadowDirection: left;
 	titleStyleName: "mypanelTitle";
-	borderAlpha: 0.95;
 }
 
 /* this will affect the chat */
