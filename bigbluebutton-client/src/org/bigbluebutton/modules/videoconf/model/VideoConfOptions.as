@@ -29,7 +29,10 @@ package org.bigbluebutton.modules.videoconf.model
 		public var camQualityBandwidth:Number = 0;
 
 		[Bindable]
-		public var h264Level:String = "4.1";	
+		public var enableH264:Boolean = false;
+		
+		[Bindable]
+		public var h264Level:String = "2.1";	
 		
 		[Bindable]
 		public var h264Profile:String = "main";	
@@ -70,6 +73,9 @@ package org.bigbluebutton.modules.videoconf.model
 				if (vxml.@camQualityPicture != undefined) {
 					camQualityPicture = Number(vxml.@camQualityPicture.toString());
 				}
+				if (vxml.@enableH264 != undefined) {
+					enableH264 = (vxml.@enableH264.toString().toUpperCase() == "TRUE") ? true : false;
+				}	
 				if (vxml.@h264Level != undefined) {
 					h264Level = vxml.@h264Level.toString();
 				}
