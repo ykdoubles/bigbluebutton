@@ -94,4 +94,10 @@ public class ParticipantsEventSender implements IRoomListener {
 		// TODO Auto-generated method stub
 		return name;
 	}
+
+	@Override
+	public void setRecordStatus(Boolean isRecording) {
+		// TODO Auto-generated method stub
+		
+	}
 }

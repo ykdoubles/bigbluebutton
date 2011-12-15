@@ -263,6 +263,15 @@ package org.bigbluebutton.main.model.users {
 			); //_netConnection.call
 		}
 		
+		public function sendRecordStatus(isRecording:Boolean):void {
+			var nc:NetConnection = netConnectionDelegate.connection;			
+			nc.call(
+				"xx.xx",// Remote function name
+				responder,
+				isRecording
+			); //_netConnection.call
+		}
+		
 		public function addStream(userid:Number, streamName:String):void {
 			var nc:NetConnection = netConnectionDelegate.connection;	
 			nc.call(

@@ -202,12 +202,12 @@ package org.bigbluebutton.modules.deskshare.services
 			dispatcher.dispatchEvent(event);
 		}
 		
-		public function recordingStatusCallback(status:String):void {
+		/*public function recordingStatusCallback(status:String):void {
 			var event:RecordStatusEvent = new RecordStatusEvent();
 			event.module = "DESKSHARE";
 			event.status = status;
 			dispatcher.dispatchEvent(event);
-		}
+		}*/
 		
 		/**
 		 * Check if anybody is publishing the stream for this room 

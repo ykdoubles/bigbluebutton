@@ -115,5 +115,6 @@ package org.bigbluebutton.main.model.modules
 			event.config = config;
 			dispatcher.dispatchEvent(event);
 		}
+		
 	}
 }

@@ -97,6 +97,12 @@ public class ParticipantsService {
 		application.setParticipantStatus(roomName, userid, status, value);
 	}
 	
+	public void setRecordStatus(Boolean isRecording){
+		String roomName = Red5.getConnectionLocal().getScope().getName();
+		log.debug("setting Recording Status");
+		application.setRecordStatus(roomName, isRecording);
+	}
+	
 	public void setParticipantsApplication(ParticipantsApplication a) {
 		log.debug("Setting Participants Applications");
 		application = a;

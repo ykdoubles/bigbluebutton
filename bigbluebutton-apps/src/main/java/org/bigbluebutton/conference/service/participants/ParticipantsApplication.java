@@ -125,4 +125,14 @@ public class ParticipantsApplication {
 		log.debug("Setting room manager");
 		roomsManager = r;
 	}
+
+	public void setRecordStatus(String roomName, Boolean isRecording) {
+		log.debug("Setting record status");
+		if(roomsManager.hasRoom(roomName)){
+			Room room = roomsManager.getRoom(roomName);
+			room.setRecordStatus(isRecording);
+			return;
+		}
+		log.debug("Failed to set the record status");
+	}
 }

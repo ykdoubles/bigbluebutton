@@ -262,9 +262,9 @@
 				handleLogout(e);
 			}
 			
-			private function handleRecordStatusEvent(evt:RecordStatusEvent):void {
+			/*private function handleRecordStatusEvent(evt:RecordStatusEvent):void {
 				Alert.show(evt.status, evt.module);
-			}
+			}*/
 			
 			private function setLogVisibility(e:ConfigEvent):void{
 		//		logBtn.visible = e.config.showDebug;

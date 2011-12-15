@@ -98,6 +98,11 @@ public class ParticipantUpdatingRoomListener implements IRoomListener{
 	public void endAndKickAll() {
 		// no-op
 	}
+
+	@Override
+	public void setRecordStatus(Boolean isRecording) {
+		
+	}
 	
 	
 }

@@ -79,4 +79,10 @@ public class ParticipantsEventRecorder implements IRoomListener {
 		return this.name;
 	}
 
+	@Override
+	public void setRecordStatus(Boolean isRecording) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

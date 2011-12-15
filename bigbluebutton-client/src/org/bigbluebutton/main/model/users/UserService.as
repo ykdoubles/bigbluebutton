@@ -18,15 +18,19 @@
 */
 package org.bigbluebutton.main.model.users
 {
+	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.events.Dispatcher;
 	
 	import flash.net.NetConnection;
 	
 	import mx.collections.ArrayCollection;
 	
+	import org.bigbluebutton.common.Role;
+	import org.bigbluebutton.common.events.ToolbarButtonEvent;
 	import org.bigbluebutton.core.BBB;
 	import org.bigbluebutton.core.managers.UserConfigManager;
 	import org.bigbluebutton.core.managers.UserManager;
+	import org.bigbluebutton.main.events.RecordStatusEvent;
 	import org.bigbluebutton.main.events.SuccessfulLoginEvent;
 	import org.bigbluebutton.main.events.UserServicesEvent;
 	import org.bigbluebutton.main.model.ConferenceParameters;
@@ -38,6 +42,7 @@ package org.bigbluebutton.main.model.users
 	import org.bigbluebutton.main.model.users.events.RaiseHandEvent;
 	import org.bigbluebutton.main.model.users.events.RoleChangeEvent;
 	import org.bigbluebutton.main.model.users.events.UsersConnectionEvent;
+	import org.bigbluebutton.main.views.components.RecordButton;
 
 	public class UserService {
 		private var joinService:JoinService;
@@ -85,6 +90,7 @@ package org.bigbluebutton.main.model.users
 					_conferenceParameters.record = false;
 				}
 				
+				showRecordButton(_conferenceParameters.role, _conferenceParameters.record);
 				/**
 				 * Temporarily store the parameters in global BBB so we get easy access to it.
 				 */
@@ -95,6 +101,15 @@ package org.bigbluebutton.main.model.users
 				dispatcher.dispatchEvent(e);
 				
 				connect();
+			}
+		}
+		
+		private function showRecordButton(role:String,record:Boolean):void{
+			if(role == Role.MODERATOR && record == true){
+				var btnRecord:RecordButton = new RecordButton();
+				var event:ToolbarButtonEvent = new ToolbarButtonEvent(ToolbarButtonEvent.ADD);
+				event.button = btnRecord;
+				dispatcher.dispatchEvent(event);
 			}
 		}
 		
@@ -160,6 +175,10 @@ package org.bigbluebutton.main.model.users
 			var assignTo:Number = e.userid;
 			var name:String = e.username;
 			_userSOService.assignPresenter(assignTo, name, 1);
+		}
+		
+		public function sendRecordStatus(e:RecordStatusEvent):void{
+			_userSOService.sendRecordStatus(e.isRecording);
 		}
 	}
 }

@@ -6,12 +6,11 @@ package org.bigbluebutton.main.events
 	{
 		public static const RECORD_STATUS_EVENT:String = "RECORD_STATUS_EVENT";
 		
-		public var module:String;
-		public var status:String;
+		public var isRecording:Boolean; 
 		
-		public function RecordStatusEvent(bubbles:Boolean=true, cancelable:Boolean=false)
+		public function RecordStatusEvent(type:String)
 		{
-			super(RECORD_STATUS_EVENT, bubbles, cancelable);
+			super(type, true, false);
 		}
 		
 	}
