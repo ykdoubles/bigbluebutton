@@ -64,5 +64,11 @@ public class RoomListener implements IRoomListener{
 	
 	public void endAndKickAll() {
 		// no-op
+	}
+
+	@Override
+	public void setRecordStatus(Boolean isRecording) {
+		// TODO Auto-generated method stub
+		
 	}	
 }

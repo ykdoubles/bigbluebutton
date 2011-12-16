@@ -22,8 +22,9 @@ $Id: $
 
 <mx:Button xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:mate="http://mate.asfusion.com/"
-		   label="record"
-		   click="startStopRecord()"
+		   toolTip="{(!isRecording) ? ResourceUtil.getInstance().getString('bbb.toolbar.record.start.toolTip') : ResourceUtil.getInstance().getString('bbb.toolbar.record.stop.toolTip')}"
+		   click="setRecordStatus()"
+		   icon="{(!isRecording) ? recordStartIcon : recordStopIcon}"
 		   implements="org.bigbluebutton.common.IBbbToolbarComponent">
 	<mx:Script>
 		<![CDATA[
@@ -34,13 +35,13 @@ $Id: $
 			import org.bigbluebutton.main.views.MainToolbar;
 			import org.bigbluebutton.util.i18n.ResourceUtil;
 			
-			//private var images:Images = new Images();
-			private var isRecording:Boolean = false;
-			//[Bindable] public var deskShareIcon:Class = images.deskShareIcon;
+			private var images:Images = new Images();
+			[Bindable] private var isRecording:Boolean = false;
+			[Bindable] public var recordStartIcon:Class = images.record_start;
+			[Bindable] public var recordStopIcon:Class = images.record_stop;
 			
-			//while the call is happening the button should be blocked!
-			private function startStopRecord():void {
-				//isRecording = (isRecording) ? false : true;
+			private function setRecordStatus():void {
+				isRecording = (isRecording) ? false : true;
 				
 				LogUtil.debug("record clicked");
 				var e:RecordStatusEvent = new RecordStatusEvent(RecordStatusEvent.RECORD_STATUS_EVENT);

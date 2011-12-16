@@ -266,7 +266,7 @@ package org.bigbluebutton.main.model.users {
 		public function sendRecordStatus(isRecording:Boolean):void {
 			var nc:NetConnection = netConnectionDelegate.connection;			
 			nc.call(
-				"xx.xx",// Remote function name
+				"participants.setRecordStatus",// Remote function name
 				responder,
 				isRecording
 			); //_netConnection.call

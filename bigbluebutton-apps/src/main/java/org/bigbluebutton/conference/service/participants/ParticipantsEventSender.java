@@ -97,7 +97,9 @@ public class ParticipantsEventSender implements IRoomListener {
 
 	@Override
 	public void setRecordStatus(Boolean isRecording) {
-		// TODO Auto-generated method stub
-		
+		log.debug("Setting record status to " + isRecording);
+		ArrayList args = new ArrayList();
+		args.add(isRecording);
+		//so.sendMessage("recordStatusSetted", args);
 	}
 }

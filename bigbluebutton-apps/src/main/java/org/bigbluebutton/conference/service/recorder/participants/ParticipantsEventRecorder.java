@@ -81,8 +81,13 @@ public class ParticipantsEventRecorder implements IRoomListener {
 
 	@Override
 	public void setRecordStatus(Boolean isRecording) {
-		// TODO Auto-generated method stub
+		log.debug("Setting record status to " + isRecording);
+		RecordStatusEvent evt = new RecordStatusEvent();
+		evt.setMeetingId(session);
+		evt.setTimestamp(System.currentTimeMillis());
+		evt.setIsRecording(isRecording);
 		
+		recorder.record(session, evt);
 	}
 
 }
