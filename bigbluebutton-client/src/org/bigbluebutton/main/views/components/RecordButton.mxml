@@ -22,10 +22,12 @@ $Id: $
 
 <mx:Button xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:mate="http://mate.asfusion.com/"
-		   toolTip="{(!isRecording) ? ResourceUtil.getInstance().getString('bbb.toolbar.record.start.toolTip') : ResourceUtil.getInstance().getString('bbb.toolbar.record.stop.toolTip')}"
-		   click="setRecordStatus()"
-		   icon="{(!isRecording) ? recordStartIcon : recordStopIcon}"
+		   toolTip="{(!recordStatus) ? ResourceUtil.getInstance().getString('bbb.toolbar.record.start.toolTip') : ResourceUtil.getInstance().getString('bbb.toolbar.record.stop.toolTip')}"
+		   click="sendNewStatus()"
+		   icon="{(!recordStatus) ? recordStartIcon : recordStopIcon}"
 		   implements="org.bigbluebutton.common.IBbbToolbarComponent">
+	<mate:Listener type="{RecordStatusEvent.UPDATE_RECORD_STATUS}" method="setRecordStatus" />
+	
 	<mx:Script>
 		<![CDATA[
 			import org.bigbluebutton.common.Images;
@@ -36,17 +38,19 @@ $Id: $
 			import org.bigbluebutton.util.i18n.ResourceUtil;
 			
 			private var images:Images = new Images();
-			[Bindable] private var isRecording:Boolean = false;
+			[Bindable] private var recordStatus:Boolean = false;
 			[Bindable] public var recordStartIcon:Class = images.record_start;
 			[Bindable] public var recordStopIcon:Class = images.record_stop;
 			
-			private function setRecordStatus():void {
-				isRecording = (isRecording) ? false : true;
-				
+			private function sendNewStatus():void {
 				LogUtil.debug("record clicked");
 				var e:RecordStatusEvent = new RecordStatusEvent(RecordStatusEvent.RECORD_STATUS_EVENT);
-				e.isRecording = isRecording;
+				//sending new record status
+				e.status = !recordStatus;
 				dispatchEvent(e);
+			}
+			private function setRecordStatus(newStatus:Boolean):void {
+				recordStatus = newStatus;
 			}
 			public function getAlignment():String{
 				return MainToolbar.ALIGN_LEFT;

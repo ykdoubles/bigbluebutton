@@ -178,7 +178,7 @@ package org.bigbluebutton.main.model.users
 		}
 		
 		public function sendRecordStatus(e:RecordStatusEvent):void{
-			_userSOService.sendRecordStatus(e.isRecording);
+			_userSOService.sendRecordStatus(e.status);
 		}
 	}
 }

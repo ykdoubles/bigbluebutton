@@ -100,6 +100,6 @@ public class ParticipantsEventSender implements IRoomListener {
 		log.debug("Setting record status to " + isRecording);
 		ArrayList args = new ArrayList();
 		args.add(isRecording);
-		//so.sendMessage("recordStatusSetted", args);
+		so.sendMessage("recordStatusSetted", args);
 	}
 }

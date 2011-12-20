@@ -32,6 +32,7 @@ package org.bigbluebutton.main.model.users {
 	import org.bigbluebutton.main.events.MadePresenterEvent;
 	import org.bigbluebutton.main.events.ParticipantJoinEvent;
 	import org.bigbluebutton.main.events.PresenterStatusEvent;
+	import org.bigbluebutton.main.events.RecordStatusEvent;
 	import org.bigbluebutton.main.model.ConferenceParameters;
 	import org.bigbluebutton.main.model.User;
 	import org.bigbluebutton.main.model.users.events.ConnectionFailedEvent;
@@ -263,13 +264,26 @@ package org.bigbluebutton.main.model.users {
 			); //_netConnection.call
 		}
 		
-		public function sendRecordStatus(isRecording:Boolean):void {
+		public function sendRecordStatus(status:Boolean):void {
 			var nc:NetConnection = netConnectionDelegate.connection;			
 			nc.call(
 				"participants.setRecordStatus",// Remote function name
 				responder,
-				isRecording
+				status
 			); //_netConnection.call
+		}
+		/**
+		 * Called by the server
+		 **/
+		public function recordStatusSetted(newStatus:Boolean):void{
+			LogUtil.debug("Received a recorder status: " + newStatus);
+			
+			if(UserManager.getInstance().getConference().amIModerator()){
+				var e:RecordStatusEvent = new RecordStatusEvent(RecordStatusEvent.UPDATE_RECORD_STATUS);
+				e.status = newStatus;
+				var dispatcher:Dispatcher = new Dispatcher();
+				dispatcher.dispatchEvent(e);
+			}
 		}
 		
 		public function addStream(userid:Number, streamName:String):void {
