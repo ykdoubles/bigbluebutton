@@ -132,6 +132,8 @@
 			
 			public function shareScreen(fullScreen:Boolean):void {
 				LogUtil.debug("Calling shareScreen");
+				btnFSPublish.enabled = false;
+				btnRegionPublish.enabled = false;
 				startSharing(connection, uri, room, fullScreen);
 			}
 			
@@ -226,7 +228,6 @@
 			
 			private function stopStream():void{
 				streaming = false;
-				this.removeChild(videoHolder);
 				captureHeight = Capabilities.screenResolutionY;
 				captureWidth = Capabilities.screenResolutionX;
 				ns.close();

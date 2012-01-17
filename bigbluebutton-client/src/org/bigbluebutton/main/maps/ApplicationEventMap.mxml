@@ -96,6 +96,10 @@
 	<EventHandlers type="{RoleChangeEvent.ASSIGN_PRESENTER}">
 		<MethodInvoker generator="{UserService}" method="assignPresenter" arguments="{event}" />
 	</EventHandlers>
+
+	<EventHandlers type="{ModuleLoadEvent.START_ALL_MODULES}">
+		<MethodInvoker generator="{ModulesProxy}" method="startAllModules" />
+	</EventHandlers>
 	
 	<EventHandlers type="{RecordStatusEvent.RECORD_STATUS_EVENT}">
 		<MethodInvoker generator="{UserService}" method="sendRecordStatus" arguments="{event}" />
