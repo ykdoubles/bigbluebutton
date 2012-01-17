@@ -49,8 +49,9 @@ $Id: $
 				e.status = !recordStatus;
 				dispatchEvent(e);
 			}
-			private function setRecordStatus(newStatus:Boolean):void {
-				recordStatus = newStatus;
+			private function setRecordStatus(evt:RecordStatusEvent):void {
+				LogUtil.debug("Listener: newStatus " + evt.status);
+				recordStatus = evt.status;				
 			}
 			public function getAlignment():String{
 				return MainToolbar.ALIGN_LEFT;
