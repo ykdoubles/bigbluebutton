@@ -85,15 +85,15 @@ public class MeetingService {
 	public void createMeeting(Meeting m) {
 		log.debug("Storing Meeting with internal id:" + m.getInternalId());
 		meetings.put(m.getInternalId(), m);
-		if (m.isRecord()) {
-			Map<String,String> metadata=new HashMap<String,String>();
-			metadata.putAll(m.getMetadata());
-			//TODO: Need a better way to store these values for recordings
-			metadata.put("meetingId", m.getExternalId());
-			metadata.put("meetingName", m.getName());
-			
-			messagingService.recordMeetingInfo(m.getInternalId(), metadata);
-		}
+		//record meeting in redis
+		Map<String,String> metadata=new HashMap<String,String>();
+		metadata.putAll(m.getMetadata());
+		//TODO: Need a better way to store these values for recordings
+		metadata.put("meetingId", m.getExternalId());
+		metadata.put("meetingName", m.getName());
+		
+		messagingService.recordMeeting(m.getInternalId(), m.getValues(),metadata);
+		
 	}
 
 	public Meeting getMeeting(String meetingId) {

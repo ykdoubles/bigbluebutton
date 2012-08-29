@@ -22,6 +22,7 @@ public class RedisMessagingService implements MessagingService {
 
 	private final Executor exec = Executors.newSingleThreadExecutor();
 	private Runnable pubsubListener;
+	private static final String COLON=":";
 
 	public RedisMessagingService(){
 		
@@ -35,21 +36,22 @@ public class RedisMessagingService implements MessagingService {
 	public void removeListener(MessageListener listener) {
  		listeners.remove(listener);
  	}
-
-	public void recordMeetingInfo(String meetingId, Map<String, String> info) {
+	
+	public void recordMeeting(String meetingId, Map<String, String> meeting, Map<String,String> metadata){
 		Jedis jedis = redisPool.getResource();
 		try {
-		    for (String key: info.keySet()) {
-				    	log.debug("Storing metadata {} = {}", key, info.get(key));
-				}   
-
+			jedis.hmset("meeting" + COLON + meetingId, meeting);
+			//storing metadata
+			for (String key: metadata.keySet()) {
+		    	log.debug("Storing metadata {} = {}", key, metadata.get(key));
+			}   
+		
 		    log.debug("Saving metadata in {}", meetingId);
-			jedis.hmset("meeting:info:" + meetingId, info);
-		} catch (Exception e){
-			log.warn("Cannot record the info meeting:"+meetingId,e);
+			jedis.hmset("meeting"+ COLON +"info" + COLON + meetingId, metadata);
+			jedis.rpush("meetings", meetingId);
 		} finally {
 			redisPool.returnResource(jedis);
-		}		
+		}
 	}
 
 	public void endMeeting(String meetingId) {

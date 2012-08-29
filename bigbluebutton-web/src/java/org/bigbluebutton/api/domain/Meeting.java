@@ -22,6 +22,7 @@ package org.bigbluebutton.api.domain;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -228,6 +229,25 @@ public class Meeting {
 		long now = System.currentTimeMillis();
 		System.out.println("Expiry " + now + " endTime=" + endTime + "expiry=" + (expiry * MILLIS_IN_A_MINUTE));
 		return (System.currentTimeMillis() - endTime > (expiry * MILLIS_IN_A_MINUTE));
+	}
+	
+	public Map<String,String> getValues(){
+    	HashMap<String, String> map = new HashMap<String, String>();
+    	map.put("name", name);
+    	map.put("externalMeetingId", extMeetingId);
+    	map.put("internalMeetingId", intMeetingId);
+    	map.put("viewerPassword", viewerPass);
+    	map.put("moderatorPassword", moderatorPass);
+    	map.put("maxUsers", Integer.toString(maxUsers));
+    	map.put("logoutUrl", logoutUrl);
+    	map.put("record", Boolean.toString(record));
+    	map.put("duration", Integer.toString(duration));
+    	map.put("webVoice", webVoice);
+    	map.put("telVoice", telVoice);
+    	map.put("welcomeMsg", welcomeMsg);
+    	map.put("dialNumber", dialNumber);
+    	map.put("createdTime", Long.toString(createdTime));    	
+    	return map;
 	}
 	
 	/***
