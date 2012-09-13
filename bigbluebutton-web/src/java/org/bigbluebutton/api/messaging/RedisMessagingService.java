@@ -48,7 +48,22 @@ public class RedisMessagingService implements MessagingService {
 		
 		    log.debug("Saving metadata in {}", meetingId);
 			jedis.hmset("meeting"+ COLON +"info" + COLON + meetingId, metadata);
-			jedis.rpush("meetings", meetingId);
+			//temporary storage
+			jedis.rpush("bbb-meetings", meetingId);
+			
+		} finally {
+			redisPool.returnResource(jedis);
+		}
+	}
+	
+	public void removeMeeting(String meetingId){
+		Jedis jedis = redisPool.getResource();
+		try {
+			jedis.del("meeting" + COLON + meetingId);
+			//jedis.hmset("meeting"+ COLON +"info" + COLON + meetingId, metadata);
+			//temporary storage
+			jedis.lrem("bbb-meetings",-1, meetingId);
+			
 		} finally {
 			redisPool.returnResource(jedis);
 		}

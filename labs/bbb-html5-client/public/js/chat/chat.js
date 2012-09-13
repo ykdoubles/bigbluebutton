@@ -54,6 +54,15 @@ socket.on('connect', function () {
     }
   });
 
+  socket.on('userJoinMsg', function (params){
+    var clickFunc = '$(\'.selected\').removeClass(\'selected\');$(this).addClass(\'selected\');';
+    $("#current_users").append('<div class="user clickable" onclick="'+clickFunc+'" id= "'+params.userid+'"><b>' + params.username + '</b></div>');
+  });
+
+  socket.on('userLeftMsg', function (params){
+    $("#"+params.userid).remove();
+  });
+
   /**
    * Received event to update all the messages in the chat box
    * @param  {Array} messages Array of messages in public chat box

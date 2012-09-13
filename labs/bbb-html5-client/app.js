@@ -29,7 +29,7 @@ var express = require('express'),
   socketAction = require('./routes/socketio');
   sanitizer = require('sanitizer');
   store = redis.createClient();
-  store.flushdb();
+  //store.flushdb();
   pub = redis.createClient();
   sub = redis.createClient();
   
@@ -165,8 +165,24 @@ io.sockets.on('connection', socketAction.SocketOnConnection);
  * @return {undefined}
  */
 sub.on("pmessage", function(pattern, channel, message) {
-  //value of pub channel is used as the name of the SocketIO room to send to.
-  var channel_viewers = io.sockets.in(channel);
-  //apply the parameters to the socket event, and emit it on the channels
-  channel_viewers.emit.apply(channel_viewers, JSON.parse(message));
+
+  if(channel == "bigbluebutton:bridge"){
+    console.log(message);
+    var attributes = JSON.parse(message);
+    var channel_viewers = io.sockets.in(attributes.meetingID);
+    var only_values = [];
+    only_values.push(attributes.messageName);
+    only_values.push(attributes.params);
+
+    //apply the parameters to the socket event, and emit it on the channels
+    channel_viewers.emit.apply(channel_viewers, only_values);
+  }
+  else{
+    //value of pub channel is used as the name of the SocketIO room to send to.
+    var channel_viewers = io.sockets.in(channel);
+    //apply the parameters to the socket event, and emit it on the channels
+    channel_viewers.emit.apply(channel_viewers, JSON.parse(message));    
+  }
+
+
 });

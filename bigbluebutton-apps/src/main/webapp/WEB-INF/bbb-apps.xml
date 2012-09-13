@@ -12,10 +12,15 @@
 		<property name="messagingService" ref="messagingService"></property>
 		<property name="conversionUpdatesMessageListener" ref="conversionUpdatesMessageListener"></property>
 	</bean>
+	
+	<bean id="participantsBridgeSender" class="org.bigbluebutton.conference.service.messaging.participants.ParticipantsBridgeSender">
+		<property name="messagingService" ref="messagingService"></property>
+	</bean>
 			
 	<bean id="participantsHandler" class="org.bigbluebutton.conference.service.participants.ParticipantsHandler">
 		<property name="participantsApplication"> <ref local="participantsApplication"/></property>
 		<property name="recorderApplication"> <ref local="recorderApplication"/></property>
+		<property name="participantsBridgeSender"> <ref local="participantsBridgeSender"/></property>
 	</bean>
 	
 	<bean id="participantsApplication" 
@@ -125,6 +130,7 @@
 	
     <bean id="messagingService" class="org.bigbluebutton.conference.service.messaging.RedisMessagingService">
     	<property name="redisPool" ref="redisPool"/>
+    	<property name="participantsApplication"> <ref local="participantsApplication"/></property>
   	</bean>
     
     <bean id="config" class="org.bigbluebutton.conference.service.recorder.GenericObjectPoolConfigWrapper">

@@ -29,7 +29,9 @@ import org.red5.server.api.so.ISharedObject;
 import org.red5.server.adapter.ApplicationAdapter;
 import org.red5.server.api.Red5;
 import java.util.HashMap;
-import java.util.Map;import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.service.recorder.RecorderApplication;
+import java.util.Map;import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.service.messaging.MessagingService;
+import org.bigbluebutton.conference.service.messaging.participants.ParticipantsBridgeSender;
+import org.bigbluebutton.conference.service.recorder.RecorderApplication;
 import org.bigbluebutton.conference.service.recorder.participants.ParticipantsEventRecorder;
 
 public class ParticipantsHandler extends ApplicationAdapter implements IApplication{
@@ -40,6 +42,7 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 
 	private ParticipantsApplication participantsApplication;
 	private RecorderApplication recorderApplication;
+	private ParticipantsBridgeSender participantsBridgeSender;
 	
 	@Override
 	public boolean appConnect(IConnection conn, Object[] params) {
@@ -81,10 +84,13 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 		ISharedObject so = getSharedObject(connection.getScope(), PARTICIPANTS_SO);
 		ParticipantsEventSender sender = new ParticipantsEventSender(so);
 		ParticipantsEventRecorder recorder = new ParticipantsEventRecorder(connection.getScope().getName(), recorderApplication);
+		//ParticipantsBridgeSender bridge = new ParticipantsBridgeSender(connection.getScope().getName(), messagingService);
 		
 		log.debug("Adding room listener " + connection.getScope().getName());
 		participantsApplication.addRoomListener(connection.getScope().getName(), recorder);
 		participantsApplication.addRoomListener(connection.getScope().getName(), sender);
+		//messagingService.addParticipantsEventSender(sender);
+		//participantsApplication.addRoomListener(connection.getScope().getName(), bridge);
 		log.debug("Done setting up recorder and listener");
 		
 		return true;
@@ -109,7 +115,8 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 		if (bbbSession == null) {
 			log.debug("roomLeave - session is null"); 
 		} else {
-			participantsApplication.participantLeft(bbbSession.getSessionName(), new Long(bbbSession.getInternalUserID()));
+			//participantsApplication.participantLeft(bbbSession.getSessionName(), new Long(bbbSession.getInternalUserID()));
+			participantsBridgeSender.participantLeft(bbbSession.getSessionName(), bbbSession.getExternUserID(), new Long(bbbSession.getInternalUserID()));
 		}		
 	}
 	
@@ -134,7 +141,7 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
     	}
 	}
 	
-	public boolean participantJoin() {
+	public void participantJoin() {
 		log.debug(APP + ":participantJoin - getting userid");
 		BigBlueButtonSession bbbSession = getBbbSession();
 		if (bbbSession != null) {
@@ -144,14 +151,14 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 			String room = bbbSession.getRoom();
 			log.debug(APP + ":participantJoin - [" + room + "] [" + userid + ", " + username + ", " + role + "]");
 			
-			Map<String, Boolean> status = new HashMap<String, Boolean>();
+			/*Map<String, Boolean> status = new HashMap<String, Boolean>();
 			status.put("raiseHand", false);
 			status.put("presenter", false);
-			status.put("hasStream", false);	
-			return participantsApplication.participantJoin(room, userid, username, role, bbbSession.getExternUserID(), status);
+			status.put("hasStream", false);*/
+			participantsBridgeSender.participantJoined(room, userid, username, role, bbbSession.getExternUserID());
+			//return participantsApplication.participantJoin(room, userid, username, role, bbbSession.getExternUserID(), status);
 		}
 		log.warn("Can't send user join as session is null.");
-		return false;
 	}
 	
 	public void setParticipantsApplication(ParticipantsApplication a) {
@@ -164,5 +171,13 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 	
 	private BigBlueButtonSession getBbbSession() {
 		return (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+	}
+
+	public void setParticipantsBridgeSender(ParticipantsBridgeSender participantsBridgeSender) {
+		this.participantsBridgeSender = participantsBridgeSender;
+	}
+
+	public ParticipantsBridgeSender getParticipantsBridgeSender() {
+		return participantsBridgeSender;
 	}
 }

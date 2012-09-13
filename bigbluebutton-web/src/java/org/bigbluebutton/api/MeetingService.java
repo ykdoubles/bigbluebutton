@@ -60,12 +60,14 @@ public class MeetingService {
 		  			processRecording(m.getInternalId());
 		  		}
 				meetings.remove(m.getInternalId());
+				messagingService.removeMeeting(m.getInternalId());
 				continue;
 			}
 			
 			if (m.wasNeverStarted(defaultMeetingCreateJoinDuration)) {
 				log.info("Removing non-joined meeting [{} - {}]", m.getInternalId(), m.getName());
 				meetings.remove(m.getInternalId());
+				messagingService.removeMeeting(m.getInternalId());
 				continue;
 			}
 			
@@ -202,6 +204,7 @@ public class MeetingService {
 					processRecording(m.getInternalId());
 				}
 				meetings.remove(m.getInternalId());
+				messagingService.removeMeeting(m.getInternalId());
 			}
 		}else{
 			log.debug("endMeeting - meeting doesn't exist: " + meetingId);

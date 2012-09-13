@@ -9,6 +9,7 @@ public class MessagingConstants {
 	public static final String PARTICIPANTS_CHANNEL = "bigbluebutton:meeting:participants";
 	public static final String PRESENTATION_CHANNEL = "bigbluebutton:meeting:presentation";
 	
+	public static final String BIGBLUEBUTTON_BRIDGE = "bigbluebutton:bridge";
 	
 	public static final String END_MEETING_REQUEST_EVENT = "EndMeetingRequestEvent";
 	public static final String MEETING_STARTED_EVENT = "MeetingStartedEvent";
