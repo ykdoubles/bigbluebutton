@@ -11,4 +11,6 @@ public interface MessagingService {
 	public void send(String channel, String message);
 	public void addListener(MessageListener listener);
 	public void removeListener(MessageListener listener);
+	public long generateInternalUserID();
+	public void recordUserSession(String meetingID, String internalUserID, Map<String, String> properties);
 }

@@ -192,6 +192,10 @@ exports.SocketOnConnection = function(socket) {
           numOfSockets+=1;
           store.hset(redisAction.getUserString(meetingID, sessionID), 'sockets', numOfSockets);
           if ((properties.refreshing == 'false') && (properties.dupSess == 'false')) {
+
+            //TODO: temporary solution for join user
+            pub.publish(receivers, JSON.stringify(['user list change', usernames]));
+
             //all of the next sessions created with this sessionID are duplicates
             store.hset(redisAction.getUserString(meetingID, sessionID), 'dupSess', true);
             socketAction.publishUsernames(meetingID, null, function() {

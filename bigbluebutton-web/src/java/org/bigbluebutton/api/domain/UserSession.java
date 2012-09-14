@@ -14,5 +14,5 @@ public class UserSession {
     String mode = null;
     String record = null;
     String welcome = null;
-    String logoutUrl = null;
+    String logoutUrl = null; 
 }

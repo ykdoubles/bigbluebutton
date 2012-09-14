@@ -299,7 +299,7 @@ class ApiController {
     }
     
 	UserSession us = new UserSession();
-	us.internalUserId = System.currentTimeMillis(); //RandomStringUtils.randomAlphanumeric(12).toLowerCase()
+	us.internalUserId = meetingService.generateUserID(); //System.currentTimeMillis(); //RandomStringUtils.randomAlphanumeric(12).toLowerCase()
     us.conferencename = meeting.getName()
     us.meetingID = meeting.getInternalId()
     us.externUserID = externUserID
@@ -320,6 +320,7 @@ class ApiController {
 	session['user-token'] = us.meetingID + "-" + us.internalUserId;
 	session['logout-url'] = us.logoutUrl
 	
+	//meetingService.recordUser(us.meetingID, us.internalUserId, us.fullname, us.role);
 	meetingService.addUserSession(session['user-token'], us);
 	
 	log.info("Session user token for " + us.fullname + " [" + session['user-token'] + "]")

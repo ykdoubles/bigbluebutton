@@ -114,7 +114,9 @@ public class RoomsManager {
 	public Map getParticipants(String roomName) {
 		Room r = getRoom(roomName);
 		if (r != null) {
-			return r.getParticipants();
+			//return r.getParticipants();
+			//temporary solution for getParticipants
+			return messagingService.getParticipants(roomName);
 		}
 		log.warn("Getting participants from a non-existing room " + roomName);
 		return null;

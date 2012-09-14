@@ -36,6 +36,15 @@ public class MeetingService {
 	public void addUserSession(String token, UserSession user) {
 		sessions.put(token, user);
 	}
+	public void recordUser(String meetingID, String internalUserID, String username, String role) {
+		HashMap<String,String> properties = new HashMap<String, String>();
+		
+		properties.put("internalUserID", internalUserID);
+		properties.put("username",username);
+		properties.put("role", role);
+		
+		messagingService.recordUserSession(meetingID, internalUserID, properties);
+	}
 	
 	public UserSession getUserSession(String token) {
 		return sessions.get(token);
@@ -233,6 +242,10 @@ public class MeetingService {
 		cleaner = c;
 		cleaner.setMeetingService(this);
 		cleaner.start();
+	}
+	
+	public long generateUserID(){
+		return messagingService.generateInternalUserID();
 	}
 	
 	/**

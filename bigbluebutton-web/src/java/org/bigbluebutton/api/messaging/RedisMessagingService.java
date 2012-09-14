@@ -48,8 +48,7 @@ public class RedisMessagingService implements MessagingService {
 		
 		    log.debug("Saving metadata in {}", meetingId);
 			jedis.hmset("meeting"+ COLON +"info" + COLON + meetingId, metadata);
-			//temporary storage
-			jedis.rpush("bbb-meetings", meetingId);
+			jedis.sadd("meetings", meetingId);
 			
 		} finally {
 			redisPool.returnResource(jedis);
@@ -61,8 +60,30 @@ public class RedisMessagingService implements MessagingService {
 		try {
 			jedis.del("meeting" + COLON + meetingId);
 			//jedis.hmset("meeting"+ COLON +"info" + COLON + meetingId, metadata);
-			//temporary storage
-			jedis.lrem("bbb-meetings",-1, meetingId);
+			jedis.srem("meetings", meetingId);
+			
+		} finally {
+			redisPool.returnResource(jedis);
+		}
+	}
+	
+	public long generateInternalUserID(){
+		long internalUserID = 0;
+		Jedis jedis = redisPool.getResource();
+		try {
+			internalUserID = jedis.incr("global" + COLON + "nextInternalUserID");
+			
+		} finally {
+			redisPool.returnResource(jedis);
+		}
+		return internalUserID;
+	}
+	
+	public void recordUserSession(String meetingID, String internalUserID, Map<String, String> properties){
+		Jedis jedis = redisPool.getResource();
+		try {
+			jedis.sadd("meeting" + COLON + "users", internalUserID);
+			jedis.hmset("meeting"+ COLON +"user" + COLON + internalUserID, properties);
 			
 		} finally {
 			redisPool.returnResource(jedis);

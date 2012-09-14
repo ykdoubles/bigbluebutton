@@ -1,3 +1,4 @@
+var COLON = ":";
 /**
  * Returns the function for getting the string of a specific
  * item given the name of the item type in Redis.
@@ -43,7 +44,7 @@ exports.getMeetingsString = function() {
  * @return {string}           the key for the meeting given the meetingID in Redis
  */
 exports.getMeetingString = function(meetingID) {
-  return "meeting-" + meetingID;
+  return "meeting" + COLON + meetingID;
 };
 
 /**
@@ -53,7 +54,8 @@ exports.getMeetingString = function(meetingID) {
  * @return {string}           the key for the hash of all the users for a specified meetingID in Redis
  */
 exports.getUsersString = function(meetingID) {
-  return "meeting-" + meetingID + "-users";
+  //return "meeting-" + meetingID + "-users";
+  return "meeting" + COLON + meetingID + COLON + "users"; 
 };
 
 /**
@@ -62,8 +64,11 @@ exports.getUsersString = function(meetingID) {
  * @param  {string} sessionID the sessionID (unique ID) of the user
  * @return {string}           the key for a specific sessionID in Redis
  */
-exports.getUserString = function(meetingID, sessionID) {
+/*exports.getUserString = function(meetingID, sessionID) {
   return "meeting-" + meetingID + "-user-" + sessionID;
+};*/
+exports.getUserString = function(meetingID, userID) {
+  return "meeting" + COLON + meetingID + COLON + "user" + COLON + userID;
 };
 
 /**
@@ -73,7 +78,7 @@ exports.getUserString = function(meetingID, sessionID) {
  * @return {string}           key for the list of current users in a specific meeting ID
  */
 exports.getCurrentUsersString = function(meetingID) {
-  return "meeting-" + meetingID + "-currentusers";
+  return "meeting" + COLON + meetingID + COLON + "currentusers";
 };
 
 /**
@@ -85,7 +90,7 @@ exports.getCurrentUsersString = function(meetingID) {
  * @return {string}                the key for the hash of all the messages for a specified meetingID in Redis
  */
 exports.getMessagesString = function(meetingID, presentationID, pageID) {
-  return "meeting-" + meetingID + "-messages";
+  return "meeting" + COLON + meetingID + COLON + "messages";
 };
 
 /**
@@ -97,7 +102,7 @@ exports.getMessagesString = function(meetingID, presentationID, pageID) {
  * @return {string}                string representing the key for a specific message in Redis
  */
 exports.getMessageString = function(meetingID, presentationID, pageID, messageID) {
-  return "meeting-" + meetingID + "-message-" + messageID;
+  return "meeting" + COLON + meetingID + COLON + "message" + COLON + messageID;
 };
 
 /**
@@ -106,7 +111,7 @@ exports.getMessageString = function(meetingID, presentationID, pageID, messageID
  * @return {string}           key for the list of presentations for a meeting ID
  */
 exports.getPresentationsString = function(meetingID) {
-  return "meeting-" + meetingID + "-presentations";
+  return "meeting" + COLON + meetingID + COLON + "presentations";
 };
 
 /**
@@ -116,7 +121,7 @@ exports.getPresentationsString = function(meetingID) {
  * @return {string}                key for a specific presentation in a meeting
  */
 exports.getPresentationString = function(meetingID, presentationID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID;
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID;
 };
 
 /**
@@ -126,7 +131,7 @@ exports.getPresentationString = function(meetingID, presentationID) {
  * @return {string}                key for the pages in a specific presentation in a meeting
  */
 exports.getPagesString = function(meetingID, presentationID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID + "-pages";
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID + COLON + "pages";
 };
 
 /**
@@ -135,7 +140,7 @@ exports.getPagesString = function(meetingID, presentationID) {
  * @return {string}           key for the current presentation of the meeting
  */
 exports.getCurrentPresentationString = function(meetingID) {
-  return "meeting-" + meetingID + "-currentpresentation";
+  return "meeting" + COLON + meetingID + COLON + "currentpresentation";
 };
 
 /**
@@ -145,7 +150,7 @@ exports.getCurrentPresentationString = function(meetingID) {
  * @return {string}                key for the current page in the presentation
  */
 exports.getCurrentPageString = function(meetingID, presentationID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID + "-currentpage";
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID + COLON + "currentpage";
 };
 
 /**
@@ -156,7 +161,7 @@ exports.getCurrentPageString = function(meetingID, presentationID) {
  * @return {string}                key of specific page.
  */
 exports.getPageString = function(meetingID, presentationID, pageID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID + "-page-" + pageID;
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID + COLON + "page" + COLON + pageID;
 };
 
 /**
@@ -167,7 +172,7 @@ exports.getPageString = function(meetingID, presentationID, pageID) {
  * @return {string}                key of page image.
  */
 exports.getPageImageString = function(meetingID, presentationID, pageID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID + "-page-" + pageID + "-image";
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID + COLON + "page" + COLON + pageID + COLON + "image";
 };
 
 /**
@@ -178,7 +183,7 @@ exports.getPageImageString = function(meetingID, presentationID, pageID) {
  * @return {string}                key for list of current shapes for the page
  */
 exports.getCurrentShapesString = function(meetingID, presentationID, pageID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID + "-page-" + pageID + "-currentshapes";
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID + COLON + "page" + COLON + pageID + COLON + "currentshapes";
 };
 
 /**
@@ -190,7 +195,7 @@ exports.getCurrentShapesString = function(meetingID, presentationID, pageID) {
  * @return {string}                key for specific shape on page
  */
 exports.getShapeString = function(meetingID, presentationID, pageID, shapeID) {
-  return "meeting-" + meetingID + "-presentation-" + presentationID + "-page-" + pageID + "-shape-" + shapeID;
+  return "meeting" + COLON + meetingID + COLON + "presentation" + COLON + presentationID + COLON + "page" + COLON + pageID + COLON + "shape" + COLON + shapeID;
 };
 
 /**
@@ -199,7 +204,7 @@ exports.getShapeString = function(meetingID, presentationID, pageID, shapeID) {
  * @return {string}           the key for the current viewbox
  */
 exports.getCurrentViewBoxString = function(meetingID) {
-  return "meeting-" + meetingID + "-viewbox";
+  return "meeting" + COLON + meetingID + COLON + "viewbox";
 };
 
 /**
@@ -208,7 +213,7 @@ exports.getCurrentViewBoxString = function(meetingID) {
  * @return {string}           the key for the current tool
  */
 exports.getCurrentToolString = function(meetingID) {
-  return "meeting-" + meetingID + "-currenttool";
+  return "meeting" + COLON + meetingID + COLON + "currenttool";
 };
 
 /**
@@ -217,7 +222,7 @@ exports.getCurrentToolString = function(meetingID) {
  * @return {string}           the key for the presenter
  */
 exports.getPresenterString = function(meetingID) {
-  return "meeting-" + meetingID + "-presenter";
+  return "meeting" + COLON + meetingID + COLON + "presenter";
 };
 
 /**
@@ -227,7 +232,7 @@ exports.getPresenterString = function(meetingID) {
  * @return {string}           the key for the public ID for a user
  */
 exports.getPublicIDString = function (meetingID, publicID) {
-  return 'meeting-' + meetingID + '-publicID-' + publicID;
+  return 'meeting' + COLON + meetingID + COLON + 'publicID' + COLON + publicID;
 };
 /**
  * Get the key for session ID for a user
@@ -236,7 +241,7 @@ exports.getPublicIDString = function (meetingID, publicID) {
  * @return {string}           the key for session ID for a user
  */
 exports.getSessionIDString = function (meetingID, sessionID) {
-  return 'meeting-' + meetingID + '-sessionID-' + sessionID;
+  return 'meeting' + COLON + meetingID + COLON + 'sessionID' + COLON + sessionID;
 };
 
 /**
@@ -247,7 +252,7 @@ exports.getSessionIDString = function (meetingID, sessionID) {
  * @return {string}                the key for the width of a page image
  */
 exports.getPageWidthString = function(meetingID, presentationID, pageID) {
-  return 'meeting-' + meetingID + '-presentation-' + presentationID + '-page-' + pageID + '-width';
+  return 'meeting' + COLON + meetingID + COLON + 'presentation' + COLON + presentationID + COLON + 'page' + COLON + pageID + COLON + 'width';
 };
 
 /**
@@ -258,7 +263,7 @@ exports.getPageWidthString = function(meetingID, presentationID, pageID) {
  * @return {string}                the key for the height of a page image
  */
 exports.getPageHeightString = function(meetingID, presentationID, pageID) {
-  return 'meeting-' + meetingID + '-presentation-' + presentationID + '-page-' + pageID + '-height';
+  return 'meeting' + COLON + meetingID + COLON + 'presentation' + COLON + presentationID + COLON + 'page' + COLON + pageID + COLON + 'height';
 };
 
 /**
@@ -1058,7 +1063,13 @@ exports.createMeeting = function(meetingID, callback) {
  * @param  {Function} callback  callback function
  * @return {undefined}          callback is called with return value if applicable
  */
-exports.createUser = function(meetingID, userID, callback) {
+/*exports.createUser = function(meetingID, userID, callback) {
+  var userID = 
+  store.sadd(redisAction.getUsersString(meetingID), userID); //meeting-123-users.push(sessionID)
+  if(callback) callback();
+};*/
+exports.createUser = function(meetingID, callback) {
+  var userID = store.incr("global:nextInternalUserID");
   store.sadd(redisAction.getUsersString(meetingID), userID); //meeting-123-users.push(sessionID)
   if(callback) callback();
 };
@@ -1086,11 +1097,10 @@ exports.updateUserProperties = function(meetingID, userID, properties, callback)
 };
 
 exports.getTemporalMeetings = function(callback){
-  store.lrange("bbb-meetings",0,-1,function (err,meetingids){
+  store.smembers("meetings",function (err,meetingids){
     if(meetingids){
       var index = 0;
       var resp = [];
-      
       var f = function (err,properties){
         if(index == meetingids.length)
           callback(resp);

@@ -29,46 +29,52 @@ public class ParticipantsBridgeSender{
 		
 	}
 	
-	public void participantJoined(String meetingID, long red5id, String username, String role, String externalUserID) {
+	public void participantJoined(String meetingID, long internalUserID, String username, String role, String externalUserID) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("meetingID", meetingID);
 		map.put("messageName", ParticipantsBridgeSender.USER_JOIN);
 		
 		HashMap<String,String> user = new HashMap<String, String>();
-		user.put("userID", externalUserID);
+		user.put("internalUserID", Long.toString(internalUserID));
 		user.put("username", username);
 		user.put("role", role);
-		
-		/*only for red5*/
-		user.put("red5id", red5id+"");
+		user.put("externalUserID", externalUserID);
 		
 		map.put("params",user);
 		
 		Gson gson = new Gson();
 		
 		messagingService.send(MessagingConstants.BIGBLUEBUTTON_BRIDGE, gson.toJson(map));
+		
 		//temporary solution for integrate with the html5 client
 		Jedis jedis = messagingService.createRedisClient();
-		jedis.sadd("meeting-"+meetingID+"-users", externalUserID);
+		jedis.sadd("meeting:"+meetingID+":users", Long.toString(internalUserID));
 		HashMap<String,String> temp_user = new HashMap<String, String>();
+		temp_user.put("internalUserID", Long.toString(internalUserID));
 		temp_user.put("username", username);
+		temp_user.put("role", role);
+		
+		//variables needed by node.js
 		temp_user.put("meetingID", meetingID);
 		temp_user.put("refreshing", "false");
 		temp_user.put("dupSess", "false");
 		temp_user.put("sockets", "0");
-		temp_user.put("pubID", externalUserID);
-		jedis.hmset("meeting-"+meetingID+"-user-"+externalUserID, temp_user);
+		temp_user.put("pubID", Long.toString(internalUserID));
+		
+		//variables needed by red5
+		temp_user.put("externalUserID", externalUserID);
+		
+		jedis.hmset("meeting:"+meetingID+":user:"+internalUserID, temp_user);
 		messagingService.dropRedisClient(jedis);
 	}
 
-	public void participantLeft(String meetingID, String externalUserID, long red5id) {
+	public void participantLeft(String meetingID, long internalUserID) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("meetingID", meetingID);
 		map.put("messageName", ParticipantsBridgeSender.USER_LEFT);
 		
 		HashMap<String,String> user = new HashMap<String, String>();
-		user.put("userID", externalUserID);
-		user.put("red5id", red5id+"");
+		user.put("internalUserID", Long.toString(internalUserID));
 		
 		map.put("params",user);
 		
@@ -78,8 +84,8 @@ public class ParticipantsBridgeSender{
 		
 		//TODO: temp solution
 		Jedis jedis = messagingService.createRedisClient();
-		jedis.srem("meeting-"+meetingID+"-users", externalUserID);
-		jedis.del("meeting-"+meetingID+"-user-"+externalUserID);
+		jedis.srem("meeting:"+meetingID+":users", Long.toString(internalUserID));
+		jedis.del("meeting:"+meetingID+":user:"+internalUserID);
 		messagingService.dropRedisClient(jedis);
 	}
 

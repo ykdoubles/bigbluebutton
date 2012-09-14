@@ -116,7 +116,7 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 			log.debug("roomLeave - session is null"); 
 		} else {
 			//participantsApplication.participantLeft(bbbSession.getSessionName(), new Long(bbbSession.getInternalUserID()));
-			participantsBridgeSender.participantLeft(bbbSession.getSessionName(), bbbSession.getExternUserID(), new Long(bbbSession.getInternalUserID()));
+			participantsBridgeSender.participantLeft(bbbSession.getSessionName(), new Long(bbbSession.getInternalUserID()));
 		}		
 	}
 	
@@ -156,6 +156,7 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 			status.put("presenter", false);
 			status.put("hasStream", false);*/
 			participantsBridgeSender.participantJoined(room, userid, username, role, bbbSession.getExternUserID());
+			return;
 			//return participantsApplication.participantJoin(room, userid, username, role, bbbSession.getExternUserID(), status);
 		}
 		log.warn("Can't send user join as session is null.");
