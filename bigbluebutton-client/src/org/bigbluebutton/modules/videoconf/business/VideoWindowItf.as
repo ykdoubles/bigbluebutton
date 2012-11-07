@@ -43,7 +43,6 @@ package org.bigbluebutton.modules.videoconf.business
 	import org.bigbluebutton.core.managers.UserManager;
 	import org.bigbluebutton.main.model.users.BBBUser;
 	import org.bigbluebutton.main.model.users.events.KickUserEvent;
-	import org.bigbluebutton.main.model.users.events.RoleChangeEvent;
 	import org.bigbluebutton.main.views.MainCanvas;
 	import org.bigbluebutton.modules.listeners.events.ListenersCommand;
 	import org.bigbluebutton.modules.videoconf.views.ControlButtons;

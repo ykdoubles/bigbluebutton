@@ -63,14 +63,14 @@ public class ParticipantsEventRecorder implements IRoomListener {
 	}
 
 	@Override
-	public void assignPresenter(ArrayList<String> presenter) {
+	public void assignPresenter(String newPresenterUserID, String newPresenterName, String assignedBy) {
 		log.debug("RECORD module:presentation event:assign_presenter");
 		AssignPresenterRecordEvent event = new AssignPresenterRecordEvent();
 		event.setMeetingId(session);
 		event.setTimestamp(System.currentTimeMillis());
-		event.setUserId(presenter.get(0).toString());
-		event.setName(presenter.get(1).toString());
-		event.setAssignedBy(presenter.get(2).toString());
+		event.setUserId(newPresenterUserID);
+		event.setName(newPresenterName);
+		event.setAssignedBy(assignedBy);
 		
 		recorder.record(session, event);
 	}

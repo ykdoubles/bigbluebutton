@@ -91,7 +91,7 @@ public class ParticipantUpdatingRoomListener implements IRoomListener{
 		}
 	}
 
-	public void assignPresenter(ArrayList<String> presenter) {
+	public void assignPresenter(String newPresenterUserID, String newPresenterName, String assignedBy) {
 		// Do nothing.
 	}
 	

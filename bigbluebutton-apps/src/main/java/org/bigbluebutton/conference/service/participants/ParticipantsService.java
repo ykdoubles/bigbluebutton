@@ -37,26 +37,9 @@ public class ParticipantsService {
 	private ParticipantsApplication application;
 
 	@SuppressWarnings("unchecked")
-	public void assignPresenter(String userid, String name, Long assignedBy) {
-		log.info("Receive assignPresenter request from client [" + userid + "," + name + "," + assignedBy + "]");
+	public void assignPresenter(String newPresenterUserID, String assignedBy) {
 		IScope scope = Red5.getConnectionLocal().getScope();
-		ArrayList<String> presenter = new ArrayList<String>();
-		presenter.add(userid);
-		presenter.add(name);
-		presenter.add(assignedBy.toString());
-		ArrayList<String> curPresenter = application.getCurrentPresenter(scope.getName());
-		application.setParticipantStatus(scope.getName(), userid, "presenter", true);
-		
-		if (curPresenter != null){ 
-			String curUserid = (String) curPresenter.get(0);
-			if (! curUserid.equals(userid)){
-				log.info("Changing the current presenter [" + curPresenter.get(0) + "] to viewer.");
-				application.setParticipantStatus(scope.getName(), curPresenter.get(0), "presenter", false);
-			}
-		} else {
-			log.info("No current presenter. So do nothing.");
-		}
-		application.assignPresenter(scope.getName(), presenter);
+		application.assignPresenter(scope.getName(), newPresenterUserID, assignedBy);
 	}
 	
 	@SuppressWarnings("unchecked")

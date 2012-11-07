@@ -29,6 +29,7 @@ package org.bigbluebutton.main.model.users {
 	import org.bigbluebutton.common.Role;
 	import org.bigbluebutton.core.BBB;
 	import org.bigbluebutton.core.EventConstants;
+	import org.bigbluebutton.core.UsersUtil;
 	import org.bigbluebutton.core.events.CoreEvent;
 	import org.bigbluebutton.core.managers.ConnectionManager;
 	import org.bigbluebutton.core.managers.UserManager;
@@ -125,6 +126,7 @@ package org.bigbluebutton.main.model.users {
 					var presenterEvent:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
 					presenterEvent.userid = user.userID;
 					presenterEvent.username = user.name;
+          presenterEvent.assignedBy = UsersUtil.getMyUserID();
 					var dispatcher:Dispatcher = new Dispatcher();
 					dispatcher.dispatchEvent(presenterEvent);
 				} else {
@@ -135,7 +137,7 @@ package org.bigbluebutton.main.model.users {
       }
 		}
 		
-		public function assignPresenter(userid:String, name:String, assignedBy:Number):void {
+		public function assignPresenter(userid:String, name:String, assignedBy:String):void {
 			var nc:NetConnection = _connectionManager.connection;
 			nc.call("participants.assignPresenter",// Remote function name
 				new Responder(
@@ -155,7 +157,6 @@ package org.bigbluebutton.main.model.users {
 					}
 				), //new Responder
 				userid,
-				name,
 				assignedBy
 			); //_netConnection.call
 		}
@@ -254,7 +255,7 @@ package org.bigbluebutton.main.model.users {
 		 * Callback from the server from many of the bellow nc.call methods
 		 */
 		public function participantStatusChange(userID:String, status:String, value:Object):void {
-			LogUtil.debug("Received status change [" + userID + "," + status + "," + value + "]")			
+			LogUtil.debug("**** Received status change [" + userID + "," + status + "," + value + "]")			
 			UserManager.getInstance().getConference().newUserStatus(userID, status, value);
 			
 			if (status == "presenter"){

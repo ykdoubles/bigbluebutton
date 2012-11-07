@@ -20,15 +20,17 @@ package org.bigbluebutton.conference.service.participants;
 
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
-import org.red5.server.api.Red5;
-import java.util.ArrayList;
+import org.red5.server.api.Red5;import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.ConnectionInvokerService;
 import org.bigbluebutton.conference.RoomsManager;
 import org.bigbluebutton.conference.Room;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IRoomListener;
 
 public class ParticipantsApplication {
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsApplication.class, "bigbluebutton" );	
+	
 	private ConnectionInvokerService connInvokerService;
 	
 	private RoomsManager roomsManager;
@@ -69,8 +71,16 @@ public class ParticipantsApplication {
 		return false;
 	}
 	
-	public void setParticipantStatus(String room, String userid, String status, Object value) {
-		roomsManager.changeParticipantStatus(room, userid, status, value);
+	public void setParticipantStatus(String meetingID, String userid, String status, Object value) {
+		roomsManager.changeParticipantStatus(meetingID, userid, status, value);
+		
+		Map<String, Object> message = new HashMap<String, Object>();	
+		message.put("userID", userid);
+		message.put("statusName", status);
+		message.put("statusValue", value);
+		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserStatusChangeCommand", message);
+		connInvokerService.sendMessage(m);
+		
 	}
 	
 	public Map getParticipants(String roomName) {
@@ -83,12 +93,18 @@ public class ParticipantsApplication {
 		return roomsManager.getParticipants(roomName);
 	}
 	
-	public boolean participantLeft(String roomName, String userid) {
-		log.debug("Participant " + userid + " leaving room " + roomName);
-		if (roomsManager.hasRoom(roomName)) {
-			Room room = roomsManager.getRoom(roomName);
-			log.debug("Removing " + userid + " from room " + roomName);
+	public boolean participantLeft(String meetingID, String userid) {
+		log.debug("Participant " + userid + " leaving room " + meetingID);
+		if (roomsManager.hasRoom(meetingID)) {
+			Room room = roomsManager.getRoom(meetingID);
+			log.debug("Removing " + userid + " from room " + meetingID);
 			room.removeParticipant(userid);
+						
+			Map<String, Object> message = new HashMap<String, Object>();	
+			message.put("userID", userid);
+			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserLeftCommand", message);
+			connInvokerService.sendMessage(m);
+			
 			return true;
 		}
 
@@ -96,33 +112,56 @@ public class ParticipantsApplication {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public boolean participantJoin(String roomName, String userid, String username, String role, String externUserID, Map status) {
-		log.debug("participant joining room " + roomName);
-		if (roomsManager.hasRoom(roomName)) {
+	public boolean participantJoin(String meetingID, String userid, String username, String role, String externUserID, Map status) {
+		log.debug("participant joining room " + meetingID);
+		if (roomsManager.hasRoom(meetingID)) {
 			User p = new User(userid, username, role, externUserID, status);			
-			Room room = roomsManager.getRoom(roomName);
+			Room room = roomsManager.getRoom(meetingID);
 			room.addParticipant(p);
-			log.debug("participant joined room " + roomName);
+			log.debug("participant joined room " + meetingID);
+						
+			Map<String, Object> message = new HashMap<String, Object>();	
+			message.put("user", p.toMap());
+			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserJoinedCommand", message);
+			connInvokerService.sendMessage(m);
+			
 			return true;
 		}
-		log.debug("participant failed to join room " + roomName);
+		log.debug("participant failed to join room " + meetingID);
 		return false;
 	}
 	
-	public ArrayList<String> getCurrentPresenter(String room){
-		if (roomsManager.hasRoom(room)){
-			return roomsManager.getCurrentPresenter(room);			
-		}
-		log.warn("Getting presenter on a non-existant room " + room);
-		return null;
+	public Map<String, String> getCurrentPresenter(String meetingID) {
+		return roomsManager.getCurrentPresenter(meetingID);
 	}
 	
-	public void assignPresenter(String room, ArrayList presenter){
-		if (roomsManager.hasRoom(room)){
-			roomsManager.assignPresenter(room, presenter);
+	public void assignPresenter(String meetingID, String newPresenterUserID, String assignedByUserID){
+		if (roomsManager.hasRoom(meetingID)){
+			
+			Map<String,String> curPresenter = getCurrentPresenter(meetingID);
+			if (curPresenter != null) { 
+				setParticipantStatus(meetingID, newPresenterUserID, "presenter", true);
+						
+				String curPresenterUserid = (String) curPresenter.get("presenterUserID");
+				if (curPresenterUserid != null && !curPresenterUserid.equals(newPresenterUserID)){
+					log.info("Changing the current presenter [" + curPresenter.get(0) + "] to viewer.");
+					setParticipantStatus(meetingID, curPresenterUserid, "presenter", false);
+				}
+			} else {
+				log.info("No current presenter. So do nothing.");
+			}
+			
+			roomsManager.assignPresenter(meetingID, newPresenterUserID, assignedByUserID);
+						
+			Map<String, Object> message = new HashMap<String, Object>();	
+			message.put("newPresenterUserID", newPresenterUserID);
+			message.put("assignedByUserID", assignedByUserID);
+			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "AssignPresenterCommand", message);
+			connInvokerService.sendMessage(m);
+			
 			return;
 		}
-		log.warn("Assigning presenter on a non-existant room " + room);	
+		log.warn("Assigning presenter on a non-existant room " + meetingID);	
 	}
 	
 	public void setRoomsManager(RoomsManager r) {

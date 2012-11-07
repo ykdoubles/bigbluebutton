@@ -55,38 +55,38 @@ public class ParticipantsEventSender implements IRoomListener {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void assignPresenter(ArrayList<String> presenter) {
-		log.debug("calling assignPresenterCallback " + presenter.get(0) + ", " + presenter.get(1) + " " + presenter.get(2));
-		so.sendMessage("assignPresenterCallback", presenter);
+	public void assignPresenter(String newPresenterUserID, String newPresenterName, String assignedBy) {
+//		log.debug("calling assignPresenterCallback " + presenter.get(0) + ", " + presenter.get(1) + " " + presenter.get(2));
+//		so.sendMessage("assignPresenterCallback", presenter);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void participantJoined(User p) {
 		log.debug("A participant has joined " + p.getInternalUserID());
-		ArrayList args = new ArrayList();
-		args.add(p.toMap());
-		log.debug("Sending participantJoined " + p.getExternalUserID() + " to client.");
-		so.sendMessage("participantJoined", args);
+//		ArrayList args = new ArrayList();
+//		args.add(p.toMap());
+//		log.debug("Sending participantJoined " + p.getExternalUserID() + " to client.");
+//		so.sendMessage("participantJoined", args);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void participantLeft(User p) {
-		ArrayList args = new ArrayList();
-		args.add(p.getInternalUserID());
-		so.sendMessage("participantLeft", args);
+//		ArrayList args = new ArrayList();
+//		args.add(p.getInternalUserID());
+//		so.sendMessage("participantLeft", args);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void participantStatusChange(User p, String status, Object value) {
 		log.debug("A participant's status has changed " + p.getInternalUserID() + " " + status + " " + value);
-		ArrayList args = new ArrayList();
-		args.add(p.getInternalUserID());
-		args.add(status);
-		args.add(value);
-		so.sendMessage("participantStatusChange", args);
+//		ArrayList args = new ArrayList();
+//		args.add(p.getInternalUserID());
+//		args.add(status);
+//		args.add(value);
+//		so.sendMessage("participantStatusChange", args);
 	}
 
 	@Override

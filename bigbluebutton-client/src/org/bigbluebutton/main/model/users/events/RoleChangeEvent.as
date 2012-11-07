@@ -26,7 +26,8 @@ package org.bigbluebutton.main.model.users.events
 		
 		public var userid:String;
 		public var username:String;
-		
+		public var assignedBy:String;
+    
 		public function RoleChangeEvent(type:String)
 		{
 			super(type, true, false);

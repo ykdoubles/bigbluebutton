@@ -43,7 +43,7 @@ public class PresentationService {
 	public Map<String, Object> getPresentationInfo() {
 		log.debug("Getting presentation information.");
 		IScope scope = Red5.getConnectionLocal().getScope();
-		ArrayList<String> curPresenter = participantsApplication.getCurrentPresenter(scope.getName());
+		Map<String, String> curPresenter = participantsApplication.getCurrentPresenter(scope.getName());
 		int curSlide = presentationApplication.getCurrentSlide(scope.getName());
 		Boolean isSharing = presentationApplication.getSharingPresentation(scope.getName());
 		String currentPresentation = presentationApplication.getCurrentPresentation(scope.getName());
@@ -53,10 +53,9 @@ public class PresentationService {
 		Map<String, Object> presenter = new HashMap<String, Object>();		
 		if (curPresenter != null) {
 			presenter.put("hasPresenter", true);
-			presenter.put("user", curPresenter.get(0));
-			presenter.put("name", curPresenter.get(1));
-			presenter.put("assignedBy",curPresenter.get(2));
-			log.debug("Presenter: " + curPresenter.get(0) + " " + curPresenter.get(1) + " " + curPresenter.get(2));
+			presenter.put("user", curPresenter.get("presenterUserID"));
+			presenter.put("name", curPresenter.get("presenterName"));
+			presenter.put("assignedBy",curPresenter.get("assignedBy"));
 		} else {
 			presenter.put("hasPresenter", false);
 		}

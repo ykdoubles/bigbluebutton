@@ -68,6 +68,8 @@
         var e:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
         e.userid = sharerUserID;
         e.username = UsersUtil.getUserName(sharerUserID);
+        e.assignedBy = UsersUtil.getMyUserID();
+        
         var gd:Dispatcher = new Dispatcher();
         gd.dispatchEvent(e);     
       }

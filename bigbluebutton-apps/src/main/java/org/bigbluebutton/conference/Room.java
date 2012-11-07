@@ -24,8 +24,8 @@ import org.red5.logging.Red5LoggerFactory;
 import net.jcip.annotations.ThreadSafe;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 /**
@@ -35,9 +35,11 @@ import java.util.Map;
 @ThreadSafe
 public class Room implements Serializable {
 	private static Logger log = Red5LoggerFactory.getLogger( Room.class, "bigbluebutton" );	
-	ArrayList<String> currentPresenter = null;
+	String curPresenterUserID = "";
+	String presenterAssignedBy = "";
+	
 	private String name;
-	private Map <String, User> participants;
+	private Map <String, User> users;
 
 	// these should stay transient so they're not serialized in ActiveMQ messages:	
 	//private transient Map <Long, Participant> unmodifiableMap;
@@ -45,7 +47,7 @@ public class Room implements Serializable {
 
 	public Room(String name) {
 		this.name = name;
-		participants = new ConcurrentHashMap<String, User>();
+		users = new ConcurrentHashMap<String, User>();
 		//unmodifiableMap = Collections.unmodifiableMap(participants);
 		listeners   = new ConcurrentHashMap<String, IRoomListener>();
 	}
@@ -69,7 +71,7 @@ public class Room implements Serializable {
 	public void addParticipant(User participant) {
 		synchronized (this) {
 			log.debug("adding participant " + participant.getInternalUserID());
-			participants.put(participant.getInternalUserID(), participant);
+			users.put(participant.getInternalUserID(), participant);
 //			unmodifiableMap = Collections.unmodifiableMap(participants)
 		}
 		log.debug("Informing roomlisteners " + listeners.size());
@@ -84,10 +86,10 @@ public class Room implements Serializable {
 		boolean present = false;
 		User p = null;
 		synchronized (this) {
-			present = participants.containsKey(userid);
+			present = users.containsKey(userid);
 			if (present) {
 				log.debug("removing participant");
-				p = participants.remove(userid);
+				p = users.remove(userid);
 			}
 		}
 		if (present) {
@@ -103,10 +105,10 @@ public class Room implements Serializable {
 		boolean present = false;
 		User p = null;
 		synchronized (this) {
-			present = participants.containsKey(userid);
+			present = users.containsKey(userid);
 			if (present) {
 				log.debug("change participant status");
-				p = participants.get(userid);
+				p = users.get(userid);
 				p.setStatus(status, value);
 				//participants.put(userid, p);
 				//unmodifiableMap = Collections.unmodifiableMap(participants);
@@ -130,21 +132,21 @@ public class Room implements Serializable {
 	}
 
 	public Map getParticipants() {
-		return participants;//unmodifiableMap;
+		return users;//unmodifiableMap;
 	}	
 
 	public Collection<User> getParticipantCollection() {
-		return participants.values();
+		return users.values();
 	}
 
 	public int getNumberOfParticipants() {
-		log.debug("Returning number of participants: " + participants.size());
-		return participants.size();
+		log.debug("Returning number of participants: " + users.size());
+		return users.size();
 	}
 
 	public int getNumberOfModerators() {
 		int sum = 0;
-		for (Iterator<User> it = participants.values().iterator(); it.hasNext(); ) {
+		for (Iterator<User> it = users.values().iterator(); it.hasNext(); ) {
 			User part = it.next();
 			if (part.isModerator()) {
 				sum++;
@@ -154,17 +156,36 @@ public class Room implements Serializable {
 		return sum;
 	}
 
-	public ArrayList<String> getCurrentPresenter() {
-		return currentPresenter;
+	public Map<String, String> getCurrentPresenter() {
+		Map<String, String> curPres =  new HashMap<String, String>();
+		curPres.put("presenterUserID", curPresenterUserID);
+		curPres.put("assignedBy", presenterAssignedBy);
+		curPres.put("presenterName", "");
+		
+		User user = getUser(curPresenterUserID);
+		if (user != null) {
+			curPres.put("presenterName", user.getName());
+		}
+
+		
+		return curPres;
 	}
 	
-	public void assignPresenter(ArrayList<String> presenter){
-		currentPresenter = presenter;
-		for (Iterator iter = listeners.values().iterator(); iter.hasNext();) {
-			log.debug("calling on listener");
-			IRoomListener listener = (IRoomListener) iter.next();
-			log.debug("calling sendUpdateMessage on listener " + listener.getName());
-			listener.assignPresenter(presenter);
-		}	
+	public void assignPresenter(String newPresenterUserID, String assignedByUserID) {
+		User user = getUser(newPresenterUserID);
+		if (user != null) {
+			curPresenterUserID = newPresenterUserID;
+			presenterAssignedBy = assignedByUserID;
+			
+			for (Iterator<IRoomListener> iter = listeners.values().iterator(); iter.hasNext();) {
+				IRoomListener listener = (IRoomListener) iter.next();
+				listener.assignPresenter(newPresenterUserID, user.getName(), assignedByUserID);
+			}				
+		}
+
+	}
+	
+	private User getUser(String userID) {
+		return users.get(userID);
 	}
 }

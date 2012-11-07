@@ -48,6 +48,7 @@
           import org.bigbluebutton.common.Role;
           import org.bigbluebutton.common.events.LocaleChangeEvent;
           import org.bigbluebutton.core.EventConstants;
+          import org.bigbluebutton.core.UsersUtil;
           import org.bigbluebutton.core.events.CoreEvent;
           import org.bigbluebutton.core.managers.UserManager;
           import org.bigbluebutton.main.events.ParticipantJoinEvent;
@@ -120,6 +121,8 @@
 				var e:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
 				e.userid = viewersGrid.selectedItem.userID;
 				e.username = viewersGrid.selectedItem.name;
+        e.assignedBy = UsersUtil.getMyUserID();
+        
 				dispatchEvent(e);
 				
 				presentBtn.enabled = false;

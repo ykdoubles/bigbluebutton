@@ -1,9 +1,9 @@
-usePlugin 'scala'
 usePlugin 'java'
+usePlugin 'scala'
 usePlugin 'war'
 usePlugin 'eclipse'
 
-version = '0.8'
+version = '0.81'
 jar.enabled = true
 
 def appName = 'bigbluebutton'
@@ -113,6 +113,7 @@ dependencies {
    compile 'com.google.code.gson:gson:1.7.1'
    providedCompile 'commons:commons-lang3:3.0-beta'
    compile 'commons-lang:commons-lang:2.5'
+   
 }
 
 test {

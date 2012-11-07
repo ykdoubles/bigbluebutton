@@ -26,7 +26,6 @@ import org.bigbluebutton.conference.service.presentation.ConversionUpdatesMessag
 import org.red5.logging.Red5LoggerFactory;
 import com.google.gson.Gson;
 import net.jcip.annotations.ThreadSafe;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -193,7 +192,7 @@ public class RoomsManager {
 		this.messagingService.start();
 	}
 	
-	public ArrayList<String> getCurrentPresenter( String room){
+	public Map<String, String> getCurrentPresenter( String room){
 		Room r = getRoom(room);
 		if (r != null) {
 			return r.getCurrentPresenter();		
@@ -202,13 +201,13 @@ public class RoomsManager {
 		return null;
 	}
 	
-	public void assignPresenter(String room, ArrayList presenter){
-		Room r = getRoom(room);
+	public void assignPresenter(String meetingID, String newPresenterUserID, String assignedByUserID){
+		Room r = getRoom(meetingID);
 		if (r != null) {
-			r.assignPresenter(presenter);
+			r.assignPresenter(newPresenterUserID, assignedByUserID);
 			return;
 		}	
-		log.warn("Assigning presenter to a non-existing room " + room);	
+		log.warn("Assigning presenter to a non-existing room " + meetingID);	
 	}
 	
 	public void setConversionUpdatesMessageListener(ConversionUpdatesMessageListener conversionUpdatesMessageListener) {
