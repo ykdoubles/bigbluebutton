@@ -22,9 +22,7 @@ package org.bigbluebutton.conference;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 import net.jcip.annotations.ThreadSafe;
-import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,41 +32,41 @@ import java.util.Map;
  * Encapsulates Participants and RoomListeners.
  */
 @ThreadSafe
-public class Room implements Serializable {
-	private static Logger log = Red5LoggerFactory.getLogger( Room.class, "bigbluebutton" );	
+public class Meeting {
+	private static Logger log = Red5LoggerFactory.getLogger( Meeting.class, "bigbluebutton" );	
 	String curPresenterUserID = "";
 	String presenterAssignedBy = "";
 	
-	private String name;
+	private String meetingID;
 	private Map<String, User> users;
 
 	private transient Map<String, User> unmodifiableMap;
 	private transient final Map<String, IRoomListener> listeners;
 
-	public Room(String name) {
-		this.name = name;
+	public Meeting(String meetingID) {
+		this.meetingID = meetingID;
 		users = new ConcurrentHashMap<String, User>();
 		unmodifiableMap = Collections.unmodifiableMap(users);
 		listeners   = new ConcurrentHashMap<String, IRoomListener>();
 	}
 
-	public String getName() {
-		return name;
+	public String getMeetingID() {
+		return meetingID;
 	}
 
-	public void addRoomListener(IRoomListener listener) {
+	public void addMeetingListener(IRoomListener listener) {
 		if (! listeners.containsKey(listener.getName())) {
 			log.debug("adding room listener");
 			listeners.put(listener.getName(), listener);			
 		}
 	}
 
-	public void removeRoomListener(IRoomListener listener) {
+	public void removeMeetingListener(IRoomListener listener) {
 		log.debug("removing room listener");
 		listeners.remove(listener);		
 	}
 
-	public void addParticipant(User participant) {
+	public void addUser(User participant) {
 		synchronized (this) {
 			log.debug("adding participant " + participant.getInternalUserID());
 			users.put(participant.getInternalUserID(), participant);
@@ -82,7 +80,7 @@ public class Room implements Serializable {
 		}
 	}
 
-	public void removeParticipant(String userid) {
+	public void removeUser(String userid) {
 		boolean present = false;
 		User p = null;
 		synchronized (this) {
@@ -101,7 +99,7 @@ public class Room implements Serializable {
 		}
 	}
 
-	public void changeParticipantStatus(String userid, String status, Object value) {
+	public void changeUserStatus(String userid, String status, Object value) {
 		boolean present = false;
 		User p = null;
 		synchronized (this) {
@@ -131,18 +129,9 @@ public class Room implements Serializable {
 		}
 	}
 
-	public Map<String, User> getParticipants() {
+	public Map<String, User> getUsers() {
 		return unmodifiableMap;
 	}	
-
-	public Collection<User> getParticipantCollection() {
-		return users.values();
-	}
-
-	public int getNumberOfParticipants() {
-		log.debug("Returning number of participants: " + users.size());
-		return users.size();
-	}
 
 	public int getNumberOfModerators() {
 		int sum = 0;

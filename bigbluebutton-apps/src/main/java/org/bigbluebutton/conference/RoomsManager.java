@@ -38,22 +38,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RoomsManager {
 	private static Logger log = Red5LoggerFactory.getLogger(RoomsManager.class, "bigbluebutton");
 	
-	private final Map <String, Room> rooms;
+	private final Map <String, Meeting> rooms;
 
 	MessagingService messagingService;
 	ConversionUpdatesMessageListener conversionUpdatesMessageListener;
 	
 	public RoomsManager() {
-		rooms = new ConcurrentHashMap<String, Room>();		
+		rooms = new ConcurrentHashMap<String, Meeting>();		
 	}
 	
-	public void addRoom(Room room) {
-		log.debug("Adding room " + room.getName());
-		room.addRoomListener(new ParticipantUpdatingRoomListener(room,messagingService)); 	
+	public void addRoom(Meeting room) {
+		log.debug("Adding room " + room.getMeetingID());
+		room.addMeetingListener(new ParticipantUpdatingRoomListener(room,messagingService)); 	
 		
 		if (checkPublisher()) {
 			HashMap<String,String> map = new HashMap<String,String>();
-			map.put("meetingId", room.getName());
+			map.put("meetingId", room.getMeetingID());
 			map.put("messageId", MessagingConstants.MEETING_STARTED_EVENT);
 			
 			Gson gson = new Gson();
@@ -61,16 +61,16 @@ public class RoomsManager {
 			
 			log.debug("Notified event listener of conference start");
 		}
-		rooms.put(room.getName(), room);
+		rooms.put(room.getMeetingID(), room);
 	}
 	
 	public void removeRoom(String name) {
 		log.debug("Remove room " + name);
-		Room room = rooms.remove(name);
+		Meeting room = rooms.remove(name);
 		if (checkPublisher() && room != null) {
 			room.endAndKickAll();
 			HashMap<String,String> map = new HashMap<String,String>();
-			map.put("meetingId", room.getName());
+			map.put("meetingId", room.getMeetingID());
 			map.put("messageId", MessagingConstants.MEETING_ENDED_EVENT);
 			
 			Gson gson = new Gson();
@@ -81,7 +81,7 @@ public class RoomsManager {
 	}
 
 	
-	public Set<Map.Entry<String,Room>> getAllMeetings() {
+	public Set<Map.Entry<String,Meeting>> getAllMeetings() {
 		return rooms.entrySet();
 	}
 	
@@ -102,24 +102,24 @@ public class RoomsManager {
 	 * Keeping getRoom private so that all access to Room goes through here.
 	 */
 	//TODO: this method becomes public for ParticipantsApplication, ask if it's right? 
-	public Room getRoom(String name) {
+	public Meeting getRoom(String name) {
 		log.debug("Get room " + name);
 		return rooms.get(name);
 	}
 	
 	public Map<String, User> getParticipants(String meetingID) {
-		Room r = getRoom(meetingID);
+		Meeting r = getRoom(meetingID);
 		if (r != null) {
-			return r.getParticipants();
+			return r.getUsers();
 		}
 		log.warn("Getting participants from a non-existing room " + meetingID);
 		return null;
 	}
 	
 	public void addRoomListener(String roomName, IRoomListener listener) {
-		Room r = getRoom(roomName);
+		Meeting r = getRoom(roomName);
 		if (r != null) {
-			r.addRoomListener(listener);
+			r.addMeetingListener(listener);
 			return;
 		}
 		log.warn("Adding listener to a non-existing room " + roomName);
@@ -138,7 +138,7 @@ public class RoomsManager {
 
 	public void addParticipant(String roomName, User participant) {
 		log.debug("Add participant " + participant.getName());
-		Room r = getRoom(roomName);
+		Meeting r = getRoom(roomName);
 		if (r != null) {
 /*			if (checkPublisher()) {
 
@@ -153,7 +153,7 @@ public class RoomsManager {
 					
 				}
 			}
-*/			r.addParticipant(participant);
+*/			r.addUser(participant);
 
 			return;
 		}
@@ -162,13 +162,13 @@ public class RoomsManager {
 	
 	public void removeParticipant(String roomName, String userid) {
 		log.debug("Remove participant " + userid + " from " + roomName);
-		Room r = getRoom(roomName);
+		Meeting r = getRoom(roomName);
 		if (r != null) {
 			if (checkPublisher()) {
 				//conferenceEventListener.participantsUpdated(r);
 				//missing method()?
 			}
-			r.removeParticipant(userid);
+			r.removeUser(userid);
 
 			return;
 		}
@@ -177,9 +177,9 @@ public class RoomsManager {
 	
 	public void changeParticipantStatus(String roomName, String userid, String status, Object value) {
 		log.debug("Change participant status " + userid + " - " + status + " [" + value + "]");
-		Room r = getRoom(roomName);
+		Meeting r = getRoom(roomName);
 		if (r != null) {
-			r.changeParticipantStatus(userid, status, value);
+			r.changeUserStatus(userid, status, value);
 			return;
 		}		
 		log.warn("Changing participant status on a non-existing room " + roomName);
@@ -192,7 +192,7 @@ public class RoomsManager {
 	}
 	
 	public Map<String, String> getCurrentPresenter( String room){
-		Room r = getRoom(room);
+		Meeting r = getRoom(room);
 		if (r != null) {
 			return r.getCurrentPresenter();		
 		}	
@@ -201,7 +201,7 @@ public class RoomsManager {
 	}
 	
 	public void assignPresenter(String meetingID, String newPresenterUserID, String assignedByUserID){
-		Room r = getRoom(meetingID);
+		Meeting r = getRoom(meetingID);
 		if (r != null) {
 			r.assignPresenter(newPresenterUserID, assignedByUserID);
 			return;
@@ -218,7 +218,7 @@ public class RoomsManager {
 		@Override
 		public void endMeetingRequest(String meetingId) {
 			log.debug("End meeting request for room: " + meetingId);
-			Room room = getRoom(meetingId); // must do this because the room coming in is serialized (no transient values are present)
+			Meeting room = getRoom(meetingId); // must do this because the room coming in is serialized (no transient values are present)
 			if (room != null)
 				room.endAndKickAll();
 			else

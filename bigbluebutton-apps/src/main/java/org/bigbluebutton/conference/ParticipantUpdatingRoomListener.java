@@ -35,9 +35,9 @@ public class ParticipantUpdatingRoomListener implements IRoomListener{
 	private static Logger log = Red5LoggerFactory.getLogger(ParticipantUpdatingRoomListener.class, "bigbluebutton");
 	
 	MessagingService messagingService;
-	private Room room;
+	private Meeting room;
 	
-	public ParticipantUpdatingRoomListener(Room room, MessagingService messagingService) {
+	public ParticipantUpdatingRoomListener(Meeting room, MessagingService messagingService) {
 		this.room = room;
 		this.messagingService=messagingService;
 	}
@@ -49,7 +49,7 @@ public class ParticipantUpdatingRoomListener implements IRoomListener{
 	public void participantStatusChange(User p, String status, Object value){
 		if (messagingService != null) {
 			HashMap<String,String> map= new HashMap<String, String>();
-			map.put("meetingId", this.room.getName());
+			map.put("meetingId", this.room.getMeetingID());
 			map.put("messageId", MessagingConstants.USER_STATUS_CHANGE_EVENT);
 			
 			map.put("internalUserId", p.getInternalUserID());
@@ -58,14 +58,14 @@ public class ParticipantUpdatingRoomListener implements IRoomListener{
 			
 			Gson gson= new Gson();
 			messagingService.send(MessagingConstants.PARTICIPANTS_CHANNEL, gson.toJson(map));
-			log.debug("Publishing a status change in: " + this.room.getName());
+			log.debug("Publishing a status change in: " + this.room.getMeetingID());
 		}
 	}
 	
 	public void participantJoined(User p) {
 		if (messagingService != null) {
 			HashMap<String,String> map= new HashMap<String, String>();
-			map.put("meetingId", this.room.getName());
+			map.put("meetingId", this.room.getMeetingID());
 			map.put("messageId", MessagingConstants.USER_JOINED_EVENT);
 			map.put("internalUserId", p.getInternalUserID());
 			map.put("externalUserId", p.getExternalUserID());
@@ -74,20 +74,20 @@ public class ParticipantUpdatingRoomListener implements IRoomListener{
 			
 			Gson gson= new Gson();
 			messagingService.send(MessagingConstants.PARTICIPANTS_CHANNEL, gson.toJson(map));
-			log.debug("Publishing message participant joined in " + this.room.getName());
+			log.debug("Publishing message participant joined in " + this.room.getMeetingID());
 		}
 	}
 	
 	public void participantLeft(User p) {		
 		if (messagingService != null) {
 			HashMap<String,String> map= new HashMap<String, String>();
-			map.put("meetingId", this.room.getName());
+			map.put("meetingId", this.room.getMeetingID());
 			map.put("messageId", MessagingConstants.USER_LEFT_EVENT);
 			map.put("internalUserId", p.getInternalUserID());
 			
 			Gson gson= new Gson();
 			messagingService.send(MessagingConstants.PARTICIPANTS_CHANNEL, gson.toJson(map));
-			log.debug("Publishing message participant left in " + this.room.getName());
+			log.debug("Publishing message participant left in " + this.room.getMeetingID());
 		}
 	}
 

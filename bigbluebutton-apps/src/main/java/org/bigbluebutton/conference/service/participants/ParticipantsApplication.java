@@ -28,7 +28,7 @@ import java.util.Set;
 import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.ConnectionInvokerService;
 import org.bigbluebutton.conference.RoomsManager;
-import org.bigbluebutton.conference.Room;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IRoomListener;
+import org.bigbluebutton.conference.Meeting;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IRoomListener;
 
 public class ParticipantsApplication {
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsApplication.class, "bigbluebutton" );	
@@ -40,7 +40,7 @@ public class ParticipantsApplication {
 	public boolean createRoom(String name) {
 		if(!roomsManager.hasRoom(name)){
 			log.info("Creating room " + name);
-			roomsManager.addRoom(new Room(name));
+			roomsManager.addRoom(new Meeting(name));
 			return true;
 		}
 		return false;
@@ -60,12 +60,12 @@ public class ParticipantsApplication {
 	}
 	
 	public void destroyAllRooms() {
-		Set<Map.Entry<String,Room>> meetings = roomsManager.getAllMeetings();
-		for (Map.Entry<String,Room> meeting : meetings) {
-		    Room room = meeting.getValue();
+		Set<Map.Entry<String,Meeting>> meetings = roomsManager.getAllMeetings();
+		for (Map.Entry<String,Meeting> meeting : meetings) {
+		    Meeting room = meeting.getValue();
 			Map<String, Object> message = new HashMap<String, Object>();	
 			message.put("empty", "nothing");
-			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, room.getName(), "UserLogoutCommand", message);
+			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, room.getMeetingID(), "UserLogoutCommand", message);
 			connInvokerService.sendMessage(m);
 		}
 	}
@@ -133,9 +133,9 @@ public class ParticipantsApplication {
 	public boolean participantLeft(String meetingID, String userid) {
 		log.debug("Participant " + userid + " leaving room " + meetingID);
 		if (roomsManager.hasRoom(meetingID)) {
-			Room room = roomsManager.getRoom(meetingID);
+			Meeting room = roomsManager.getRoom(meetingID);
 			log.debug("Removing " + userid + " from room " + meetingID);
-			room.removeParticipant(userid);
+			room.removeUser(userid);
 						
 			Map<String, Object> message = new HashMap<String, Object>();	
 			message.put("userID", userid);
@@ -152,8 +152,8 @@ public class ParticipantsApplication {
 		log.debug("participant joining room " + meetingID);
 		if (roomsManager.hasRoom(meetingID)) {
 			User p = new User(userid, username, role, externUserID, status);			
-			Room room = roomsManager.getRoom(meetingID);
-			room.addParticipant(p);
+			Meeting room = roomsManager.getRoom(meetingID);
+			room.addUser(p);
 			log.debug("participant joined room " + meetingID);
 						
 			Map<String, Object> message = new HashMap<String, Object>();	
