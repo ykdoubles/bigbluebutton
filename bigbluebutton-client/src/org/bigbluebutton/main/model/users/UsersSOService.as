@@ -82,7 +82,7 @@ package org.bigbluebutton.main.model.users {
 			_participantsSO.addEventListener(AsyncErrorEvent.ASYNC_ERROR, asyncErrorHandler);
 			_participantsSO.client = this;
 			_participantsSO.connect(_connectionManager.connection);
-      LogUtil.debug("In UserSOService:join - Setting my userid to [" + userid + "]");
+      trace("In UserSOService:join - Setting my userid to [" + userid + "]");
       UserManager.getInstance().getConference().setMyUserid(userid);
 			queryForParticipants();					
 			
@@ -95,7 +95,7 @@ package org.bigbluebutton.main.model.users {
 				new Responder(
 	        		// participants - On successful result
 					function(result:Object):void { 
-						LogUtil.debug("Successfully queried participants: " + result.count); 
+						trace("Successfully queried participants: " + result.count); 
 					},	
 					// status - On error occurred
 					function(status:Object):void { 
@@ -117,7 +117,7 @@ package org.bigbluebutton.main.model.users {
 					function(result:Boolean):void { 
 						
 						if (result) {
-							LogUtil.debug("Successfully assigned presenter to: " + userid);							
+							trace("Successfully assigned presenter to: " + userid);							
 						}	
 					},	
 					// status - On error occurred

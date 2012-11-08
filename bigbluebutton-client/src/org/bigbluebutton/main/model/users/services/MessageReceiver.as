@@ -27,6 +27,7 @@ package org.bigbluebutton.main.model.users.services
         
     public function onMessage(messageName:String, message:Object):void
     {
+      trace("Received [" + messageName + "]");
       switch (messageName) {
         case "UserStatusChangeCommand":
           handleUserStatusChangeCommand(message);
@@ -61,13 +62,13 @@ package org.bigbluebutton.main.model.users.services
     }
     
     private function becomePresenterIfLoneModerator():void {
-      LogUtil.debug("Checking if I need to become presenter.");
+      trace("Checking if I need to become presenter.");
       var participants:Conference = UserManager.getInstance().getConference();
       if (participants.hasOnlyOneModerator()) {
-        LogUtil.debug("There is only one moderator in the meeting. Is it me? ");
+        trace("There is only one moderator in the meeting. Is it me? ");
         var user:BBBUser = participants.getTheOnlyModerator();
         if (user.me) {
-          LogUtil.debug("Setting me as presenter because I'm the only moderator. My userid is [" + user.userID + "]");
+          trace("Setting me as presenter because I'm the only moderator. My userid is [" + user.userID + "]");
           var presenterEvent:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
           presenterEvent.userid = user.userID;
           presenterEvent.username = user.name;
@@ -75,10 +76,10 @@ package org.bigbluebutton.main.model.users.services
           var dispatcher:Dispatcher = new Dispatcher();
           dispatcher.dispatchEvent(presenterEvent);
         } else {
-          LogUtil.debug("No. It is not me. It is [" + user.userID + ", " + user.name + "]");
+          trace("No. It is not me. It is [" + user.userID + ", " + user.name + "]");
         }
       } else {
-        LogUtil.debug("No. There are more than one moderator.");
+        trace("No. There are more than one moderator.");
       }
     }
     
