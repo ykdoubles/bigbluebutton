@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import net.jcip.annotations.ThreadSafe;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -79,11 +80,9 @@ public class RoomsManager {
 		}
 	}
 
-	public void destroyAllRooms() {
-		for (Map.Entry<String,Room> entry : rooms.entrySet()) {
-		    Room room = entry.getValue();
-		    room.endAndKickAll();
-		}
+	
+	public Set<Map.Entry<String,Room>> getAllMeetings() {
+		return rooms.entrySet();
 	}
 	
 	private boolean checkPublisher() {
@@ -108,12 +107,12 @@ public class RoomsManager {
 		return rooms.get(name);
 	}
 	
-	public Map getParticipants(String roomName) {
-		Room r = getRoom(roomName);
+	public Map<String, User> getParticipants(String meetingID) {
+		Room r = getRoom(meetingID);
 		if (r != null) {
 			return r.getParticipants();
 		}
-		log.warn("Getting participants from a non-existing room " + roomName);
+		log.warn("Getting participants from a non-existing room " + meetingID);
 		return null;
 	}
 	

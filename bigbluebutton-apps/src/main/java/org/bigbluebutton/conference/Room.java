@@ -25,6 +25,7 @@ import net.jcip.annotations.ThreadSafe;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,16 +40,15 @@ public class Room implements Serializable {
 	String presenterAssignedBy = "";
 	
 	private String name;
-	private Map <String, User> users;
+	private Map<String, User> users;
 
-	// these should stay transient so they're not serialized in ActiveMQ messages:	
-	//private transient Map <Long, Participant> unmodifiableMap;
+	private transient Map<String, User> unmodifiableMap;
 	private transient final Map<String, IRoomListener> listeners;
 
 	public Room(String name) {
 		this.name = name;
 		users = new ConcurrentHashMap<String, User>();
-		//unmodifiableMap = Collections.unmodifiableMap(participants);
+		unmodifiableMap = Collections.unmodifiableMap(users);
 		listeners   = new ConcurrentHashMap<String, IRoomListener>();
 	}
 
@@ -131,8 +131,8 @@ public class Room implements Serializable {
 		}
 	}
 
-	public Map getParticipants() {
-		return users;//unmodifiableMap;
+	public Map<String, User> getParticipants() {
+		return unmodifiableMap;
 	}	
 
 	public Collection<User> getParticipantCollection() {

@@ -20,57 +20,26 @@
 package org.bigbluebutton.conference.service.participants;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
 import org.red5.server.api.scope.IScope;
+import org.bigbluebutton.conference.BigBlueButtonSession;
+import org.bigbluebutton.conference.Constants;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;import org.bigbluebutton.conference.User;
 
 public class ParticipantsService {
 
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsService.class, "bigbluebutton" );	
 	private ParticipantsApplication application;
 
-	@SuppressWarnings("unchecked")
 	public void assignPresenter(String newPresenterUserID, String assignedBy) {
 		IScope scope = Red5.getConnectionLocal().getScope();
 		application.assignPresenter(scope.getName(), newPresenterUserID, assignedBy);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Map getParticipants() {
-		String roomName = Red5.getConnectionLocal().getScope().getName();
-		log.info("Client is requesting for list of participants in [" + roomName + "].");
-		Map p = application.getParticipants(roomName);
-		Map participants = new HashMap();
-		if (p == null) {
-			participants.put("count", 0);
-			log.debug("partipants of " + roomName + " is null");
-		} else {		
-			
-			participants.put("count", p.size());
-			log.debug("number of partipants is " + p.size());
-			if (p.size() > 0) {
-				/**
-				 * Somehow we need to convert to Map so the client will be
-				 * able to decode it. Need to figure out if we can send Participant
-				 * directly. (ralam - 2/20/2009)
-				 */
-				Collection pc = p.values();
-	    		Map pm = new HashMap();
-	    		for (Iterator it = pc.iterator(); it.hasNext();) {
-	    			User ap = (User) it.next();
-	    			pm.put(ap.getInternalUserID(), ap.toMap()); 
-	    		}  
-				participants.put("participants", pm);
-			}			
-		}
-		return participants;
+	public void getParticipants() {		
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+		application.getParticipants(meetingID, getBbbSession().getInternalUserID());		
 	}
 	
 	public void setParticipantStatus(String userid, String status, Object value) {
@@ -82,5 +51,9 @@ public class ParticipantsService {
 	public void setParticipantsApplication(ParticipantsApplication a) {
 		log.debug("Setting Participants Applications");
 		application = a;
+	}
+	
+	private BigBlueButtonSession getBbbSession() {
+		return (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
 	}
 }

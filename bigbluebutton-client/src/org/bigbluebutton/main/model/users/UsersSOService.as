@@ -96,12 +96,6 @@ package org.bigbluebutton.main.model.users {
 	        		// participants - On successful result
 					function(result:Object):void { 
 						LogUtil.debug("Successfully queried participants: " + result.count); 
-						if (result.count > 0) {
-							for(var p:Object in result.participants) {
-								participantJoined(result.participants[p]);
-							}
-						}	
-						becomePresenterIfLoneModerator();
 					},	
 					// status - On error occurred
 					function(status:Object):void { 
@@ -114,29 +108,7 @@ package org.bigbluebutton.main.model.users {
 				)//new Responder
 			); //_netConnection.call
 		}
-		
-		private function becomePresenterIfLoneModerator():void {
-      LogUtil.debug("Checking if I need to become presenter.");
-			var participants:Conference = UserManager.getInstance().getConference();
-			if (participants.hasOnlyOneModerator()) {
-        LogUtil.debug("There is only one moderator in the meeting. Is it me? ");
-				var user:BBBUser = participants.getTheOnlyModerator();
-				if (user.me) {
-          LogUtil.debug("Setting me as presenter because I'm the only moderator. My userid is [" + user.userID + "]");
-					var presenterEvent:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
-					presenterEvent.userid = user.userID;
-					presenterEvent.username = user.name;
-          presenterEvent.assignedBy = UsersUtil.getMyUserID();
-					var dispatcher:Dispatcher = new Dispatcher();
-					dispatcher.dispatchEvent(presenterEvent);
-				} else {
-          LogUtil.debug("No. It is not me. It is [" + user.userID + ", " + user.name + "]");
-        }
-			} else {
-        LogUtil.debug("No. There are more than one moderator.");
-      }
-		}
-		
+				
 		public function assignPresenter(userid:String, name:String, assignedBy:String):void {
 			var nc:NetConnection = _connectionManager.connection;
 			nc.call("participants.assignPresenter",// Remote function name
@@ -161,40 +133,7 @@ package org.bigbluebutton.main.model.users {
 			); //_netConnection.call
 		}
 		
-		/**
-		 * Called by the server to assign a presenter
-		 */
-		public function assignPresenterCallback(userid:String, name:String, assignedBy:String):void {
-			LogUtil.debug("assignPresenterCallback " + userid + "," + name + "," + assignedBy);
-			var dispatcher:Dispatcher = new Dispatcher();
-			var meeting:Conference = UserManager.getInstance().getConference();
-			if (meeting.amIThisUser(userid)) {
-				meeting.setMePresenter(true);				
-				var e:MadePresenterEvent = new MadePresenterEvent(MadePresenterEvent.SWITCH_TO_PRESENTER_MODE);
-				e.userid = userid;
-				e.presenterName = name;
-				e.assignerBy = assignedBy;
-				
-				dispatcher.dispatchEvent(e);		
-        
-        var roleEvent:CoreEvent = new CoreEvent(EventConstants.NEW_ROLE);
-        roleEvent.message.role = Role.PRESENTER;
-        dispatcher.dispatchEvent(roleEvent);
-        
-			} else {				
-				meeting.setMePresenter(false);
-				var viewerEvent:MadePresenterEvent = new MadePresenterEvent(MadePresenterEvent.SWITCH_TO_VIEWER_MODE);
-				viewerEvent.userid = userid;
-				viewerEvent.presenterName = name;
-				viewerEvent.assignerBy = assignedBy;
 
-				dispatcher.dispatchEvent(viewerEvent);
-        
-        var newRoleEvent:CoreEvent = new CoreEvent(EventConstants.NEW_ROLE);
-        newRoleEvent.message.role = Role.VIEWER;
-        dispatcher.dispatchEvent(newRoleEvent);
-			}
-		}
 		
 		public function kickUser(userid:String):void{
 			_participantsSO.send("kickUserCallback", userid);
@@ -206,65 +145,7 @@ package org.bigbluebutton.main.model.users {
 			}
 		}
 		
-		public function participantLeft(userID:String):void { 			
-			var user:BBBUser = UserManager.getInstance().getConference().getUser(userID);
-			
-			UserManager.getInstance().getConference().removeUser(userID);	
-			
-			var dispatcher:Dispatcher = new Dispatcher();
-			var joinEvent:ParticipantJoinEvent = new ParticipantJoinEvent(ParticipantJoinEvent.PARTICIPANT_JOINED_EVENT);
-			joinEvent.userID = user.userID;
-			joinEvent.join = false;
-			dispatcher.dispatchEvent(joinEvent);	
-		}
-		
-		public function participantJoined(joinedUser:Object):void { 
-			var user:BBBUser = new BBBUser();
-			user.userID = joinedUser.userid;
-			user.name = joinedUser.name;
-			user.role = joinedUser.role;
-      user.externUserID = joinedUser.externUserID;
-      
-			LogUtil.debug("User status: " + joinedUser.status.hasStream);
 
-			LogUtil.info("Joined as [" + user.userID + "," + user.name + "," + user.role + "]");
-			UserManager.getInstance().getConference().addUser(user);
-			participantStatusChange(user.userID, "hasStream", joinedUser.status.hasStream);
-			participantStatusChange(user.userID, "presenter", joinedUser.status.presenter);
-			participantStatusChange(user.userID, "raiseHand", joinedUser.status.raiseHand);
-			
-			var dispatcher:Dispatcher = new Dispatcher();
-			var joinEvent:ParticipantJoinEvent = new ParticipantJoinEvent(ParticipantJoinEvent.PARTICIPANT_JOINED_EVENT);
-			joinEvent.userID = user.userID;
-			joinEvent.join = true;
-			dispatcher.dispatchEvent(joinEvent);	
-			
-		}
-		
-		/**
-		 * Called by the server to tell the client that the meeting has ended.
-		 */
-		public function logout():void {
-			var dispatcher:Dispatcher = new Dispatcher();
-			var endMeetingEvent:BBBEvent = new BBBEvent(BBBEvent.END_MEETING_EVENT);
-			dispatcher.dispatchEvent(endMeetingEvent);
-		}
-		
-		
-		/**
-		 * Callback from the server from many of the bellow nc.call methods
-		 */
-		public function participantStatusChange(userID:String, status:String, value:Object):void {
-			LogUtil.debug("**** Received status change [" + userID + "," + status + "," + value + "]")			
-			UserManager.getInstance().getConference().newUserStatus(userID, status, value);
-			
-			if (status == "presenter"){
-				var e:PresenterStatusEvent = new PresenterStatusEvent(PresenterStatusEvent.PRESENTER_NAME_CHANGE);
-				e.userID = userID;
-				var dispatcher:Dispatcher = new Dispatcher();
-				dispatcher.dispatchEvent(e);
-			}		
-		}
 					
 		public function raiseHand(userID:String, raise:Boolean):void {
 			var nc:NetConnection = _connectionManager.connection;			

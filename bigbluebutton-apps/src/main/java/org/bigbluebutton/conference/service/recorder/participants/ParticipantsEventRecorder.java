@@ -1,6 +1,5 @@
 package org.bigbluebutton.conference.service.recorder.participants;
 
-import java.util.ArrayList;
 import org.bigbluebutton.conference.IRoomListener;
 import org.bigbluebutton.conference.User;
 import org.bigbluebutton.conference.service.recorder.RecorderApplication;

@@ -9,12 +9,14 @@ package org.bigbluebutton.main.model.users.services
   import org.bigbluebutton.core.UsersUtil;
   import org.bigbluebutton.core.events.CoreEvent;
   import org.bigbluebutton.core.managers.UserManager;
+  import org.bigbluebutton.main.events.BBBEvent;
   import org.bigbluebutton.main.events.MadePresenterEvent;
   import org.bigbluebutton.main.events.ParticipantJoinEvent;
   import org.bigbluebutton.main.events.PresenterStatusEvent;
   import org.bigbluebutton.main.model.users.BBBUser;
   import org.bigbluebutton.main.model.users.Conference;
   import org.bigbluebutton.main.model.users.IMessageListener;
+  import org.bigbluebutton.main.model.users.events.RoleChangeEvent;
   
   public class MessageReceiver implements IMessageListener
   {
@@ -22,8 +24,7 @@ package org.bigbluebutton.main.model.users.services
     {
       BBB.initConnectionManager().addMessageListener(this);
     }
-    
-    
+        
     public function onMessage(messageName:String, message:Object):void
     {
       switch (messageName) {
@@ -39,10 +40,52 @@ package org.bigbluebutton.main.model.users.services
         case "AssignPresenterCommand":
           handleAssignPresenterCommand(message);
           break;
-        
+        case "UserLogoutCommand":
+          handleUserLogoutCommand(message);
+          break; 
+        case "UsersListQueryReply":
+          handleUsersListQueryReply(message);
+          break;
         default:
           //   LogUtil.warn("Cannot handle message [" + messageName + "]");
       }
+    }
+
+    private function handleUsersListQueryReply(message:Object):void {
+      if (message.count > 0) {
+        for(var p:Object in message.users) {
+          userJoined(message.users[p]);
+        }
+      }	
+      becomePresenterIfLoneModerator();    
+    }
+    
+    private function becomePresenterIfLoneModerator():void {
+      LogUtil.debug("Checking if I need to become presenter.");
+      var participants:Conference = UserManager.getInstance().getConference();
+      if (participants.hasOnlyOneModerator()) {
+        LogUtil.debug("There is only one moderator in the meeting. Is it me? ");
+        var user:BBBUser = participants.getTheOnlyModerator();
+        if (user.me) {
+          LogUtil.debug("Setting me as presenter because I'm the only moderator. My userid is [" + user.userID + "]");
+          var presenterEvent:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
+          presenterEvent.userid = user.userID;
+          presenterEvent.username = user.name;
+          presenterEvent.assignedBy = UsersUtil.getMyUserID();
+          var dispatcher:Dispatcher = new Dispatcher();
+          dispatcher.dispatchEvent(presenterEvent);
+        } else {
+          LogUtil.debug("No. It is not me. It is [" + user.userID + ", " + user.name + "]");
+        }
+      } else {
+        LogUtil.debug("No. There are more than one moderator.");
+      }
+    }
+    
+    private function handleUserLogoutCommand(message:Object):void {
+      var dispatcher:Dispatcher = new Dispatcher();
+      var endMeetingEvent:BBBEvent = new BBBEvent(BBBEvent.END_MEETING_EVENT);
+      dispatcher.dispatchEvent(endMeetingEvent);
     }
     
     private function handleAssignPresenterCommand(message:Object):void {
@@ -58,7 +101,7 @@ package org.bigbluebutton.main.model.users.services
         var e:MadePresenterEvent = new MadePresenterEvent(MadePresenterEvent.SWITCH_TO_PRESENTER_MODE);
         e.userid = newPresenterUserID;
         e.presenterName = UsersUtil.getUserName(newPresenterUserID);
-        e.assignerBy = assignedByUserID;
+        e.assignedBy = assignedByUserID;
         
         dispatcher.dispatchEvent(e);		
         
@@ -71,7 +114,7 @@ package org.bigbluebutton.main.model.users.services
         var viewerEvent:MadePresenterEvent = new MadePresenterEvent(MadePresenterEvent.SWITCH_TO_VIEWER_MODE);
         viewerEvent.userid = newPresenterUserID;
         viewerEvent.presenterName = UsersUtil.getUserName(newPresenterUserID);
-        viewerEvent.assignerBy = assignedByUserID;
+        viewerEvent.assignedBy = assignedByUserID;
         
         dispatcher.dispatchEvent(viewerEvent);
         
@@ -94,31 +137,33 @@ package org.bigbluebutton.main.model.users.services
     }
     
     private function handleUserJoinedChangeCommand(message:Object):void {
+      userJoined(message.user);
+    }
+    
+    private function userJoined(newUser:Object):void {
       var user:BBBUser = new BBBUser();
-      var joinedUser:Object = message.user;
-      user.userID = joinedUser.userid;
-      user.name = joinedUser.name;
-      user.role = joinedUser.role;
-      user.externUserID = joinedUser.externUserID;
-            
+      user.userID = newUser.userid;
+      user.name = newUser.name;
+      user.role = newUser.role;
+      user.externUserID = newUser.externUserID;
+      
       UserManager.getInstance().getConference().addUser(user);
-      userStatusChanged(user.userID, "hasStream", joinedUser.status.hasStream);
-      userStatusChanged(user.userID, "presenter", joinedUser.status.presenter);
-      userStatusChanged(user.userID, "raiseHand", joinedUser.status.raiseHand);
+      userStatusChanged(user.userID, "hasStream", newUser.status.hasStream);
+      userStatusChanged(user.userID, "presenter", newUser.status.presenter);
+      userStatusChanged(user.userID, "raiseHand", newUser.status.raiseHand);
       
       var dispatcher:Dispatcher = new Dispatcher();
       var joinEvent:ParticipantJoinEvent = new ParticipantJoinEvent(ParticipantJoinEvent.PARTICIPANT_JOINED_EVENT);
       joinEvent.userID = user.userID;
       joinEvent.join = true;
-      dispatcher.dispatchEvent(joinEvent);
+      dispatcher.dispatchEvent(joinEvent);      
     }
     
     private function handleUserStatusChangeCommand(message:Object):void {   
       userStatusChanged(message.userID, message.statusName, message.statusValue);
     }
     
-    private function userStatusChanged(userID:String, statusName:String, statusValue:Object):void {
-      LogUtil.debug("**** Received status change [" + userID + "," + statusName + "," + statusValue + "]")			
+    private function userStatusChanged(userID:String, statusName:String, statusValue:Object):void {		
       UserManager.getInstance().getConference().newUserStatus(userID, statusName, statusValue);
       
       if (statusName == "presenter") {

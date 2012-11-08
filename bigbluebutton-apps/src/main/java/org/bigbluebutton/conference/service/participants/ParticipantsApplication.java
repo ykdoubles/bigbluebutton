@@ -20,9 +20,11 @@ package org.bigbluebutton.conference.service.participants;
 
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
-import org.red5.server.api.Red5;import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.ConnectionInvokerService;
 import org.bigbluebutton.conference.RoomsManager;
@@ -44,18 +46,28 @@ public class ParticipantsApplication {
 		return false;
 	}
 	
-	public boolean destroyRoom(String name) {
-		if (roomsManager.hasRoom(name)) {
-			log.info("Destroying room " + name);
-			roomsManager.removeRoom(name);
+	public boolean destroyRoom(String meetingID) {
+		if (roomsManager.hasRoom(meetingID)) {
+			Map<String, Object> message = new HashMap<String, Object>();	
+			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserLogoutCommand", message);
+			connInvokerService.sendMessage(m);
+			
+			roomsManager.removeRoom(meetingID);			
 		} else {
-			log.warn("Destroying non-existing room " + name);
+			log.warn("Destroying non-existing room " + meetingID);
 		}
 		return true;
 	}
 	
 	public void destroyAllRooms() {
-		roomsManager.destroyAllRooms();
+		Set<Map.Entry<String,Room>> meetings = roomsManager.getAllMeetings();
+		for (Map.Entry<String,Room> meeting : meetings) {
+		    Room room = meeting.getValue();
+			Map<String, Object> message = new HashMap<String, Object>();	
+			message.put("empty", "nothing");
+			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, room.getName(), "UserLogoutCommand", message);
+			connInvokerService.sendMessage(m);
+		}
 	}
 	
 	public boolean hasRoom(String name) {
@@ -79,18 +91,35 @@ public class ParticipantsApplication {
 		message.put("statusName", status);
 		message.put("statusValue", value);
 		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserStatusChangeCommand", message);
-		connInvokerService.sendMessage(m);
-		
+		connInvokerService.sendMessage(m);		
 	}
 	
-	public Map getParticipants(String roomName) {
-		log.debug("getParticipants - " + roomName);
-		if (! roomsManager.hasRoom(roomName)) {
-			log.warn("Could not find room " + roomName + ". Total rooms " + roomsManager.numberOfRooms());
-			return null;
+	public void getParticipants(String meetingID, String userID) {
+		Map<String, User> users = roomsManager.getParticipants(meetingID);
+		
+		if (users != null) {
+			Map<String, Object> message = new HashMap<String, Object>();
+			message.put("count", users.size());
+			
+			if (users.size() > 0) {
+				/**
+				 * Somehow we need to convert to Map so the client will be able to decode it. Need to figure out if we can send Participant
+				 * directly. (ralam - 2/20/2009)
+				 */
+				Collection<User> pc = users.values();
+		    	Map<String, Object> pm = new HashMap<String, Object>();
+		    	for (Iterator<User> it = pc.iterator(); it.hasNext();) {
+		    		User ap = (User) it.next();
+		    		pm.put(ap.getInternalUserID(), ap.toMap()); 
+		    	}  
+		    	message.put("users", pm);
+			}		
+			
+			ClientMessage m = new ClientMessage(ClientMessage.DIRECT, userID, "UsersListQueryReply", message);
+			connInvokerService.sendMessage(m);
+		} else {
+			log.warn("Could not find room " + meetingID + ". Total rooms " + roomsManager.numberOfRooms());
 		}
-
-		return roomsManager.getParticipants(roomName);
 	}
 	
 	public boolean participantLeft(String meetingID, String userid) {
@@ -111,8 +140,7 @@ public class ParticipantsApplication {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public boolean participantJoin(String meetingID, String userid, String username, String role, String externUserID, Map status) {
+	public boolean participantJoin(String meetingID, String userid, String username, String role, String externUserID, Map<String, Object> status) {
 		log.debug("participant joining room " + meetingID);
 		if (roomsManager.hasRoom(meetingID)) {
 			User p = new User(userid, username, role, externUserID, status);			
@@ -168,11 +196,7 @@ public class ParticipantsApplication {
 		log.debug("Setting room manager");
 		roomsManager = r;
 	}
-	
-	private String getMeetingId(){
-		return Red5.getConnectionLocal().getScope().getName();
-	}
-		
+			
 	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
 		this.connInvokerService = connInvokerService;
 	}

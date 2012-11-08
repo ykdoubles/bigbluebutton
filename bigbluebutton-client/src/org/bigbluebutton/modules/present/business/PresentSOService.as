@@ -428,7 +428,7 @@ package org.bigbluebutton.modules.present.business {
 				var e:MadePresenterEvent = new MadePresenterEvent(MadePresenterEvent.SWITCH_TO_PRESENTER_MODE);
 				e.userid = meeting.getMyUserId();
 				e.presenterName = meeting.getMyName();
-				e.assignerBy = meeting.getMyUserId();
+				e.assignedBy = meeting.getMyUserId();
 				
 				dispatcher.dispatchEvent(e);													
 			} else {				
@@ -439,7 +439,7 @@ package org.bigbluebutton.modules.present.business {
 					var viewerEvent:MadePresenterEvent = new MadePresenterEvent(MadePresenterEvent.SWITCH_TO_VIEWER_MODE);
 					viewerEvent.userid = p.userID;
 					viewerEvent.presenterName = p.name;
-					viewerEvent.assignerBy = p.userID;
+					viewerEvent.assignedBy = p.userID;
 					
 					dispatcher.dispatchEvent(viewerEvent);					
 				}

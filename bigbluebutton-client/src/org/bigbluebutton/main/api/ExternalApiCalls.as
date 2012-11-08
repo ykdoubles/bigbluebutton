@@ -1,7 +1,6 @@
 package org.bigbluebutton.main.api
 {
-  import flash.external.ExternalInterface;
-  
+  import flash.external.ExternalInterface;  
   import org.bigbluebutton.common.LogUtil;
   import org.bigbluebutton.core.EventConstants;
   import org.bigbluebutton.core.UsersUtil;
