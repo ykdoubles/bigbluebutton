@@ -19,6 +19,8 @@
 
 package org.bigbluebutton.conference.service.participants;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
@@ -32,8 +34,15 @@ public class ParticipantsService {
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsService.class, "bigbluebutton" );	
 	private ParticipantsApplication application;
 
-	public void assignPresenter(String newPresenterUserID, String assignedBy) {
+	public void kickUser(Map<String, Object> message) {
+		application.kickUser(message.get("userID").toString());
+	}
+	
+	public void assignPresenter(Map<String, Object> message) {
 		IScope scope = Red5.getConnectionLocal().getScope();
+		String newPresenterUserID = message.get("newPresenterUserID").toString();
+		String assignedBy = message.get("assigneByUserID").toString();
+		
 		application.assignPresenter(scope.getName(), newPresenterUserID, assignedBy);
 	}
 	
@@ -42,7 +51,11 @@ public class ParticipantsService {
 		application.getParticipants(meetingID, getBbbSession().getInternalUserID());		
 	}
 	
-	public void setParticipantStatus(String userid, String status, Object value) {
+	public void setParticipantStatus(Map<String, Object> message) {
+		String userid = message.get("userID").toString();
+		String status = message.get("statusName").toString();
+		Object value = message.get("statusValue");
+		
 		String roomName = Red5.getConnectionLocal().getScope().getName();
 		log.debug("Setting participant status " + roomName + " " + userid + " " + status + " " + value);
 		application.setParticipantStatus(roomName, userid, status, value);

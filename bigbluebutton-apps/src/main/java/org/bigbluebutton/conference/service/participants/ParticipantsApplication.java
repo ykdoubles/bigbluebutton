@@ -94,6 +94,14 @@ public class ParticipantsApplication {
 		connInvokerService.sendMessage(m);		
 	}
 	
+	public void kickUser(String userID) {
+		Map<String, Object> message = new HashMap<String, Object>();
+		message.put("userID", userID);
+		
+		ClientMessage m = new ClientMessage(ClientMessage.DIRECT, userID, "UserKickCommand", message);
+		connInvokerService.sendMessage(m);		
+	}
+	
 	public void getParticipants(String meetingID, String userID) {
 		Map<String, User> users = roomsManager.getParticipants(meetingID);
 		

@@ -10,6 +10,7 @@ package org.bigbluebutton.main.model.users.services
   import org.bigbluebutton.core.events.CoreEvent;
   import org.bigbluebutton.core.managers.UserManager;
   import org.bigbluebutton.main.events.BBBEvent;
+  import org.bigbluebutton.main.events.LogoutEvent;
   import org.bigbluebutton.main.events.MadePresenterEvent;
   import org.bigbluebutton.main.events.ParticipantJoinEvent;
   import org.bigbluebutton.main.events.PresenterStatusEvent;
@@ -47,11 +48,23 @@ package org.bigbluebutton.main.model.users.services
         case "UsersListQueryReply":
           handleUsersListQueryReply(message);
           break;
+        case "UserKickCommand":
+          handleUserKickCommand(message);
+          break;
+        
         default:
           //   LogUtil.warn("Cannot handle message [" + messageName + "]");
       }
     }
 
+    private function handleUserKickCommand(message:Object):void {
+      
+      if (UserManager.getInstance().getConference().amIThisUser(message.userID)){
+        var dispatcher:Dispatcher = new Dispatcher();
+        dispatcher.dispatchEvent(new LogoutEvent(LogoutEvent.USER_LOGGED_OUT));
+      }  
+    }
+    
     private function handleUsersListQueryReply(message:Object):void {
       if (message.count > 0) {
         for(var p:Object in message.users) {
