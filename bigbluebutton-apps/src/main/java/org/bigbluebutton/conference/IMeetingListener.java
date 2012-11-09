@@ -19,7 +19,7 @@
 
 package org.bigbluebutton.conference;
 
-public interface IRoomListener {
+public interface IMeetingListener {
 	public String getName();
 	public void participantStatusChange(User p, String status, Object value);
 	public void participantJoined(User participant);

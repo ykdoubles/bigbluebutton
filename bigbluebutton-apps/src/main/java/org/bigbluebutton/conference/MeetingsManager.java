@@ -35,25 +35,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * This encapsulates access to Room and Participant. This class must be threadsafe.
  */
 @ThreadSafe
-public class RoomsManager {
-	private static Logger log = Red5LoggerFactory.getLogger(RoomsManager.class, "bigbluebutton");
+public class MeetingsManager {
+	private static Logger log = Red5LoggerFactory.getLogger(MeetingsManager.class, "bigbluebutton");
 	
-	private final Map <String, Meeting> rooms;
+	private final Map <String, Meeting> meetings;
 
 	MessagingService messagingService;
 	ConversionUpdatesMessageListener conversionUpdatesMessageListener;
 	
-	public RoomsManager() {
-		rooms = new ConcurrentHashMap<String, Meeting>();		
+	public MeetingsManager() {
+		meetings = new ConcurrentHashMap<String, Meeting>();		
 	}
 	
-	public void addRoom(Meeting room) {
-		log.debug("Adding room " + room.getMeetingID());
-		room.addMeetingListener(new ParticipantUpdatingRoomListener(room,messagingService)); 	
+	public void addMeeting(Meeting meeting) {
+
+		meeting.addMeetingListener(new ParticipantUpdatingRoomListener(meeting,messagingService)); 	
 		
 		if (checkPublisher()) {
 			HashMap<String,String> map = new HashMap<String,String>();
-			map.put("meetingId", room.getMeetingID());
+			map.put("meetingId", meeting.getMeetingID());
 			map.put("messageId", MessagingConstants.MEETING_STARTED_EVENT);
 			
 			Gson gson = new Gson();
@@ -61,12 +61,12 @@ public class RoomsManager {
 			
 			log.debug("Notified event listener of conference start");
 		}
-		rooms.put(room.getMeetingID(), room);
+		meetings.put(meeting.getMeetingID(), meeting);
 	}
 	
-	public void removeRoom(String name) {
-		log.debug("Remove room " + name);
-		Meeting room = rooms.remove(name);
+	public void removeMeeting(String meetingID) {
+		log.debug("Remove room " + meetingID);
+		Meeting room = meetings.remove(meetingID);
 		if (checkPublisher() && room != null) {
 			room.endAndKickAll();
 			HashMap<String,String> map = new HashMap<String,String>();
@@ -82,7 +82,7 @@ public class RoomsManager {
 
 	
 	public Set<Map.Entry<String,Meeting>> getAllMeetings() {
-		return rooms.entrySet();
+		return meetings.entrySet();
 	}
 	
 	private boolean checkPublisher() {
@@ -90,25 +90,24 @@ public class RoomsManager {
 	}
 
 		
-	public boolean hasRoom(String name) {
-		return rooms.containsKey(name);
+	public boolean hasMeeting(String meetingID) {
+		return meetings.containsKey(meetingID);
 	}
 	
-	public int numberOfRooms() {
-		return rooms.size();
+	public int numberOfMeetings() {
+		return meetings.size();
 	}
 	
 	/**
 	 * Keeping getRoom private so that all access to Room goes through here.
 	 */
 	//TODO: this method becomes public for ParticipantsApplication, ask if it's right? 
-	public Meeting getRoom(String name) {
-		log.debug("Get room " + name);
-		return rooms.get(name);
+	public Meeting getMeeting(String meetingID) {
+		return meetings.get(meetingID);
 	}
 	
-	public Map<String, User> getParticipants(String meetingID) {
-		Meeting r = getRoom(meetingID);
+	public Map<String, User> getUsers(String meetingID) {
+		Meeting r = getMeeting(meetingID);
 		if (r != null) {
 			return r.getUsers();
 		}
@@ -116,13 +115,13 @@ public class RoomsManager {
 		return null;
 	}
 	
-	public void addRoomListener(String roomName, IRoomListener listener) {
-		Meeting r = getRoom(roomName);
+	public void addMeetingListener(String meetingID, IMeetingListener listener) {
+		Meeting r = getMeeting(meetingID);
 		if (r != null) {
 			r.addMeetingListener(listener);
 			return;
 		}
-		log.warn("Adding listener to a non-existing room " + roomName);
+		log.warn("Adding listener to a non-existing room " + meetingID);
 	}
 	
 	// TODO: this must be broken, right?  where is roomName? (JRT: 9/25/2009)
@@ -136,9 +135,9 @@ public class RoomsManager {
 //		log.warn("Removing listener from a non-existing room ${roomName}")
 //	}
 
-	public void addParticipant(String roomName, User participant) {
-		log.debug("Add participant " + participant.getName());
-		Meeting r = getRoom(roomName);
+	public void addUser(String meetingID, User user) {
+		log.debug("Add participant " + user.getName());
+		Meeting r = getMeeting(meetingID);
 		if (r != null) {
 /*			if (checkPublisher()) {
 
@@ -153,16 +152,16 @@ public class RoomsManager {
 					
 				}
 			}
-*/			r.addUser(participant);
+*/			r.addUser(user);
 
 			return;
 		}
-		log.warn("Adding participant to a non-existing room " + roomName);
+		log.warn("Adding participant to a non-existing room " + meetingID);
 	}
 	
-	public void removeParticipant(String roomName, String userid) {
+	public void removeUser(String roomName, String userid) {
 		log.debug("Remove participant " + userid + " from " + roomName);
-		Meeting r = getRoom(roomName);
+		Meeting r = getMeeting(roomName);
 		if (r != null) {
 			if (checkPublisher()) {
 				//conferenceEventListener.participantsUpdated(r);
@@ -175,14 +174,14 @@ public class RoomsManager {
 		log.warn("Removing listener from a non-existing room " + roomName);
 	}
 	
-	public void changeParticipantStatus(String roomName, String userid, String status, Object value) {
+	public void changeUserStatus(String meetingID, String userid, String status, Object value) {
 		log.debug("Change participant status " + userid + " - " + status + " [" + value + "]");
-		Meeting r = getRoom(roomName);
+		Meeting r = getMeeting(meetingID);
 		if (r != null) {
 			r.changeUserStatus(userid, status, value);
 			return;
 		}		
-		log.warn("Changing participant status on a non-existing room " + roomName);
+		log.warn("Changing participant status on a non-existing room " + meetingID);
 	}
 
 	public void setMessagingService(MessagingService messagingService) {
@@ -191,17 +190,17 @@ public class RoomsManager {
 		this.messagingService.start();
 	}
 	
-	public Map<String, String> getCurrentPresenter( String room){
-		Meeting r = getRoom(room);
+	public Map<String, String> getCurrentPresenter(String meetingID){
+		Meeting r = getMeeting(meetingID);
 		if (r != null) {
 			return r.getCurrentPresenter();		
 		}	
-		log.warn("Getting presenter from a non-existing room " + room);
+		log.warn("Getting presenter from a non-existing room " + meetingID);
 		return null;
 	}
 	
 	public void assignPresenter(String meetingID, String newPresenterUserID, String assignedByUserID){
-		Meeting r = getRoom(meetingID);
+		Meeting r = getMeeting(meetingID);
 		if (r != null) {
 			r.assignPresenter(newPresenterUserID, assignedByUserID);
 			return;
@@ -218,7 +217,7 @@ public class RoomsManager {
 		@Override
 		public void endMeetingRequest(String meetingId) {
 			log.debug("End meeting request for room: " + meetingId);
-			Meeting room = getRoom(meetingId); // must do this because the room coming in is serialized (no transient values are present)
+			Meeting room = getMeeting(meetingId); // must do this because the room coming in is serialized (no transient values are present)
 			if (room != null)
 				room.endAndKickAll();
 			else

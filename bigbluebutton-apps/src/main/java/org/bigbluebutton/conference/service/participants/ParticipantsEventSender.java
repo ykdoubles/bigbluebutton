@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import org.bigbluebutton.conference.service.recorder.Recorder;
-import org.bigbluebutton.conference.IRoomListener;
+import org.bigbluebutton.conference.IMeetingListener;
 import org.bigbluebutton.conference.BigBlueButtonUtils;import org.red5.server.api.so.ISharedObject;
 import org.bigbluebutton.conference.User;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 
-public class ParticipantsEventSender implements IRoomListener {
+public class ParticipantsEventSender implements IMeetingListener {
 
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsEventSender.class, "bigbluebutton" );
 	

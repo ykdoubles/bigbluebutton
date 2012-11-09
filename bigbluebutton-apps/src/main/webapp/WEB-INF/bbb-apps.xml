@@ -8,7 +8,7 @@
 			http://www.springframework.org/schema/util/spring-util-2.0.xsd
 			">
 	
-	<bean id="roomsManager" class="org.bigbluebutton.conference.RoomsManager">
+	<bean id="roomsManager" class="org.bigbluebutton.conference.MeetingsManager">
 		<property name="messagingService" ref="messagingService"></property>
 		<property name="conversionUpdatesMessageListener" ref="conversionUpdatesMessageListener"></property>
 	</bean>

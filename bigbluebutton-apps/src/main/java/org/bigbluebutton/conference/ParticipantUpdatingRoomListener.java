@@ -19,9 +19,7 @@
 
 package org.bigbluebutton.conference;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.bigbluebutton.conference.service.messaging.MessagingConstants;
 import org.bigbluebutton.conference.service.messaging.MessagingService;
 import org.red5.logging.Red5LoggerFactory;
@@ -30,7 +28,7 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 
 
-public class ParticipantUpdatingRoomListener implements IRoomListener{
+public class ParticipantUpdatingRoomListener implements IMeetingListener{
 
 	private static Logger log = Red5LoggerFactory.getLogger(ParticipantUpdatingRoomListener.class, "bigbluebutton");
 	

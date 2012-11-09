@@ -41,27 +41,27 @@ public class Meeting {
 	private Map<String, User> users;
 
 	private transient Map<String, User> unmodifiableMap;
-	private transient final Map<String, IRoomListener> listeners;
+	private transient final Map<String, IMeetingListener> listeners;
 
 	public Meeting(String meetingID) {
 		this.meetingID = meetingID;
 		users = new ConcurrentHashMap<String, User>();
 		unmodifiableMap = Collections.unmodifiableMap(users);
-		listeners   = new ConcurrentHashMap<String, IRoomListener>();
+		listeners   = new ConcurrentHashMap<String, IMeetingListener>();
 	}
 
 	public String getMeetingID() {
 		return meetingID;
 	}
 
-	public void addMeetingListener(IRoomListener listener) {
+	public void addMeetingListener(IMeetingListener listener) {
 		if (! listeners.containsKey(listener.getName())) {
 			log.debug("adding room listener");
 			listeners.put(listener.getName(), listener);			
 		}
 	}
 
-	public void removeMeetingListener(IRoomListener listener) {
+	public void removeMeetingListener(IMeetingListener listener) {
 		log.debug("removing room listener");
 		listeners.remove(listener);		
 	}
@@ -73,8 +73,8 @@ public class Meeting {
 //			unmodifiableMap = Collections.unmodifiableMap(participants)
 		}
 		log.debug("Informing roomlisteners " + listeners.size());
-		for (Iterator it = listeners.values().iterator(); it.hasNext();) {
-			IRoomListener listener = (IRoomListener) it.next();
+		for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
+			IMeetingListener listener = (IMeetingListener) it.next();
 			log.debug("calling participantJoined on listener " + listener.getName());
 			listener.participantJoined(participant);
 		}
@@ -91,8 +91,8 @@ public class Meeting {
 			}
 		}
 		if (present) {
-			for (Iterator it = listeners.values().iterator(); it.hasNext();) {
-				IRoomListener listener = (IRoomListener) it.next();
+			for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
+				IMeetingListener listener = (IMeetingListener) it.next();
 				log.debug("calling participantLeft on listener " + listener.getName());
 				listener.participantLeft(p);
 			}
@@ -113,8 +113,8 @@ public class Meeting {
 			}
 		}
 		if (present) {
-			for (Iterator it = listeners.values().iterator(); it.hasNext();) {
-				IRoomListener listener = (IRoomListener) it.next();
+			for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
+				IMeetingListener listener = (IMeetingListener) it.next();
 				log.debug("calling participantStatusChange on listener " + listener.getName());
 				listener.participantStatusChange(p, status, value);
 			}
@@ -122,8 +122,8 @@ public class Meeting {
 	}
 
 	public void endAndKickAll() {
-		for (Iterator it = listeners.values().iterator(); it.hasNext();) {
-			IRoomListener listener = (IRoomListener) it.next();
+		for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
+			IMeetingListener listener = (IMeetingListener) it.next();
 			log.debug("calling endAndKickAll on listener " + listener.getName());
 			listener.endAndKickAll();
 		}
@@ -166,8 +166,8 @@ public class Meeting {
 			curPresenterUserID = newPresenterUserID;
 			presenterAssignedBy = assignedByUserID;
 			
-			for (Iterator<IRoomListener> iter = listeners.values().iterator(); iter.hasNext();) {
-				IRoomListener listener = (IRoomListener) iter.next();
+			for (Iterator<IMeetingListener> iter = listeners.values().iterator(); iter.hasNext();) {
+				IMeetingListener listener = (IMeetingListener) iter.next();
 				listener.assignPresenter(newPresenterUserID, user.getName(), assignedByUserID);
 			}				
 		}

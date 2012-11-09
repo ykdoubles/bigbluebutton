@@ -27,32 +27,32 @@ import java.util.Map;
 import java.util.Set;
 import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.ConnectionInvokerService;
-import org.bigbluebutton.conference.RoomsManager;
-import org.bigbluebutton.conference.Meeting;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IRoomListener;
+import org.bigbluebutton.conference.MeetingsManager;
+import org.bigbluebutton.conference.Meeting;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IMeetingListener;
 
 public class ParticipantsApplication {
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsApplication.class, "bigbluebutton" );	
 	
 	private ConnectionInvokerService connInvokerService;
 	
-	private RoomsManager roomsManager;
+	private MeetingsManager roomsManager;
 	
 	public boolean createRoom(String name) {
-		if(!roomsManager.hasRoom(name)){
+		if(!roomsManager.hasMeeting(name)){
 			log.info("Creating room " + name);
-			roomsManager.addRoom(new Meeting(name));
+			roomsManager.addMeeting(new Meeting(name));
 			return true;
 		}
 		return false;
 	}
 	
 	public boolean destroyRoom(String meetingID) {
-		if (roomsManager.hasRoom(meetingID)) {
+		if (roomsManager.hasMeeting(meetingID)) {
 			Map<String, Object> message = new HashMap<String, Object>();	
 			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserLogoutCommand", message);
 			connInvokerService.sendMessage(m);
 			
-			roomsManager.removeRoom(meetingID);			
+			roomsManager.removeMeeting(meetingID);			
 		} else {
 			log.warn("Destroying non-existing room " + meetingID);
 		}
@@ -71,12 +71,12 @@ public class ParticipantsApplication {
 	}
 	
 	public boolean hasRoom(String name) {
-		return roomsManager.hasRoom(name);
+		return roomsManager.hasMeeting(name);
 	}
 	
-	public boolean addRoomListener(String room, IRoomListener listener) {
-		if (roomsManager.hasRoom(room)){
-			roomsManager.addRoomListener(room, listener);
+	public boolean addRoomListener(String room, IMeetingListener listener) {
+		if (roomsManager.hasMeeting(room)){
+			roomsManager.addMeetingListener(room, listener);
 			return true;
 		}
 		log.warn("Adding listener to a non-existant room " + room);
@@ -84,7 +84,7 @@ public class ParticipantsApplication {
 	}
 	
 	public void setParticipantStatus(String meetingID, String userid, String status, Object value) {
-		roomsManager.changeParticipantStatus(meetingID, userid, status, value);
+		roomsManager.changeUserStatus(meetingID, userid, status, value);
 		
 		Map<String, Object> message = new HashMap<String, Object>();	
 		message.put("userID", userid);
@@ -103,7 +103,7 @@ public class ParticipantsApplication {
 	}
 	
 	public void getParticipants(String meetingID, String userID) {
-		Map<String, User> users = roomsManager.getParticipants(meetingID);
+		Map<String, User> users = roomsManager.getUsers(meetingID);
 		
 		if (users != null) {
 			Map<String, Object> message = new HashMap<String, Object>();
@@ -126,14 +126,14 @@ public class ParticipantsApplication {
 			ClientMessage m = new ClientMessage(ClientMessage.DIRECT, userID, "UsersListQueryReply", message);
 			connInvokerService.sendMessage(m);
 		} else {
-			log.warn("Could not find room " + meetingID + ". Total rooms " + roomsManager.numberOfRooms());
+			log.warn("Could not find room " + meetingID + ". Total rooms " + roomsManager.numberOfMeetings());
 		}
 	}
 	
 	public boolean participantLeft(String meetingID, String userid) {
 		log.debug("Participant " + userid + " leaving room " + meetingID);
-		if (roomsManager.hasRoom(meetingID)) {
-			Meeting room = roomsManager.getRoom(meetingID);
+		if (roomsManager.hasMeeting(meetingID)) {
+			Meeting room = roomsManager.getMeeting(meetingID);
 			log.debug("Removing " + userid + " from room " + meetingID);
 			room.removeUser(userid);
 						
@@ -150,9 +150,9 @@ public class ParticipantsApplication {
 	
 	public boolean participantJoin(String meetingID, String userid, String username, String role, String externUserID, Map<String, Object> status) {
 		log.debug("participant joining room " + meetingID);
-		if (roomsManager.hasRoom(meetingID)) {
+		if (roomsManager.hasMeeting(meetingID)) {
 			User p = new User(userid, username, role, externUserID, status);			
-			Meeting room = roomsManager.getRoom(meetingID);
+			Meeting room = roomsManager.getMeeting(meetingID);
 			room.addUser(p);
 			log.debug("participant joined room " + meetingID);
 						
@@ -172,7 +172,7 @@ public class ParticipantsApplication {
 	}
 	
 	public void assignPresenter(String meetingID, String newPresenterUserID, String assignedByUserID){
-		if (roomsManager.hasRoom(meetingID)){
+		if (roomsManager.hasMeeting(meetingID)){
 			
 			Map<String,String> curPresenter = getCurrentPresenter(meetingID);
 			if (curPresenter != null) { 
@@ -200,7 +200,7 @@ public class ParticipantsApplication {
 		log.warn("Assigning presenter on a non-existant room " + meetingID);	
 	}
 	
-	public void setRoomsManager(RoomsManager r) {
+	public void setRoomsManager(MeetingsManager r) {
 		log.debug("Setting room manager");
 		roomsManager = r;
 	}
