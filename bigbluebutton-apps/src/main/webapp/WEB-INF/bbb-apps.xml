@@ -8,7 +8,24 @@
 			http://www.springframework.org/schema/util/spring-util-2.0.xsd
 			">
 	
+	<bean id="messageInGW" class="org.bigbluebutton.conference.MessageInGateway" init-method="start" destroy-method="stop">
+	  <property name="meetingManager"> <ref local="roomsManager"/></property>
+	</bean>
+	
+  <bean id="messageOutGW" class="org.bigbluebutton.conference.MessageOutGateway" init-method="start" destroy-method="stop">
+    <property name="messageOutListeners">
+      <set>
+        <ref bean="participantsMessageOutListener" />
+      </set>
+    </property>
+  </bean>
+  
+  <bean id="participantsMessageOutListener" class="org.bigbluebutton.conference.service.participants.ParticipantsMessageOutListener">
+    <property name="connInvokerService"> <ref bean="connInvokerService"/></property>
+  </bean>
+  
 	<bean id="roomsManager" class="org.bigbluebutton.conference.MeetingsManager">
+	  <property name="messageOutGateway"> <ref local="messageOutGW"/></property>
 		<property name="messagingService" ref="messagingService"></property>
 		<property name="conversionUpdatesMessageListener" ref="conversionUpdatesMessageListener"></property>
 	</bean>
@@ -19,6 +36,7 @@
 	</bean>
 	
 	<bean id="participantsApplication" class="org.bigbluebutton.conference.service.participants.ParticipantsApplication">
+	  <property name="messageInGateway"> <ref local="messageInGW"/></property>
 		<property name="roomsManager"> <ref local="roomsManager"/></property>
 		<property name="connInvokerService"> <ref bean="connInvokerService"/></property>
 	</bean>

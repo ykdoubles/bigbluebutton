@@ -19,27 +19,26 @@
 package org.bigbluebutton.conference;
 
 import org.slf4j.Logger;
+import org.bigbluebutton.conference.messages.in.IMessageIn;
+import org.bigbluebutton.conference.messages.in.MeetingStart;
 import org.bigbluebutton.conference.service.messaging.MessageListener;
 import org.bigbluebutton.conference.service.messaging.MessagingConstants;
 import org.bigbluebutton.conference.service.messaging.MessagingService;
 import org.bigbluebutton.conference.service.presentation.ConversionUpdatesMessageListener;
 import org.red5.logging.Red5LoggerFactory;
 import com.google.gson.Gson;
-import net.jcip.annotations.ThreadSafe;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * This encapsulates access to Room and Participant. This class must be threadsafe.
- */
-@ThreadSafe
 public class MeetingsManager {
 	private static Logger log = Red5LoggerFactory.getLogger(MeetingsManager.class, "bigbluebutton");
 	
 	private final Map <String, Meeting> meetings;
 
+	private MessageOutGateway messageOutGW;
+	
 	MessagingService messagingService;
 	ConversionUpdatesMessageListener conversionUpdatesMessageListener;
 	
@@ -47,34 +46,35 @@ public class MeetingsManager {
 		meetings = new ConcurrentHashMap<String, Meeting>();		
 	}
 	
-	public void addMeeting(Meeting meeting) {
-
-		meeting.addMeetingListener(new ParticipantUpdatingRoomListener(meeting,messagingService)); 	
-		
-		if (checkPublisher()) {
-			HashMap<String,String> map = new HashMap<String,String>();
-			map.put("meetingId", meeting.getMeetingID());
-			map.put("messageId", MessagingConstants.MEETING_STARTED_EVENT);
-			
-			Gson gson = new Gson();
-			messagingService.send(MessagingConstants.SYSTEM_CHANNEL, gson.toJson(map));
-			
-			log.debug("Notified event listener of conference start");
+	public void accept(IMessageIn message) {
+		if (message instanceof MeetingStart) {
+			handleMeetingStart((MeetingStart) message);
 		}
-		meetings.put(meeting.getMeetingID(), meeting);
 	}
+	
+	private void handleMeetingStart(MeetingStart message) {
+		if (! meetings.containsKey(message.meetingID)) {
+			Meeting m = new Meeting(message.meetingID, messageOutGW);
+			meetings.put(message.meetingID, m);
+			m.start();
+		}		
+	}
+	
+
+	public void stopMeeting(String meetingID) {
+		Meeting m = meetings.get(meetingID);
+		if (m != null) {
+			m.end();
+		}
+	}
+	
 	
 	public void removeMeeting(String meetingID) {
 		log.debug("Remove room " + meetingID);
 		Meeting room = meetings.remove(meetingID);
 		if (checkPublisher() && room != null) {
 			room.endAndKickAll();
-			HashMap<String,String> map = new HashMap<String,String>();
-			map.put("meetingId", room.getMeetingID());
-			map.put("messageId", MessagingConstants.MEETING_ENDED_EVENT);
-			
-			Gson gson = new Gson();
-			messagingService.send(MessagingConstants.SYSTEM_CHANNEL, gson.toJson(map));
+
 			
 			log.debug("Notified event listener of conference end");
 		}
@@ -109,50 +109,20 @@ public class MeetingsManager {
 	public Map<String, User> getUsers(String meetingID) {
 		Meeting r = getMeeting(meetingID);
 		if (r != null) {
-			return r.getUsers();
+			return null; //r.getUsers();
 		}
 		log.warn("Getting participants from a non-existing room " + meetingID);
 		return null;
 	}
 	
-	public void addMeetingListener(String meetingID, IMeetingListener listener) {
-		Meeting r = getMeeting(meetingID);
-		if (r != null) {
-			r.addMeetingListener(listener);
-			return;
-		}
-		log.warn("Adding listener to a non-existing room " + meetingID);
-	}
-	
-	// TODO: this must be broken, right?  where is roomName? (JRT: 9/25/2009)
-//	public void removeRoomListener(IRoomListener listener) {
-//		
-//		Room r = getRoom(roomName);
-//		if (r != null) {
-//			r.removeRoomListener(listener)
-//			return
-//		}	
-//		log.warn("Removing listener from a non-existing room ${roomName}")
-//	}
+
+
 
 	public void addUser(String meetingID, User user) {
 		log.debug("Add participant " + user.getName());
 		Meeting r = getMeeting(meetingID);
 		if (r != null) {
-/*			if (checkPublisher()) {
-
-				if (r.getNumberOfParticipants() == 0) {
-					log.debug("Notified event listener of conference start");
-					HashMap<String,String> map = new HashMap<String,String>();
-					map.put("meetingId", roomName);
-					map.put("messageId", MessagingConstants.USER_JOINED_EVENT);
-					
-					Gson gson = new Gson();
-					publisher.publish(MessagingConstants.SYSTEM_CHANNEL, gson.toJson(map));
-					
-				}
-			}
-*/			r.addUser(user);
+			r.addUser(user);
 
 			return;
 		}
@@ -210,6 +180,10 @@ public class MeetingsManager {
 	
 	public void setConversionUpdatesMessageListener(ConversionUpdatesMessageListener conversionUpdatesMessageListener) {
 		this.conversionUpdatesMessageListener = conversionUpdatesMessageListener;
+	}
+	
+	public void setMessageOutGateway(MessageOutGateway gw) {
+		messageOutGW = gw;
 	}
 	
 	private class RoomsManagerListener implements MessageListener{

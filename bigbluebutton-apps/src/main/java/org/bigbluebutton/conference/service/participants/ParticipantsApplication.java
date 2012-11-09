@@ -28,7 +28,11 @@ import java.util.Set;
 import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.ConnectionInvokerService;
 import org.bigbluebutton.conference.MeetingsManager;
-import org.bigbluebutton.conference.Meeting;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IMeetingListener;
+import org.bigbluebutton.conference.Meeting;import org.bigbluebutton.conference.MessageInGateway;
+import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IMeetingListener;
+import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
+import org.bigbluebutton.conference.messages.in.MeetingStart;
+import org.bigbluebutton.conference.messages.in.MeetingEnd;
 
 public class ParticipantsApplication {
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsApplication.class, "bigbluebutton" );	
@@ -36,62 +40,31 @@ public class ParticipantsApplication {
 	private ConnectionInvokerService connInvokerService;
 	
 	private MeetingsManager roomsManager;
+	private MessageInGateway messageInGW;
 	
-	public boolean createRoom(String name) {
-		if(!roomsManager.hasMeeting(name)){
-			log.info("Creating room " + name);
-			roomsManager.addMeeting(new Meeting(name));
-			return true;
-		}
-		return false;
+	public boolean createRoom(String meetingID) {
+		messageInGW.accept(new MeetingStart(meetingID));
+		return true;
 	}
 	
 	public boolean destroyRoom(String meetingID) {
-		if (roomsManager.hasMeeting(meetingID)) {
-			Map<String, Object> message = new HashMap<String, Object>();	
-			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserLogoutCommand", message);
-			connInvokerService.sendMessage(m);
-			
-			roomsManager.removeMeeting(meetingID);			
-		} else {
-			log.warn("Destroying non-existing room " + meetingID);
-		}
+		messageInGW.accept(new MeetingEnd(meetingID));
+		
 		return true;
 	}
 	
 	public void destroyAllRooms() {
-		Set<Map.Entry<String,Meeting>> meetings = roomsManager.getAllMeetings();
-		for (Map.Entry<String,Meeting> meeting : meetings) {
-		    Meeting room = meeting.getValue();
-			Map<String, Object> message = new HashMap<String, Object>();	
-			message.put("empty", "nothing");
-			ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, room.getMeetingID(), "UserLogoutCommand", message);
-			connInvokerService.sendMessage(m);
-		}
+		messageInGW.accept(new AllMeetingsStop());
 	}
 	
 	public boolean hasRoom(String name) {
 		return roomsManager.hasMeeting(name);
 	}
-	
-	public boolean addRoomListener(String room, IMeetingListener listener) {
-		if (roomsManager.hasMeeting(room)){
-			roomsManager.addMeetingListener(room, listener);
-			return true;
-		}
-		log.warn("Adding listener to a non-existant room " + room);
-		return false;
-	}
-	
+		
 	public void setParticipantStatus(String meetingID, String userid, String status, Object value) {
 		roomsManager.changeUserStatus(meetingID, userid, status, value);
 		
-		Map<String, Object> message = new HashMap<String, Object>();	
-		message.put("userID", userid);
-		message.put("statusName", status);
-		message.put("statusValue", value);
-		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, meetingID, "UserStatusChangeCommand", message);
-		connInvokerService.sendMessage(m);		
+	
 	}
 	
 	public void kickUser(String userID) {
@@ -207,5 +180,9 @@ public class ParticipantsApplication {
 			
 	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
 		this.connInvokerService = connInvokerService;
+	}
+	
+	public void setMessageInGateway(MessageInGateway gw) {
+		messageInGW = gw;
 	}
 }

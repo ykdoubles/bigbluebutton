@@ -20,12 +20,9 @@
 package org.bigbluebutton.conference;
 
 import org.slf4j.Logger;
+import org.bigbluebutton.conference.messages.out.MeetingStarted;
 import org.red5.logging.Red5LoggerFactory;
 import net.jcip.annotations.ThreadSafe;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 /**
  * Contains information about a Room and it's Participants. 
@@ -34,147 +31,61 @@ import java.util.Map;
 @ThreadSafe
 public class Meeting {
 	private static Logger log = Red5LoggerFactory.getLogger( Meeting.class, "bigbluebutton" );	
-	String curPresenterUserID = "";
-	String presenterAssignedBy = "";
-	
+
 	private String meetingID;
-	private Map<String, User> users;
+	private UsersManager users;
 
-	private transient Map<String, User> unmodifiableMap;
-	private transient final Map<String, IMeetingListener> listeners;
-
-	public Meeting(String meetingID) {
+	private final MessageOutGateway msgOutGW;
+	
+	public Meeting(String meetingID, MessageOutGateway outGW) {
 		this.meetingID = meetingID;
-		users = new ConcurrentHashMap<String, User>();
-		unmodifiableMap = Collections.unmodifiableMap(users);
-		listeners   = new ConcurrentHashMap<String, IMeetingListener>();
+		msgOutGW = outGW;
+		
 	}
 
 	public String getMeetingID() {
 		return meetingID;
 	}
 
-	public void addMeetingListener(IMeetingListener listener) {
-		if (! listeners.containsKey(listener.getName())) {
-			log.debug("adding room listener");
-			listeners.put(listener.getName(), listener);			
-		}
+	public void start() {
+		msgOutGW.accept(new MeetingStarted(meetingID));
+	}
+	
+	public void end() {
+		
+	}
+	
+	public void addUser(User user) {
+		users.addUser(user);
+		
 	}
 
-	public void removeMeetingListener(IMeetingListener listener) {
-		log.debug("removing room listener");
-		listeners.remove(listener);		
+	public void removeUser(String userID) {
+
+		User p = users.removeUser(userID);
+
 	}
 
-	public void addUser(User participant) {
-		synchronized (this) {
-			log.debug("adding participant " + participant.getInternalUserID());
-			users.put(participant.getInternalUserID(), participant);
-//			unmodifiableMap = Collections.unmodifiableMap(participants)
-		}
-		log.debug("Informing roomlisteners " + listeners.size());
-		for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
-			IMeetingListener listener = (IMeetingListener) it.next();
-			log.debug("calling participantJoined on listener " + listener.getName());
-			listener.participantJoined(participant);
-		}
-	}
+	public void changeUserStatus(String userID, String status, Object value) {
 
-	public void removeUser(String userid) {
-		boolean present = false;
-		User p = null;
-		synchronized (this) {
-			present = users.containsKey(userid);
-			if (present) {
-				log.debug("removing participant");
-				p = users.remove(userid);
-			}
-		}
-		if (present) {
-			for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
-				IMeetingListener listener = (IMeetingListener) it.next();
-				log.debug("calling participantLeft on listener " + listener.getName());
-				listener.participantLeft(p);
-			}
-		}
-	}
+		if (users.changeUserStatus(userID, status, value)) {
+			User user = users.getUser(userID);
 
-	public void changeUserStatus(String userid, String status, Object value) {
-		boolean present = false;
-		User p = null;
-		synchronized (this) {
-			present = users.containsKey(userid);
-			if (present) {
-				log.debug("change participant status");
-				p = users.get(userid);
-				p.setStatus(status, value);
-				//participants.put(userid, p);
-				//unmodifiableMap = Collections.unmodifiableMap(participants);
-			}
-		}
-		if (present) {
-			for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
-				IMeetingListener listener = (IMeetingListener) it.next();
-				log.debug("calling participantStatusChange on listener " + listener.getName());
-				listener.participantStatusChange(p, status, value);
-			}
 		}		
 	}
 
 	public void endAndKickAll() {
-		for (Iterator<IMeetingListener> it = listeners.values().iterator(); it.hasNext();) {
-			IMeetingListener listener = (IMeetingListener) it.next();
-			log.debug("calling endAndKickAll on listener " + listener.getName());
-			listener.endAndKickAll();
-		}
+
 	}
 
-	public Map<String, User> getUsers() {
-		return unmodifiableMap;
-	}	
-
-	public int getNumberOfModerators() {
-		int sum = 0;
-		for (Iterator<User> it = users.values().iterator(); it.hasNext(); ) {
-			User part = it.next();
-			if (part.isModerator()) {
-				sum++;
-			}
-		} 
-		log.debug("Returning number of moderators: " + sum);
-		return sum;
-	}
-
-	public Map<String, String> getCurrentPresenter() {
-		Map<String, String> curPres =  new HashMap<String, String>();
-		curPres.put("presenterUserID", curPresenterUserID);
-		curPres.put("assignedBy", presenterAssignedBy);
-		curPres.put("presenterName", "");
-		
-		User user = getUser(curPresenterUserID);
-		if (user != null) {
-			curPres.put("presenterName", user.getName());
-		}
-
-		
-		return curPres;
+	public Map<String, String> getCurrentPresenter() {		
+		return users.getCurrentPresenter();
 	}
 	
 	public void assignPresenter(String newPresenterUserID, String assignedByUserID) {
-		User user = getUser(newPresenterUserID);
-		if (user != null) {
-			curPresenterUserID = newPresenterUserID;
-			presenterAssignedBy = assignedByUserID;
-			
-			for (Iterator<IMeetingListener> iter = listeners.values().iterator(); iter.hasNext();) {
-				IMeetingListener listener = (IMeetingListener) iter.next();
-				listener.assignPresenter(newPresenterUserID, user.getName(), assignedByUserID);
-			}				
+		if (users.assignPresenter(newPresenterUserID, assignedByUserID)) {		
+			User user = users.getUser(newPresenterUserID);			
 		}
 
-	}
-	
-	private User getUser(String userID) {
-		return users.get(userID);
 	}
 }
