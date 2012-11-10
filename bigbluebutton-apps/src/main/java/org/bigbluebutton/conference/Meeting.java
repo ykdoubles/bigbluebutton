@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.bigbluebutton.conference.messages.in.IMessageIn;
 import org.bigbluebutton.conference.messages.in.MeetingEnd;
 import org.bigbluebutton.conference.messages.in.MeetingStart;
+import org.bigbluebutton.conference.messages.in.UserJoin;
+import org.bigbluebutton.conference.messages.in.UserLeave;
 import org.bigbluebutton.conference.messages.in.UsersQuery;
 import org.bigbluebutton.conference.messages.out.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.UsersQueryReply;
@@ -95,18 +97,20 @@ public class Meeting {
 		msgOutGW.accept(new MeetingStarted(meetingID));
 	}
 	
-	public void handleMeetingEnd(MeetingEnd msg) {
-		
+	private void handleMeetingEnd(MeetingEnd msg) {
+		//endAndKickAll()
 	}
 	
-
+	private void handleUserJoin(UserJoin msg) {
+//		usersMgr.addUser(user);	
+	}
 	
-	public void addUser(User user) {
-		usersMgr.addUser(user);		
+	private void handleUserLeave(UserLeave msg) {
+		// User p = usersMgr.removeUser(userID);
 	}
 
 	public void removeUser(String userID) {
-		User p = usersMgr.removeUser(userID);
+		
 	}
 
 	public void changeUserStatus(String userID, String status, Object value) {
@@ -117,15 +121,7 @@ public class Meeting {
 		}		
 	}
 
-	public void endAndKickAll() {
-
-	}
-
-	public Map<String, String> getCurrentPresenter() {		
-		return usersMgr.getCurrentPresenter();
-	}
-	
-	public void assignPresenter(String newPresenterUserID, String assignedByUserID) {
+	private void handleUserAssignPresenter(String newPresenterUserID, String assignedByUserID) {
 		if (usersMgr.assignPresenter(newPresenterUserID, assignedByUserID)) {		
 			User user = usersMgr.getUser(newPresenterUserID);			
 		}
