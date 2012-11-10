@@ -1,14 +1,17 @@
-package org.bigbluebutton.conference;
+package org.bigbluebutton.conference.imp;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.bigbluebutton.conference.IMessageInGateway;
+import org.bigbluebutton.conference.MeetingsManager;
 import org.bigbluebutton.conference.messages.in.IMessageIn;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
-public class MessageInGateway {
+public class MessageInGateway implements IMessageInGateway {
 	private static Logger log = Red5LoggerFactory.getLogger(MessageInGateway.class, "bigbluebutton");
 	
 	private static final Executor exec = Executors.newSingleThreadExecutor();	

@@ -39,9 +39,9 @@ public class Meeting {
 
 	private String meetingID;
 	private UsersManager usersMgr;
-	private final MessageOutGateway msgOutGW;
+	private final IMessageOutGateway msgOutGW;
 	
-	public Meeting(String meetingID, MessageOutGateway outGW) {
+	public Meeting(String meetingID, IMessageOutGateway outGW) {
 		this.meetingID = meetingID;
 		msgOutGW = outGW;		
 	}

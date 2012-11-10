@@ -20,7 +20,8 @@ package org.bigbluebutton.conference.service.participants;
 
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
-import java.util.Map;import org.bigbluebutton.conference.MessageInGateway;
+import java.util.Map;
+import org.bigbluebutton.conference.imp.MessageInGateway;
 import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
 import org.bigbluebutton.conference.messages.in.MeetingStart;
 import org.bigbluebutton.conference.messages.in.MeetingEnd;

@@ -19,6 +19,7 @@
 package org.bigbluebutton.conference;
 
 import org.slf4j.Logger;
+import org.bigbluebutton.conference.imp.MessageOutGateway;
 import org.bigbluebutton.conference.messages.in.AbstractMessageIn;
 import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
 import org.bigbluebutton.conference.messages.in.IMessageIn;

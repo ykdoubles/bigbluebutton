@@ -1,4 +1,4 @@
-package org.bigbluebutton.conference;
+package org.bigbluebutton.conference.imp;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -6,11 +6,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.bigbluebutton.conference.IMessageOutGateway;
+import org.bigbluebutton.conference.IMessageOutListener;
 import org.bigbluebutton.conference.messages.out.IMessageOut;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
-public class MessageOutGateway {
+public class MessageOutGateway implements IMessageOutGateway {
 	private static Logger log = Red5LoggerFactory.getLogger(MessageOutGateway.class, "bigbluebutton");
 	
 	private static final Executor exec = Executors.newSingleThreadExecutor();	
