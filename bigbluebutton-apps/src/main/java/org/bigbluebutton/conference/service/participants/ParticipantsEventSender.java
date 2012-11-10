@@ -63,7 +63,7 @@ public class ParticipantsEventSender implements IMeetingListener {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void participantJoined(User p) {
-		log.debug("A participant has joined " + p.getInternalUserID());
+//		log.debug("A participant has joined " + p.getInternalUserID());
 //		ArrayList args = new ArrayList();
 //		args.add(p.toMap());
 //		log.debug("Sending participantJoined " + p.getExternalUserID() + " to client.");
@@ -81,7 +81,7 @@ public class ParticipantsEventSender implements IMeetingListener {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void participantStatusChange(User p, String status, Object value) {
-		log.debug("A participant's status has changed " + p.getInternalUserID() + " " + status + " " + value);
+//		log.debug("A participant's status has changed " + p.getInternalUserID() + " " + status + " " + value);
 //		ArrayList args = new ArrayList();
 //		args.add(p.getInternalUserID());
 //		args.add(status);

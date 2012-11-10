@@ -83,8 +83,8 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 		ParticipantsEventRecorder recorder = new ParticipantsEventRecorder(connection.getScope().getName(), recorderApplication);
 		
 		log.debug("Adding room listener " + connection.getScope().getName());
-		participantsApplication.addRoomListener(connection.getScope().getName(), recorder);
-		participantsApplication.addRoomListener(connection.getScope().getName(), sender);
+//		participantsApplication.addRoomListener(connection.getScope().getName(), recorder);
+//		participantsApplication.addRoomListener(connection.getScope().getName(), sender);
 		log.debug("Done setting up recorder and listener");
 		
 		return true;
@@ -148,7 +148,8 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 			status.put("raiseHand", false);
 			status.put("presenter", false);
 			status.put("hasStream", false);	
-			return participantsApplication.participantJoin(room, userid, username, role, bbbSession.getExternUserID(), status);
+//			participantsApplication.participantJoin(room, userid, username, role, bbbSession.getExternUserID(), status);
+			return true;
 		}
 		log.warn("Can't send user join as session is null.");
 		return false;

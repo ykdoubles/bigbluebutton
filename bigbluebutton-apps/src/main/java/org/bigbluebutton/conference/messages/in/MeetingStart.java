@@ -1,10 +1,8 @@
 package org.bigbluebutton.conference.messages.in;
 
-public class MeetingStart implements IMessageIn {
-
-	public final String meetingID;
+public class MeetingStart extends AbstractMessageIn {
 	
 	public MeetingStart(String meetingID) {
-		this.meetingID = meetingID;
+		super(meetingID);
 	}
 }

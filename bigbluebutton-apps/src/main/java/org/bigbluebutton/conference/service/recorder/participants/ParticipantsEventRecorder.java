@@ -30,8 +30,8 @@ public class ParticipantsEventRecorder implements IMeetingListener {
 	public void participantJoined(User p) {
 		ParticipantJoinRecordEvent ev = new ParticipantJoinRecordEvent();
 		ev.setTimestamp(System.currentTimeMillis());
-		ev.setUserId(p.getInternalUserID());
-		ev.setName(p.getName());
+		ev.setUserId(p.internalUserID);
+		ev.setName(p.name);
 		ev.setMeetingId(session);
 		ev.setStatus(p.getStatus().toString());
 		ev.setRole(p.getRole());
@@ -43,7 +43,7 @@ public class ParticipantsEventRecorder implements IMeetingListener {
 	public void participantLeft(User p) {
 		ParticipantLeftRecordEvent ev = new ParticipantLeftRecordEvent();
 		ev.setTimestamp(System.currentTimeMillis());
-		ev.setUserId(p.getInternalUserID());
+		ev.setUserId(p.internalUserID);
 		ev.setMeetingId(session);
 		
 		recorder.record(session, ev);
@@ -53,7 +53,7 @@ public class ParticipantsEventRecorder implements IMeetingListener {
 	public void participantStatusChange(User p, String status, Object value) {
 		ParticipantStatusChangeRecordEvent ev = new ParticipantStatusChangeRecordEvent();
 		ev.setTimestamp(System.currentTimeMillis());
-		ev.setUserId(p.getInternalUserID());
+		ev.setUserId(p.internalUserID);
 		ev.setMeetingId(session);
 		ev.setStatus(status);
 		ev.setValue(value.toString());

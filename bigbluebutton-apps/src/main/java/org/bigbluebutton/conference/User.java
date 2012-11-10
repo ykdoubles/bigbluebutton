@@ -18,102 +18,54 @@
 */
 package org.bigbluebutton.conference;
 
-import net.jcip.annotations.ThreadSafe;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.Serializable;
 
-/**
- * Contains information for a Participant. Encapsulates status and the
- * only way to change/add status is through setStatus;
- */
-@ThreadSafe
-public class User implements Serializable {
-	private String internalUserID;
-	private String name;
-	private String role = "VIEWER";
-	private String externalUserID;
+import org.bigbluebutton.conference.vo.StatusVO;
+
+
+public class User {
+	public final String internalUserID;
+	public final String name;
+	public final String externalUserID;
 	
-	private final Map status;
-	private Map<String, Object> unmodifiableStatus;
+	public String role = "VIEWER";	
+	private final Map<String, StatusVO> statusMap;
+	private final Map<String, StatusVO> unmodifiableStatusMap;
 	
-	public User(String internalUserID, String name, String role, String externalUserID, Map<String, Object> status) {
+	public User(String internalUserID, String name, String role, String externalUserID, StatusVO status) {
 		this.internalUserID = internalUserID;
 		this.name = name;
 		this.role = role;
 		this.externalUserID = externalUserID;
-		this.status = new ConcurrentHashMap<String, Object>(status);
-		unmodifiableStatus = Collections.unmodifiableMap(status);
+		
+		this.statusMap = new ConcurrentHashMap<String, StatusVO>();
+		statusMap.put(status.name, status);
+		
+		unmodifiableStatusMap = Collections.unmodifiableMap(statusMap);
 	}
 	
 	public boolean isModerator() {
 		return "MODERATOR".equals(role);
 	}
 	
-	public String getName() {
-		return name;
-	}
-	
-	public String getInternalUserID() {
-		return internalUserID;
+	public Collection<StatusVO> getStatus() {
+		return unmodifiableStatusMap.values();
 	}
 	
 	public String getRole() {
 		return role;
 	}
-	
-	public String getExternalUserID() {
-	   return externalUserID;
-	}
-	
-	/**
-	 * Returns that status for this participant. However, the status cannot
-	 * be modified. To do that, setStatus(...) must be used.
-	 */
-	public Map getStatus() {
-		return unmodifiableStatus;
-	}
-	
-	public void setStatus(String statusName, Object value) {
-		// Should we sychronize?
-		synchronized (this) {
-			status.put(statusName, value);
-			/**
-			 * Update unmodifiableStatus as it does not get synched with status.
-			 * Not sure it it should auto-syc, so just sync it. 
-			 * Not sure if this is the right way to do it (ralam 2/26/2009).
-			 */
-			unmodifiableStatus = Collections.unmodifiableMap(status);
-		}
+			
+	public void setStatus(StatusVO status) {
+		statusMap.put(status.name, status);
 	}
 	
 	public void removeStatus(String statusName) {
-		// Should we sychronize?
-		synchronized (this) {
-			status.remove(statusName);
-			/**
-			 * Update unmodifiableStatus as it does not get synched with status.
-			 * Not sure it it should auto-syc, so just sync it. 
-			 * Not sure if this is the right way to do it (ralam 2/26/2009).
-			 */
-			unmodifiableStatus = Collections.unmodifiableMap(status);
-		}
+		statusMap.remove(statusName);
 	}
-	
-	public Map<String, Object> toMap() {
-		Map m = new HashMap();
-		m.put("userid", internalUserID);
-		m.put("externUserID", externalUserID);
-		m.put("name", name);
-		m.put("role", role);
-		/**
-		 * Create a copy of the status instead of returning the
-		 * unmodifiableMap. This way callers can still manipulate it
-		 * for their own purpose but our copy still remains unmodified.
-		 */
-		m.put("status", new HashMap(unmodifiableStatus));
-		return m;
-	}
+
 }

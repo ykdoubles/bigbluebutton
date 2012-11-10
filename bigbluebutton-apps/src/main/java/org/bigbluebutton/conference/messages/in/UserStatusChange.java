@@ -1,10 +1,16 @@
 package org.bigbluebutton.conference.messages.in;
 
-import org.bigbluebutton.conference.messages.in.vo.StatusVO;
 
-public class UserStatusChange implements IMessageIn {
+public class UserStatusChange extends AbstractMessageIn {
 
-	public UserStatusChange(String meetingID, String userID, StatusVO status) {
-		
+	public final String userID;
+	public final String statusName;
+	public final Object statusValue;
+	
+	public UserStatusChange(String meetingID, String userID, String statusName, Object statusValue) {
+		super(meetingID);
+		this.userID = userID;
+		this.statusName = statusName;
+		this.statusValue = statusValue;
 	}
 }

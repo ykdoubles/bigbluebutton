@@ -43,7 +43,7 @@ public class PresentationService {
 	public Map<String, Object> getPresentationInfo() {
 		log.debug("Getting presentation information.");
 		IScope scope = Red5.getConnectionLocal().getScope();
-		Map<String, String> curPresenter = participantsApplication.getCurrentPresenter(scope.getName());
+//		Map<String, String> curPresenter = participantsApplication.getCurrentPresenter(scope.getName());
 		int curSlide = presentationApplication.getCurrentSlide(scope.getName());
 		Boolean isSharing = presentationApplication.getSharingPresentation(scope.getName());
 		String currentPresentation = presentationApplication.getCurrentPresentation(scope.getName());
@@ -51,14 +51,14 @@ public class PresentationService {
 		ArrayList<String> presentationNames = presentationApplication.getPresentations(scope.getName());
 		
 		Map<String, Object> presenter = new HashMap<String, Object>();		
-		if (curPresenter != null) {
-			presenter.put("hasPresenter", true);
-			presenter.put("user", curPresenter.get("presenterUserID"));
-			presenter.put("name", curPresenter.get("presenterName"));
-			presenter.put("assignedBy",curPresenter.get("assignedBy"));
-		} else {
-			presenter.put("hasPresenter", false);
-		}
+//		if (curPresenter != null) {
+//			presenter.put("hasPresenter", true);
+//			presenter.put("user", curPresenter.get("presenterUserID"));
+//			presenter.put("name", curPresenter.get("presenterName"));
+//			presenter.put("assignedBy",curPresenter.get("assignedBy"));
+//		} else {
+//			presenter.put("hasPresenter", false);
+//		}
 				
 		Map<String, Object> presentation = new HashMap<String, Object>();
 		if (isSharing.booleanValue()) {

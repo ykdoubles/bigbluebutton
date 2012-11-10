@@ -35,7 +35,8 @@ public class ParticipantsService {
 	private ParticipantsApplication application;
 
 	public void kickUser(Map<String, Object> message) {
-		application.kickUser(message.get("userID").toString());
+		IScope scope = Red5.getConnectionLocal().getScope();
+		application.kickUser(scope.getName(), message.get("userID").toString());
 	}
 	
 	public void assignPresenter(Map<String, Object> message) {

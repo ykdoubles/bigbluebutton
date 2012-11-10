@@ -1,10 +1,8 @@
 package org.bigbluebutton.conference.messages.out;
 
-public class MeetingStarted implements IMessageOut {
+public class MeetingStarted extends AbstractMessageOut {
 
-	public final String meetingID;
-	
 	public MeetingStarted(String meetingID) {
-		this.meetingID = meetingID;
+		super(meetingID);
 	}
 }

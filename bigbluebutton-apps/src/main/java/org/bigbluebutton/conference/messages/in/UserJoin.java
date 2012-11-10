@@ -1,14 +1,13 @@
 package org.bigbluebutton.conference.messages.in;
 
-import org.bigbluebutton.conference.messages.in.vo.UserVO;
+import org.bigbluebutton.conference.vo.UserVO;
 
-public class UserJoin implements IMessageIn {
+public class UserJoin extends AbstractMessageIn {
 
-	public final String meetingID;
 	public final UserVO user;
 	
 	public UserJoin(String meetingID, UserVO user) {
-		this.meetingID = meetingID;
+		super(meetingID);
 		this.user = user;
 	}
 }
