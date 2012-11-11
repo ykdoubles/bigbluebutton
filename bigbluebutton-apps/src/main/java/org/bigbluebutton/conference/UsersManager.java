@@ -20,7 +20,7 @@ public class UsersManager {
 	
 	public void addUser(User user) {
 		synchronized (this) {
-			users.put(user.getInternalUserID(), user);
+//			users.put(user.getInternalUserID(), user);
 		}
 	}
 	
@@ -34,7 +34,7 @@ public class UsersManager {
 		synchronized (this) {
 			User p = users.get(userid);
 			if (p != null) {
-				p.setStatus(status, value);
+//				p.setStatus(status, value);
 				return true;
 			}
 			return false;
@@ -64,7 +64,7 @@ public class UsersManager {
 		
 		User user = getUser(curPresenterUserID);
 		if (user != null) {
-			curPres.put("presenterName", user.getName());
+//			curPres.put("presenterName", user.getName());
 		}
 
 		

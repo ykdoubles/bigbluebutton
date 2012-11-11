@@ -31,6 +31,7 @@ import org.bigbluebutton.conference.ConnectionInvokerService;
 import org.bigbluebutton.conference.Constants;
 import org.bigbluebutton.conference.service.chat.ChatRoomsManager;
 import org.bigbluebutton.conference.service.chat.ChatRoom;import org.bigbluebutton.conference.service.chat.IChatRoomListener;
+import org.bigbluebutton.conference.service.recorder.RecorderApplication;
 
 
 public class ChatApplication {
@@ -40,6 +41,7 @@ public class ChatApplication {
 	private ChatRoomsManager roomsManager;
 	public ChatHandler handler;
 	private ConnectionInvokerService connInvokerService;
+	private RecorderApplication recorderApplication;
 	
 	public boolean createRoom(String name) {
 		roomsManager.addRoom(new ChatRoom(name));
@@ -87,6 +89,8 @@ public class ChatApplication {
 		
 		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, getMeetingId(), "ChatReceivePublicMessageCommand", chatobj.toMap());
 		connInvokerService.sendMessage(m);
+		
+//		recorderApplication.record(session, buildEvent(chatobj));
 	}
 
 	public void sendPrivateMessage(ChatMessageVO chatobj) {
@@ -112,5 +116,10 @@ public class ChatApplication {
 	
 	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
 		this.connInvokerService = connInvokerService;
+	}
+	
+	public void setRecorderApplication(RecorderApplication a) {
+		log.debug("Setting archive application");
+		recorderApplication = a;
 	}
 }
