@@ -16,7 +16,7 @@
 * with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 * 
 */
-package org.bigbluebutton.conference.service.participants;
+package org.bigbluebutton.conference.service.users;
 
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;

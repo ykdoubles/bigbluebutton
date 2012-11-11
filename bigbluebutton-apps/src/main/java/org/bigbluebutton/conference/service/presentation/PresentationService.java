@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;import org.red5.server.api.Red5;import org.red5.server.api.scope.IScope;
-import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
+import org.bigbluebutton.conference.service.users.ParticipantsApplication;
 
 public class PresentationService {	
 	private static Logger log = Red5LoggerFactory.getLogger( PresentationService.class, "bigbluebutton" );

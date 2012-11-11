@@ -17,7 +17,7 @@
 * 
 */
 
-package org.bigbluebutton.conference.service.participants;
+package org.bigbluebutton.conference.service.users;
 
 import org.red5.server.adapter.IApplication;
 import org.red5.server.api.IClient;

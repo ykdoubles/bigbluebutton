@@ -24,7 +24,7 @@ public class SubscribeMessageService implements MessagingService{
 	private final Executor exec = Executors.newSingleThreadExecutor();
 	private Runnable pubsubListener;
 	
-	private final Set<MessageListener> listeners = new HashSet<MessageListener>();
+	private final Set<IMessageSubscriber> listeners = new HashSet<IMessageSubscriber>();
 	
 	@Override
 	public void start() {
@@ -64,12 +64,12 @@ public class SubscribeMessageService implements MessagingService{
 	}
 
 	@Override
-	public void addListener(MessageListener listener) {
+	public void addListener(IMessageSubscriber listener) {
 		listeners.add(listener);
 	}
 
 	@Override
-	public void removeListener(MessageListener listener) {
+	public void removeListener(IMessageSubscriber listener) {
 		listeners.remove(listener);
 	}
 	
@@ -99,14 +99,14 @@ public class SubscribeMessageService implements MessagingService{
 				String messageId = map.get("messageId");
 				if(messageId != null){
 					if(MessagingConstants.END_MEETING_REQUEST_EVENT.equalsIgnoreCase(messageId)){
-						for (MessageListener listener : listeners) {
+						for (IMessageSubscriber listener : listeners) {
 							listener.endMeetingRequest(meetingId);
 						}
 					}
 				}
 			}
 			else if(channel.equalsIgnoreCase(MessagingConstants.PRESENTATION_CHANNEL)){
-				for (MessageListener listener : listeners) {
+				for (IMessageSubscriber listener : listeners) {
 					listener.presentationUpdates(map);
 				}
 			}

@@ -17,7 +17,7 @@
 * 
 */
 
-package org.bigbluebutton.conference.service.participants;
+package org.bigbluebutton.conference.service.users;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

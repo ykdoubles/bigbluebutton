@@ -26,7 +26,7 @@ import org.bigbluebutton.conference.messages.in.IMessageIn;
 import org.bigbluebutton.conference.messages.in.MeetingEnd;
 import org.bigbluebutton.conference.messages.in.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.MeetingStart;
-import org.bigbluebutton.conference.service.messaging.MessageListener;
+import org.bigbluebutton.conference.service.messaging.IMessageSubscriber;
 import org.bigbluebutton.conference.service.messaging.MessagingService;
 import org.bigbluebutton.conference.service.presentation.ConversionUpdatesMessageListener;
 import org.red5.logging.Red5LoggerFactory;
@@ -99,7 +99,7 @@ public class MeetingsManager {
 		messageOutGW = gw;
 	}
 	
-	private class RoomsManagerListener implements MessageListener{
+	private class RoomsManagerListener implements IMessageSubscriber{
 
 		@Override
 		public void endMeetingRequest(String meetingId) {

@@ -1,4 +1,4 @@
-package org.bigbluebutton.conference.service.participants;
+package org.bigbluebutton.conference.service.users;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,8 +20,8 @@ import org.bigbluebutton.conference.vo.UserVO;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
-public class ParticipantsMessageOutListener implements IMessageOutListener {
-	private static Logger log = Red5LoggerFactory.getLogger(ParticipantsMessageOutListener.class, "bigbluebutton");
+public class UsersConnectionInvoker implements IMessageOutListener {
+	private static Logger log = Red5LoggerFactory.getLogger(UsersConnectionInvoker.class, "bigbluebutton");
 	
 	private IConnectionInvokerService connInvokerService;
 	
