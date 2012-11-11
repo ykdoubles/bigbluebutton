@@ -71,7 +71,7 @@ public class ParticipantsApplication {
 	}
 	
 	public void participantJoin(String meetingID, String userID, String username, String role, String externUserID, Map<String, StatusVO> status) {
-		UserVO uvo = new UserVO(userID, externUserID, role, username, status.values());
+		UserVO uvo = new UserVO(userID, externUserID, role, username);
 		messageInGW.accept(new UserJoin(meetingID, uvo));
 	}
 		

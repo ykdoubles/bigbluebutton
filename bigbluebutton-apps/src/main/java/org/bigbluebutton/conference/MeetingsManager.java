@@ -24,6 +24,7 @@ import org.bigbluebutton.conference.messages.in.AbstractMessageIn;
 import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
 import org.bigbluebutton.conference.messages.in.IMessageIn;
 import org.bigbluebutton.conference.messages.in.MeetingEnd;
+import org.bigbluebutton.conference.messages.in.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.MeetingStart;
 import org.bigbluebutton.conference.service.messaging.MessageListener;
 import org.bigbluebutton.conference.service.messaging.MessagingService;
@@ -67,19 +68,18 @@ public class MeetingsManager {
 	
 	private void handleMeetingStart(MeetingStart msg) {
 		if (! meetings.containsKey(msg.meetingID)) {
-			Meeting m = new Meeting(msg.meetingID, messageOutGW);
+			Meeting m = new Meeting(msg.meetingID, msg.meetingID, messageOutGW);
 			meetings.put(msg.meetingID, m);
 			m.processMessage(msg);
 		} else {
 			log.info("Requesting to start already running meeting [" + msg.meetingID + "]");
 		}
 	}
-	
-
+		
 	private void handleMeetingEnd(MeetingEnd msg) {
 		Meeting m = meetings.remove(msg.meetingID);
 		if (m != null) {
-			m.processMessage(msg);
+			log.debug("Meeting [{}] , [{}] ended.", m.meetingID, m.meetingName);
 		}
 	}
 	
