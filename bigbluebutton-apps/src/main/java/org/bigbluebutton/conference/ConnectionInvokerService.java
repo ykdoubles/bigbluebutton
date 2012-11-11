@@ -12,7 +12,7 @@ import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.service.ServiceUtils;
 
-public class ConnectionInvokerService {
+public class ConnectionInvokerService implements IConnectionInvokerService {
 
 	private static final int NTHREADS = 4;
 	private static final Executor exec = Executors.newFixedThreadPool(NTHREADS);

@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.bigbluebutton.conference.ClientMessage;
-import org.bigbluebutton.conference.ConnectionInvokerService;
+import org.bigbluebutton.conference.IConnectionInvokerService;
 import org.bigbluebutton.conference.IMessageOutListener;
-import org.bigbluebutton.conference.User;
 import org.bigbluebutton.conference.messages.in.UserAssignPresenter;
 import org.bigbluebutton.conference.messages.out.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.IMessageOut;
@@ -24,7 +23,7 @@ import org.slf4j.Logger;
 public class ParticipantsMessageOutListener implements IMessageOutListener {
 	private static Logger log = Red5LoggerFactory.getLogger(ParticipantsMessageOutListener.class, "bigbluebutton");
 	
-	private ConnectionInvokerService connInvokerService;
+	private IConnectionInvokerService connInvokerService;
 	
 	@Override
 	public void accept(IMessageOut message) {
@@ -116,7 +115,7 @@ public class ParticipantsMessageOutListener implements IMessageOutListener {
 		connInvokerService.sendMessage(cm);		
 	}
 	
-	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
+	public void setConnInvokerService(IConnectionInvokerService connInvokerService) {
 		this.connInvokerService = connInvokerService;
 	}
 }

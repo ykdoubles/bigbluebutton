@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.bigbluebutton.conference.exceptions.PresenterChangeException;
 import org.bigbluebutton.conference.exceptions.SamePresenterChangeException;
 import org.bigbluebutton.conference.messages.in.IMessageIn;
-import org.bigbluebutton.conference.messages.in.MeetingEnd;
 import org.bigbluebutton.conference.messages.in.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.MeetingStart;
 import org.bigbluebutton.conference.messages.in.UserAssignPresenter;
@@ -42,13 +41,10 @@ import org.bigbluebutton.conference.messages.out.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.UsersQueryReply;
 import org.bigbluebutton.conference.vo.NewPresenterVO;
-import org.bigbluebutton.conference.vo.StatusVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.red5.logging.Red5LoggerFactory;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 public class Meeting {
 	private static Logger log = Red5LoggerFactory.getLogger(Meeting.class, "bigbluebutton");	
