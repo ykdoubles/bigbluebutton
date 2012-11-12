@@ -32,13 +32,13 @@ import java.util.HashMap;
 import java.util.Map;import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.service.recorder.RecorderApplication;
 import org.bigbluebutton.conference.service.recorder.participants.ParticipantsEventRecorder;
 
-public class ParticipantsHandler extends ApplicationAdapter implements IApplication{
-	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsHandler.class, "bigbluebutton" );
+public class UsersHandler extends ApplicationAdapter implements IApplication{
+	private static Logger log = Red5LoggerFactory.getLogger( UsersHandler.class, "bigbluebutton" );
 
 	private static final String PARTICIPANTS_SO = "participantsSO";   
 	private static final String APP = "PARTICIPANTS";
 
-	private ParticipantsApplication participantsApplication;
+	private UsersApplication participantsApplication;
 	private RecorderApplication recorderApplication;
 	
 
@@ -80,7 +80,7 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 		return false;
 	}
 	
-	public void setParticipantsApplication(ParticipantsApplication a) {
+	public void setParticipantsApplication(UsersApplication a) {
 		participantsApplication = a;
 	}
 	

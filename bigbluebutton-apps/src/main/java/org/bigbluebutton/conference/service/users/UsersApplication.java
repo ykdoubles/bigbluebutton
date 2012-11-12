@@ -34,8 +34,8 @@ import org.bigbluebutton.conference.messages.in.UsersQuery;
 import org.bigbluebutton.conference.vo.StatusVO;
 import org.bigbluebutton.conference.vo.UserVO;
 
-public class ParticipantsApplication {
-	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsApplication.class, "bigbluebutton" );	
+public class UsersApplication {
+	private static Logger log = Red5LoggerFactory.getLogger( UsersApplication.class, "bigbluebutton" );	
 		
 	private MessageInGateway messageInGW;
 	

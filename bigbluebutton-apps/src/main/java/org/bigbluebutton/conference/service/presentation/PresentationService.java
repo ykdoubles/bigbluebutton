@@ -25,12 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;import org.red5.server.api.Red5;import org.red5.server.api.scope.IScope;
-import org.bigbluebutton.conference.service.users.ParticipantsApplication;
+import org.bigbluebutton.conference.service.users.UsersApplication;
 
 public class PresentationService {	
 	private static Logger log = Red5LoggerFactory.getLogger( PresentationService.class, "bigbluebutton" );
 	
-	private ParticipantsApplication participantsApplication;
+	private UsersApplication participantsApplication;
 	private PresentationApplication presentationApplication;
 
 	public void removePresentation(String name) {
@@ -109,7 +109,7 @@ public class PresentationService {
 		presentationApplication.resizeAndMoveSlide(scope.getName(), xOffset, yOffset, widthRatio, heightRatio);
 	}
 
-	public void setParticipantsApplication(ParticipantsApplication a) {
+	public void setParticipantsApplication(UsersApplication a) {
 	    log.debug("Setting participants application");
 	    participantsApplication = a;
 	}

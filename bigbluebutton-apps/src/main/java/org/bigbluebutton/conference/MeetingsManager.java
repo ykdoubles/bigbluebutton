@@ -24,30 +24,19 @@ import org.bigbluebutton.conference.messages.in.AbstractMessageIn;
 import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
 import org.bigbluebutton.conference.messages.in.IMessageIn;
 import org.bigbluebutton.conference.messages.in.MeetingEnd;
-import org.bigbluebutton.conference.messages.in.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.MeetingStart;
-import org.bigbluebutton.conference.service.messaging.IMessageSubscriber;
-import org.bigbluebutton.conference.service.messaging.MessagingService;
-import org.bigbluebutton.conference.service.presentation.ConversionUpdatesMessageListener;
 import org.red5.logging.Red5LoggerFactory;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeetingsManager {
 	private static Logger log = Red5LoggerFactory.getLogger(MeetingsManager.class, "bigbluebutton");
 	
-	private final Map <String, Meeting> meetings;
+	private final Map <String, Meeting> meetings = new ConcurrentHashMap<String, Meeting>();
 
 	private MessageOutGateway messageOutGW;
 	
-	MessagingService messagingService;
-	ConversionUpdatesMessageListener conversionUpdatesMessageListener;
-	
-	public MeetingsManager() {
-		meetings = new ConcurrentHashMap<String, Meeting>();		
-	}
-	
+		
 	public void accept(IMessageIn message) {
 		if (message instanceof MeetingStart) {
 			handleMeetingStart((MeetingStart) message);
@@ -82,40 +71,9 @@ public class MeetingsManager {
 			log.debug("Meeting [{}] , [{}] ended.", m.meetingID, m.meetingName);
 		}
 	}
-	
-
-	public void setMessagingService(MessagingService messagingService) {
-		this.messagingService = messagingService;
-		this.messagingService.addListener(new RoomsManagerListener());
-		this.messagingService.start();
-	}
-	
-
-	public void setConversionUpdatesMessageListener(ConversionUpdatesMessageListener conversionUpdatesMessageListener) {
-		this.conversionUpdatesMessageListener = conversionUpdatesMessageListener;
-	}
-	
+		
 	public void setMessageOutGateway(MessageOutGateway gw) {
 		messageOutGW = gw;
-	}
-	
-	private class RoomsManagerListener implements IMessageSubscriber{
-
-		@Override
-		public void endMeetingRequest(String meetingId) {
-			log.debug("End meeting request for room: " + meetingId);
-//			Meeting room = getMeeting(meetingId); // must do this because the room coming in is serialized (no transient values are present)
-//			if (room != null)
-//				room.endAndKickAll();
-//			else
-//				log.debug("Could not find room " + meetingId);
-		}
-		
-		@Override
-		public void presentationUpdates(HashMap<String, String> map) {
-			conversionUpdatesMessageListener.handleReceivedMessage(map);
-		}
-		
 	}
 	
 }

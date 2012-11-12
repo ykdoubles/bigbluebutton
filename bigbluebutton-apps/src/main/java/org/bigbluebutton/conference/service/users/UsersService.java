@@ -29,10 +29,10 @@ import org.bigbluebutton.conference.BigBlueButtonSession;
 import org.bigbluebutton.conference.Constants;
 
 
-public class ParticipantsService {
+public class UsersService {
 
-	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsService.class, "bigbluebutton" );	
-	private ParticipantsApplication application;
+	private static Logger log = Red5LoggerFactory.getLogger( UsersService.class, "bigbluebutton" );	
+	private UsersApplication application;
 
 	public void kickUser(Map<String, Object> message) {
 		IScope scope = Red5.getConnectionLocal().getScope();
@@ -62,7 +62,7 @@ public class ParticipantsService {
 		application.setParticipantStatus(roomName, userid, status, value);
 	}
 	
-	public void setParticipantsApplication(ParticipantsApplication a) {
+	public void setParticipantsApplication(UsersApplication a) {
 		log.debug("Setting Participants Applications");
 		application = a;
 	}

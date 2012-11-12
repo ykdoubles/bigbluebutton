@@ -21,7 +21,7 @@ package org.bigbluebutton.conference;
 import java.util.Iterator;
 import java.util.Set;
 import org.red5.server.api.Red5;import org.bigbluebutton.conference.service.recorder.RecorderApplication;
-import org.bigbluebutton.conference.service.users.ParticipantsApplication;
+import org.bigbluebutton.conference.service.users.UsersApplication;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.IApplication;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
@@ -36,7 +36,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	private static Logger log = Red5LoggerFactory.getLogger(BigBlueButtonApplication.class, "bigbluebutton");
 
-	private ParticipantsApplication participantsApplication;
+	private UsersApplication participantsApplication;
 	private RecorderApplication recorderApplication;
 	private AbstractApplicationContext appCtx;
 	private ConnectionInvokerService connInvokerService;
@@ -149,7 +149,7 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		return bbbSession.getInternalUserID();
 	}
 	
-	public void setParticipantsApplication(ParticipantsApplication a) {
+	public void setParticipantsApplication(UsersApplication a) {
 		participantsApplication = a;
 	}
 	
