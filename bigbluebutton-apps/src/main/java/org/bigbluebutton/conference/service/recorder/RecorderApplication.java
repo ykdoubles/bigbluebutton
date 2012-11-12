@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * in BigBlueButton for send events messages to a JMS queue.
  * The class follows the same standard as the others modules of BigBlueButton Apps.
  */
-public class RecorderApplication {
+public class RecorderApplication implements IRecordingService {
 	private static Logger log = Red5LoggerFactory.getLogger(RecorderApplication.class, "bigbluebutton");
 	
 	private final Map<String, String> recordingSessions;

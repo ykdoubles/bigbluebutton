@@ -1,7 +1,7 @@
 package org.bigbluebutton.conference.service.messaging;
 
 import org.bigbluebutton.conference.BigBlueButton;
-import org.bigbluebutton.conference.messages.in.MeetingForceEnd;
+import org.bigbluebutton.conference.messages.in.meetings.MeetingForceEnd;
 
 public class MeetingsMessageSubscriber implements IMessageSubscriber {
 

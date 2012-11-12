@@ -27,10 +27,10 @@ import org.red5.server.api.scope.IScope;
 import org.bigbluebutton.conference.BigBlueButton;
 import org.bigbluebutton.conference.BigBlueButtonSession;
 import org.bigbluebutton.conference.Constants;
-import org.bigbluebutton.conference.messages.in.UserAssignPresenter;
-import org.bigbluebutton.conference.messages.in.UserKick;
-import org.bigbluebutton.conference.messages.in.UserVideoStatusChange;
-import org.bigbluebutton.conference.messages.in.UsersQuery;
+import org.bigbluebutton.conference.messages.in.users.UserAssignPresenter;
+import org.bigbluebutton.conference.messages.in.users.UserKick;
+import org.bigbluebutton.conference.messages.in.users.UserVideoStatusChange;
+import org.bigbluebutton.conference.messages.in.users.UsersQuery;
 
 public class UsersService {
 	private static Logger log = Red5LoggerFactory.getLogger( UsersService.class, "bigbluebutton" );	

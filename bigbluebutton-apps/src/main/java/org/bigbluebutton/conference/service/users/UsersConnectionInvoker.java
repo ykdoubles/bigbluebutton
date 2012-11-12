@@ -7,14 +7,14 @@ import java.util.Map;
 import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.IConnectionInvokerService;
 import org.bigbluebutton.conference.IMessageOutListener;
-import org.bigbluebutton.conference.messages.out.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.IMessageOut;
-import org.bigbluebutton.conference.messages.out.MeetingEnded;
-import org.bigbluebutton.conference.messages.out.UserJoined;
-import org.bigbluebutton.conference.messages.out.UserKicked;
-import org.bigbluebutton.conference.messages.out.UserLeft;
-import org.bigbluebutton.conference.messages.out.UserPresenterChanged;
-import org.bigbluebutton.conference.messages.out.UsersQueryReply;
+import org.bigbluebutton.conference.messages.out.meetings.MeetingEnded;
+import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
+import org.bigbluebutton.conference.messages.out.users.UserJoined;
+import org.bigbluebutton.conference.messages.out.users.UserKicked;
+import org.bigbluebutton.conference.messages.out.users.UserLeft;
+import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
+import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class UsersConnectionInvoker implements IMessageOutListener {
 		if (message instanceof MeetingStarted) {
 			
 		} else if (message instanceof MeetingEnded) {
-			handleMeetingStopped((MeetingEnded) message);
+			handleMeetingEnded((MeetingEnded) message);
 		} else if (message instanceof UserPresenterChanged) {
 			handleUserPresenterChanged((UserPresenterChanged) message);
 		} else if (message instanceof UserKicked) {
@@ -106,10 +106,11 @@ public class UsersConnectionInvoker implements IMessageOutListener {
 		}
 	}
 		
-	private void handleMeetingStopped(MeetingEnded m) {
+	private void handleMeetingEnded(MeetingEnded m) {
 		log.debug("Meeting stopped message [" + m.meetingID + "]");		
 		Map<String, Object> msg = new HashMap<String, Object>();
 		msg.put("meetingID", m.meetingID);
+		
 		ClientMessage cm = new ClientMessage(ClientMessage.BROADCAST, m.meetingID, "UserLogoutCommand", msg);
 		connInvokerService.sendMessage(cm);		
 	}

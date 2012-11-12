@@ -20,9 +20,9 @@ package org.bigbluebutton.conference;
 
 import java.util.Iterator;
 import java.util.Set;
-import org.red5.server.api.Red5;import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
-import org.bigbluebutton.conference.messages.in.MeetingEnd;
-import org.bigbluebutton.conference.messages.in.MeetingStart;
+import org.red5.server.api.Red5;import org.bigbluebutton.conference.messages.in.meetings.AllMeetingsStop;
+import org.bigbluebutton.conference.messages.in.meetings.MeetingEnd;
+import org.bigbluebutton.conference.messages.in.meetings.MeetingStart;
 import org.bigbluebutton.conference.service.recorder.RecorderApplication;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.IApplication;

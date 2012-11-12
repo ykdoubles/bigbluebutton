@@ -3,8 +3,8 @@ package org.bigbluebutton.conference.service.messaging;
 import java.util.HashMap;
 import org.bigbluebutton.conference.IMessageOutListener;
 import org.bigbluebutton.conference.messages.out.IMessageOut;
-import org.bigbluebutton.conference.messages.out.MeetingEnded;
-import org.bigbluebutton.conference.messages.out.MeetingStarted;
+import org.bigbluebutton.conference.messages.out.meetings.MeetingEnded;
+import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 

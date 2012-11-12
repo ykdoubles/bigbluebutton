@@ -7,7 +7,7 @@ import redis.clients.jedis.JedisPool;
 
 public class RedisDispatcher implements Recorder {
 	private static Logger log = Red5LoggerFactory.getLogger(Recorder.class, "bigbluebutton");
-	private static final String COLON=":";
+	private static final String COLON = ":";
 	JedisPool redisPool;
 	
 	public RedisDispatcher(){
@@ -34,6 +34,4 @@ public class RedisDispatcher implements Recorder {
 	public void setRedisPool(JedisPool redisPool) {
 		this.redisPool = redisPool;
 	}
-	
-
 }
