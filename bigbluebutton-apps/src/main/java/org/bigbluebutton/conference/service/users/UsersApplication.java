@@ -43,13 +43,7 @@ public class UsersApplication {
 		messageInGW.accept(new MeetingStart(meetingID));
 		return true;
 	}
-	
-	public boolean destroyRoom(String meetingID) {
-		messageInGW.accept(new MeetingEnd(meetingID));
 		
-		return true;
-	}
-	
 	public void destroyAllRooms() {
 		messageInGW.accept(new AllMeetingsStop());
 	}

@@ -24,7 +24,6 @@ package org.bigbluebutton.conference.service.presentation;
 import org.slf4j.Logger;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.red5.logging.Red5LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +65,7 @@ public class ConversionUpdatesMessageListener {
 			
 			log.debug("Message: " + messageKey + "[ " + presentationName + "]");
 			
-			if(messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_SUCCESS_KEY)||
+			if (messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_SUCCESS_KEY)||
 					messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_FAILED_KEY)||
 					messageKey.equalsIgnoreCase(SUPPORTED_DOCUMENT_KEY)||
 					messageKey.equalsIgnoreCase(UNSUPPORTED_DOCUMENT_KEY)||
@@ -75,31 +74,27 @@ public class ConversionUpdatesMessageListener {
 					messageKey.equalsIgnoreCase(PAGE_COUNT_FAILED_KEY)){
 				
 				conversionUpdatesProcessor.process(message);
-			}
-			else if(messageKey.equalsIgnoreCase(PAGE_COUNT_EXCEEDED_KEY)){
+			} else if(messageKey.equalsIgnoreCase(PAGE_COUNT_EXCEEDED_KEY)){
 				Integer numberOfPages = new Integer((String) mapMessage.get("numberOfPages"));
 				Integer maxNumberPages = new Integer((String) mapMessage.get("maxNumberPages"));
 				message.put("numberOfPages", numberOfPages);
 				message.put("maxNumberPages", maxNumberPages);
 				conversionUpdatesProcessor.process(message);
-			}
-			else if(messageKey.equalsIgnoreCase(GENERATED_SLIDE_KEY)){
+			} else if(messageKey.equalsIgnoreCase(GENERATED_SLIDE_KEY)){
 				Integer numberOfPages = new Integer((String)mapMessage.get("numberOfPages"));
 				Integer pagesCompleted = new Integer((String)mapMessage.get("pagesCompleted"));
 				message.put("numberOfPages", numberOfPages);
 				message.put("pagesCompleted", pagesCompleted);
 				
 				conversionUpdatesProcessor.process(message);
-			}
-			else if(messageKey.equalsIgnoreCase(CONVERSION_COMPLETED_KEY)){
+			} else if(messageKey.equalsIgnoreCase(CONVERSION_COMPLETED_KEY)){
 				String slidesInfo = (String) mapMessage.get("slidesInfo");
 				message.put("slidesInfo", StringEscapeUtils.unescapeXml(slidesInfo));				
 				conversionUpdatesProcessor.process(message);
-			}
-			else{
+			} else{
 				log.error("Cannot handle recieved message.");
 			}
-    	}catch(Exception ex){
+    	} catch(Exception ex){
     		log.warn(ex.getMessage());
     	}		
 	}

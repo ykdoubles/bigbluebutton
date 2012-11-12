@@ -34,10 +34,10 @@ public class User {
 	private boolean hasHandRaised = false;
 	
 	private boolean hasVideo = false;
-	private String videoStreamName = null;
+	private String videoStreamName = "";
 	
 	private boolean hasAudio = false;
-	private String audioStreamName = null;
+	private String audioStreamName = "";
 	
 	private int audioPin = 0;
 		
@@ -74,7 +74,7 @@ public class User {
 	
 	public void removeAudio() {
 		hasAudio = false;
-		audioStreamName = null;
+		audioStreamName = "";
 	}
 	
 	public void addAudio(String streamName) {
@@ -88,7 +88,6 @@ public class User {
 	}
 	
 	public String getAudioStreamName() {
-		if (audioStreamName == null) return "";
 		return audioStreamName;
 	}
 	
@@ -98,7 +97,7 @@ public class User {
 	
 	public void removeVideo() {
 		hasVideo = false;
-		videoStreamName = null;
+		videoStreamName = "";
 	}
 	
 	public void addVideo(String streamName) {
@@ -111,9 +110,7 @@ public class User {
 		}
 	}
 	
-	public String getVideoStreamName() {
-		if (videoStreamName == null) return "";
-		
+	public String getVideoStreamName() {		
 		return videoStreamName;
 	}
 	

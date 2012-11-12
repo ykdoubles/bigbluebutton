@@ -20,8 +20,10 @@ package org.bigbluebutton.conference;
 
 import java.util.Iterator;
 import java.util.Set;
-import org.red5.server.api.Red5;import org.bigbluebutton.conference.service.recorder.RecorderApplication;
-import org.bigbluebutton.conference.service.users.UsersApplication;
+import org.red5.server.api.Red5;import org.bigbluebutton.conference.messages.in.AllMeetingsStop;
+import org.bigbluebutton.conference.messages.in.MeetingEnd;
+import org.bigbluebutton.conference.messages.in.MeetingStart;
+import org.bigbluebutton.conference.service.recorder.RecorderApplication;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.IApplication;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
@@ -36,12 +38,12 @@ import org.springframework.context.support.AbstractApplicationContext;
 public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	private static Logger log = Red5LoggerFactory.getLogger(BigBlueButtonApplication.class, "bigbluebutton");
 
-	private UsersApplication participantsApplication;
 	private RecorderApplication recorderApplication;
 	private AbstractApplicationContext appCtx;
 	private ConnectionInvokerService connInvokerService;
 	
 	private String version;
+	private BigBlueButton bbb;
 	
 	@Override
     public boolean appStart(IScope app) {
@@ -62,27 +64,23 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	@Override
     public boolean roomStart(IScope room) {
     	log.debug("Starting room [" + room.getName() + "].");
-    	assert participantsApplication != null;
     	connInvokerService.addScope(room.getName(), room);
     	return super.roomStart(room);
     }	
 	
 	@Override
     public void roomStop(IScope room) {
-    	log.debug("Stopping room [" + room.getName() + "].");
+    	String meetingID = room.getName();
+    	log.debug("Stopping room [" + meetingID + "].");
+    	
     	super.roomStop(room);
-    	assert participantsApplication != null;
-    	participantsApplication.destroyRoom(room.getName());
-    	BigBlueButtonSession bbbSession = getBbbSession();
-    	assert bbbSession != null;
-
-    	/**
-    	 * Need to figure out if the next 2 lines should be removed. (ralam nov 25, 2010).
-    	 */
-		assert recorderApplication != null;
-		recorderApplication.destroyRecordSession(bbbSession.getSessionName());
-		connInvokerService.removeScope(room.getName());
-		log.debug("Stopped room [" + room.getName() + "].");
+    	
+    	bbb.accept(new MeetingEnd(meetingID));
+    	
+		recorderApplication.destroyRecordSession(getBbbSession().getSessionName());
+		connInvokerService.removeScope(meetingID);
+		
+		log.debug("Stopped room [" + meetingID + "].");
     }
     
 	@Override
@@ -102,7 +100,7 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         log.info("[clientid=" + clientID + "] connected from " + remoteHost + ":" + remotePort + ".");
         
         String voiceBridge = ((String) params[4]).toString();
-		String room = sessionName;
+		String meetingID = sessionName;
 		assert recorderApplication != null;
 		boolean record = (Boolean)params[5];
 		log.debug("record value - [" + record + "]"); 
@@ -115,13 +113,15 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		}
 			
     	BigBlueButtonSession bbbSession = new BigBlueButtonSession(sessionName, clientID, internalUserID,  username, role, 
-    			conference, room, voiceBridge, record, externalUserID);
+    			conference, meetingID, voiceBridge, record, externalUserID);
         connection.setAttribute(Constants.SESSION, bbbSession);        
         
         String debugInfo = "internalUserID=" + internalUserID + ",username=" + username + ",role=" +  role + ",conference=" + conference + "," + 
-        					"session=" + sessionName + ",voiceConf=" + voiceBridge + ",room=" + room + ",externalUserid=" + externalUserID;
-		log.debug("User [{}] connected to room [{}]", debugInfo, room); 
-		participantsApplication.createRoom(room);
+        					"session=" + sessionName + ",voiceConf=" + voiceBridge + ",room=" + meetingID + ",externalUserid=" + externalUserID;
+		log.debug("User [{}] connected to room [{}]", debugInfo, meetingID); 
+		
+		bbb.accept(new MeetingStart(meetingID));
+		
         super.roomConnect(connection, params);
         
         connInvokerService.addConnection(bbbSession.getInternalUserID(), connection);
@@ -149,10 +149,6 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		return bbbSession.getInternalUserID();
 	}
 	
-	public void setParticipantsApplication(UsersApplication a) {
-		participantsApplication = a;
-	}
-	
 	public void setRecorderApplication(RecorderApplication a) {
 		recorderApplication = a;
 	}
@@ -162,6 +158,10 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		while (iter.hasNext()) {
 			super.addListener((IApplication) iter.next());
 		}
+	}
+	
+	public void setBigBlueButton(BigBlueButton bbb) {
+		this.bbb = bbb;
 	}
 	
 	public void setVersion(String v) {
@@ -183,7 +183,7 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		public void onApplicationEvent(ApplicationEvent event) {
 			if (event instanceof org.springframework.context.event.ContextStoppedEvent) {
 				log.info("Received shutdown event. Red5 is shutting down. Destroying all rooms.");
-				participantsApplication.destroyAllRooms();
+				bbb.accept(new AllMeetingsStop());
 			}			
 		}
 		

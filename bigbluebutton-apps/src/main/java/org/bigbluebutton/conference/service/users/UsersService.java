@@ -20,23 +20,25 @@
 package org.bigbluebutton.conference.service.users;
 
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
 import org.red5.server.api.scope.IScope;
+import org.bigbluebutton.conference.BigBlueButton;
 import org.bigbluebutton.conference.BigBlueButtonSession;
 import org.bigbluebutton.conference.Constants;
-
+import org.bigbluebutton.conference.messages.in.UserAssignPresenter;
+import org.bigbluebutton.conference.messages.in.UserKick;
+import org.bigbluebutton.conference.messages.in.UserVideoStatusChange;
+import org.bigbluebutton.conference.messages.in.UsersQuery;
 
 public class UsersService {
-
 	private static Logger log = Red5LoggerFactory.getLogger( UsersService.class, "bigbluebutton" );	
-	private UsersApplication application;
+	private BigBlueButton bbb;
 
 	public void kickUser(Map<String, Object> message) {
 		IScope scope = Red5.getConnectionLocal().getScope();
-		application.kickUser(scope.getName(), message.get("userID").toString());
+		bbb.accept(new UserKick(scope.getName(), message.get("userID").toString()));
 	}
 	
 	public void assignPresenter(Map<String, Object> message) {
@@ -44,27 +46,31 @@ public class UsersService {
 		String newPresenterUserID = message.get("newPresenterUserID").toString();
 		String assignedBy = message.get("assigneByUserID").toString();
 		
-		application.assignPresenter(scope.getName(), newPresenterUserID, assignedBy);
+		bbb.accept(new UserAssignPresenter(scope.getName(), newPresenterUserID, assignedBy));
 	}
 	
 	public void getParticipants() {		
 		String meetingID = Red5.getConnectionLocal().getScope().getName();
-		application.getParticipants(meetingID, getBbbSession().getInternalUserID());		
+	
+		bbb.accept(new UsersQuery(meetingID, getBbbSession().getInternalUserID()));
 	}
 	
 	public void setParticipantStatus(Map<String, Object> message) {
-		String userid = message.get("userID").toString();
-		String status = message.get("statusName").toString();
-		Object value = message.get("statusValue");
+		String userID = message.get("userID").toString();
+		String status = message.get("status").toString();
+		String streamName = message.get("streamName").toString();
 		
-		String roomName = Red5.getConnectionLocal().getScope().getName();
-		log.debug("Setting participant status " + roomName + " " + userid + " " + status + " " + value);
-		application.setParticipantStatus(roomName, userid, status, value);
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+		
+		if ("HASVIDEO".equals(status.toUpperCase())) {
+			bbb.accept(new UserVideoStatusChange(meetingID, userID, true, streamName));
+		} else {
+			bbb.accept(new UserVideoStatusChange(meetingID, userID, false, streamName));
+		}
 	}
 	
-	public void setParticipantsApplication(UsersApplication a) {
-		log.debug("Setting Participants Applications");
-		application = a;
+	public void setBigBlueButton(BigBlueButton bbb) {
+		this.bbb = bbb;
 	}
 	
 	private BigBlueButtonSession getBbbSession() {

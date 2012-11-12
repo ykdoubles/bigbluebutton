@@ -21,30 +21,40 @@ package org.bigbluebutton.conference.service.users;
 
 import org.red5.server.adapter.IApplication;
 import org.red5.server.api.IClient;
-import org.red5.server.api.IConnection;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IScope;
-import org.red5.server.api.so.ISharedObject;
 import org.red5.server.adapter.ApplicationAdapter;
 import org.red5.server.api.Red5;
-import java.util.HashMap;
-import java.util.Map;import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.service.recorder.RecorderApplication;
-import org.bigbluebutton.conference.service.recorder.participants.ParticipantsEventRecorder;
+import org.bigbluebutton.conference.BigBlueButton;
+import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.messages.in.UserJoin;
+import org.bigbluebutton.conference.messages.in.UserLeave;
+import org.bigbluebutton.conference.vo.UserVO;
 
-public class UsersHandler extends ApplicationAdapter implements IApplication{
+
+public class UsersHandler extends ApplicationAdapter implements IApplication {
 	private static Logger log = Red5LoggerFactory.getLogger( UsersHandler.class, "bigbluebutton" );
 
-	private static final String PARTICIPANTS_SO = "participantsSO";   
 	private static final String APP = "PARTICIPANTS";
 
-	private UsersApplication participantsApplication;
-	private RecorderApplication recorderApplication;
-	
+	private BigBlueButton bbb;
+
 
 	public boolean roomJoin(IClient client, IScope scope) {
 		log.debug(APP + ":roomJoin " + scope.getName() + " - " + scope.getParent().getName());
-		participantJoin();
+		BigBlueButtonSession bbbSession = getBbbSession();
+		if (bbbSession != null) {
+			String userid = bbbSession.getInternalUserID();
+			String username = bbbSession.getUsername();
+			String role = bbbSession.getRole();
+			String room = bbbSession.getRoom();
+			log.debug(APP + ":participantJoin - [" + room + "] [" + userid + ", " + username + ", " + role + "]");
+			
+			UserVO uvo = new UserVO(userid, username, role, bbbSession.getExternUserID());
+			bbb.accept(new UserJoin(room, uvo));
+			return true;
+		}
+		log.warn("Can't send user join as session is null.");
 		return true;
 	}
 
@@ -54,40 +64,14 @@ public class UsersHandler extends ApplicationAdapter implements IApplication{
 		if (bbbSession == null) {
 			log.debug("roomLeave - session is null"); 
 		} else {
-			participantsApplication.participantLeft(bbbSession.getSessionName(), bbbSession.getInternalUserID());
+			bbb.accept(new UserLeave(bbbSession.getSessionName(), bbbSession.getInternalUserID()));
 		}		
 	}
-	
-	
-	public boolean participantJoin() {
-		log.debug(APP + ":participantJoin - getting userid");
-		BigBlueButtonSession bbbSession = getBbbSession();
-		if (bbbSession != null) {
-			String userid = bbbSession.getInternalUserID();
-			String username = bbbSession.getUsername();
-			String role = bbbSession.getRole();
-			String room = bbbSession.getRoom();
-			log.debug(APP + ":participantJoin - [" + room + "] [" + userid + ", " + username + ", " + role + "]");
-			
-			Map<String, Object> status = new HashMap<String, Object>();
-			status.put("raiseHand", false);
-			status.put("presenter", false);
-			status.put("hasStream", false);	
-//			participantsApplication.participantJoin(room, userid, username, role, bbbSession.getExternUserID(), status);
-			return true;
-		}
-		log.warn("Can't send user join as session is null.");
-		return false;
+		
+	public void setBigBlueButton(BigBlueButton a) {
+		bbb = a;
 	}
-	
-	public void setParticipantsApplication(UsersApplication a) {
-		participantsApplication = a;
-	}
-	
-	public void setRecorderApplication(RecorderApplication a) {
-		recorderApplication = a;
-	}
-	
+		
 	private BigBlueButtonSession getBbbSession() {
 		return (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
 	}

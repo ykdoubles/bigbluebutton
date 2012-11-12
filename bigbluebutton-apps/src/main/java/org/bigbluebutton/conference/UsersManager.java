@@ -1,7 +1,6 @@
 package org.bigbluebutton.conference;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

@@ -1,7 +1,12 @@
 package org.bigbluebutton.conference.service.messaging;
 
-import java.util.Map;
-
+/**
+ * Receive messages from Redis. Make sure that the implementer of this
+ * interface doesn't block and prevent receiving messages.
+ * 
+ * @author ritzalam
+ *
+ */
 public interface IMessageSubscriber {
-	void receive(String channel, Map<String, String> message);
+	void receive(RedisMessage message);
 }

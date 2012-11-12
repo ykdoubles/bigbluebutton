@@ -20,21 +20,27 @@ public class RedisMessagingService implements IMessagePublisher {
 	private JedisPool redisPool;
 	private final Executor receiveExec = Executors.newSingleThreadExecutor();
 	private final Executor sendExec = Executors.newSingleThreadExecutor();
-	private static final BlockingQueue<RedisMessage> messages = new LinkedBlockingQueue<RedisMessage>();
+	private final Executor subscriberExec = Executors.newSingleThreadExecutor();
 	
-	private Runnable messageReceiver, messagePublisher;
+	private static final BlockingQueue<RedisMessage> messagesToSend = new LinkedBlockingQueue<RedisMessage>();
+	private static final BlockingQueue<RedisMessage> messagesReceived = new LinkedBlockingQueue<RedisMessage>();
+	
+	private Runnable messageReceiver, messagePublisher, subscriberNotifier;
 	private volatile boolean sendMessage = false;
+	private volatile boolean notifySubscribers = false;
 	private Set<IMessageSubscriber> subscribers;
 
 	public void start() {
 		log.debug("Starting redis pubsub...");		
 		startMessageReceiver();
 		startMessagePublisher();
+		startSubscriberNotifier();
 	}
 
 	public void stop() {
 		try {
 			sendMessage = false;
+			notifySubscribers = false;
 			redisPool.destroy();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -47,7 +53,7 @@ public class RedisMessagingService implements IMessagePublisher {
 			public void run() {
 				while (sendMessage) {
 					try {
-						RedisMessage rm = messages.take();
+						RedisMessage rm = messagesToSend.take();
 						publishMessage(rm);
 					} catch (InterruptedException e) {
 						log.error("Interrupted Exception while trying to publish message.");
@@ -56,6 +62,23 @@ public class RedisMessagingService implements IMessagePublisher {
 			}
 		};
 		sendExec.execute(messagePublisher);	
+	}
+
+	private void startSubscriberNotifier() {
+		notifySubscribers = true;
+		subscriberNotifier = new Runnable() {
+			public void run() {
+				while (notifySubscribers) {
+					try {
+						RedisMessage rm = messagesReceived.take();
+						notifySubscribers(rm);
+					} catch (InterruptedException e) {
+						log.error("Interrupted Exception while trying to notify subscribers.");
+					}
+				}
+			}
+		};
+		subscriberExec.execute(subscriberNotifier);	
 	}
 	
 	private void startMessageReceiver() {
@@ -69,15 +92,15 @@ public class RedisMessagingService implements IMessagePublisher {
 		receiveExec.execute(messageReceiver);	
 	}
 	
-	public boolean send(String channel, String message) {
-		RedisMessage redisMessage = new RedisMessage(channel, message);
-		return messages.offer(redisMessage);
+	public boolean send(RedisMessage redisMessage) {
+		return messagesToSend.offer(redisMessage);
 	}
 	
 	private void publishMessage(RedisMessage message) {
 		Jedis jedis = redisPool.getResource();
 		try {
-			jedis.publish(message.channel, message.message);
+			Gson gson = new Gson();
+			jedis.publish(message.channel, gson.toJson(message.message));
 		} catch(Exception e){
 			log.warn("Cannot publish the message to redis", e);
 		} finally{
@@ -85,6 +108,12 @@ public class RedisMessagingService implements IMessagePublisher {
 		}		
 	}
 
+	private void notifySubscribers(RedisMessage message) {
+		for (IMessageSubscriber subscriber : subscribers) {
+			subscriber.receive(message);
+		}
+	}
+	
 	public void setMessageSubscribers(Set<IMessageSubscriber> subscribers) {
 		this.subscribers = subscribers;
 	}
@@ -93,19 +122,6 @@ public class RedisMessagingService implements IMessagePublisher {
 		this.redisPool = redisPool;
 	}
 
-	/**
-	 * Redis Message
-	 *
-	 */
-	private class RedisMessage {
-		public final String channel;
-		public final String message;
-		
-		public RedisMessage(String channel, String message) {
-			this.channel = channel;
-			this.message = message;
-		}
-	}
 	
 	/**
 	 * Listener for messages from Redis channels.
@@ -124,11 +140,8 @@ public class RedisMessagingService implements IMessagePublisher {
 		@Override
 		public void onPMessage(String pattern, String channel, String message) {
 			Gson gson = new Gson();
-			Map<String, String> msg = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());
-			
-			for (IMessageSubscriber subscriber : subscribers) {
-				subscriber.receive(channel, msg);
-			}
+			Map<String, String> msg = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());			
+			messagesReceived.offer(new RedisMessage(channel, msg));
 		}
 
 		@Override
