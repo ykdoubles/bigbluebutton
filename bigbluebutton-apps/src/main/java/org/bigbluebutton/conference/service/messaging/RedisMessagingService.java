@@ -127,7 +127,7 @@ public class RedisMessagingService implements IMessagePublisher {
 			Map<String, String> msg = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());
 			
 			for (IMessageSubscriber subscriber : subscribers) {
-				subscriber.receive(msg);
+				subscriber.receive(channel, msg);
 			}
 		}
 

@@ -17,10 +17,14 @@ import org.bigbluebutton.conference.messages.out.UsersQueryReply;
 import org.bigbluebutton.conference.service.messaging.IMessagePublisher;
 import org.bigbluebutton.conference.service.messaging.MessagingConstants;
 import org.bigbluebutton.conference.vo.UserVO;
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
 import com.google.gson.Gson;
 
 public class UsersMessagePublisher implements IMessageOutListener {
-
+	private static Logger log = Red5LoggerFactory.getLogger(UsersMessagePublisher.class, "bigbluebutton");
+	
 	private IMessagePublisher publisher;
 	
 	@Override
@@ -47,8 +51,10 @@ public class UsersMessagePublisher implements IMessageOutListener {
 		map.put("fullname", msg.user.name);
 		map.put("role", msg.user.role);
 		
-		Gson gson= new Gson();
-		publisher.send(MessagingConstants.PARTICIPANTS_CHANNEL, gson.toJson(map));
+		Gson gson = new Gson();
+		if (! publisher.send(MessagingConstants.PARTICIPANTS_CHANNEL, gson.toJson(map))) {
+			log.error("Failed to send to [{}] message [{}]", MessagingConstants.PARTICIPANTS_CHANNEL, gson.toJson(map));
+		}
 	}
 	
 	private void handleUserLeft(UserLeft msg) {
