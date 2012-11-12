@@ -2,8 +2,10 @@ package org.bigbluebutton.conference.service.messaging;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 import com.google.gson.Gson;
@@ -16,43 +18,71 @@ public class RedisMessagingService implements IMessagePublisher {
 	private static Logger log = Red5LoggerFactory.getLogger(RedisMessagingService.class, "bigbluebutton");
 	
 	private JedisPool redisPool;
-	private final Executor exec = Executors.newSingleThreadExecutor();
-	private Runnable pubsubListener;
+	private final Executor receiveExec = Executors.newSingleThreadExecutor();
+	private final Executor sendExec = Executors.newSingleThreadExecutor();
+	private static final BlockingQueue<RedisMessage> messages = new LinkedBlockingQueue<RedisMessage>();
 	
+	private Runnable messageReceiver, messagePublisher;
+	private volatile boolean sendMessage = false;
 	private Set<IMessageSubscriber> subscribers;
 
 	public void start() {
 		log.debug("Starting redis pubsub...");		
-		final Jedis jedis = redisPool.getResource();
-		try {
-			pubsubListener = new Runnable() {
-			    public void run() {
-			    	jedis.psubscribe(new PubSubListener(), MessagingConstants.BIGBLUEBUTTON_PATTERN);       			
-			    }
-			};
-			exec.execute(pubsubListener);
-		} catch (Exception e) {
-			log.error("Error subscribing to channels: " + e.getMessage());
-		}
+		startMessageReceiver();
+		startMessagePublisher();
 	}
 
 	public void stop() {
 		try {
+			sendMessage = false;
 			redisPool.destroy();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void send(String channel, String message) {
+	private void startMessagePublisher() {
+		sendMessage = true;
+		messagePublisher = new Runnable() {
+			public void run() {
+				while (sendMessage) {
+					try {
+						RedisMessage rm = messages.take();
+						publishMessage(rm);
+					} catch (InterruptedException e) {
+						log.error("Interrupted Exception while trying to publish message.");
+					}
+				}
+			}
+		};
+		sendExec.execute(messagePublisher);	
+	}
+	
+	private void startMessageReceiver() {
+		final Jedis jedis = redisPool.getResource();
+
+		messageReceiver = new Runnable() {
+		    public void run() {
+		    	jedis.psubscribe(new PubSubListener(), MessagingConstants.BIGBLUEBUTTON_PATTERN);       			
+		    }
+		};
+		receiveExec.execute(messageReceiver);	
+	}
+	
+	public boolean send(String channel, String message) {
+		RedisMessage redisMessage = new RedisMessage(channel, message);
+		return messages.offer(redisMessage);
+	}
+	
+	private void publishMessage(RedisMessage message) {
 		Jedis jedis = redisPool.getResource();
 		try {
-			jedis.publish(channel, message);
+			jedis.publish(message.channel, message.message);
 		} catch(Exception e){
 			log.warn("Cannot publish the message to redis", e);
-		}finally{
+		} finally{
 			redisPool.returnResource(jedis);
-		}
+		}		
 	}
 
 	public void setMessageSubscribers(Set<IMessageSubscriber> subscribers) {
@@ -60,9 +90,27 @@ public class RedisMessagingService implements IMessagePublisher {
 	}
 	
 	public void setRedisPool(JedisPool redisPool){
-		this.redisPool=redisPool;
+		this.redisPool = redisPool;
 	}
 
+	/**
+	 * Redis Message
+	 *
+	 */
+	private class RedisMessage {
+		public final String channel;
+		public final String message;
+		
+		public RedisMessage(String channel, String message) {
+			this.channel = channel;
+			this.message = message;
+		}
+	}
+	
+	/**
+	 * Listener for messages from Redis channels.
+	 *
+	 */
 	private class PubSubListener extends JedisPubSub {		
 		public PubSubListener() {
 			super();			
@@ -75,9 +123,8 @@ public class RedisMessagingService implements IMessagePublisher {
 
 		@Override
 		public void onPMessage(String pattern, String channel, String message) {
-			log.debug("Message Received in channel: " + channel);
 			Gson gson = new Gson();
-			Map<String,String> msg = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());
+			Map<String, String> msg = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());
 			
 			for (IMessageSubscriber subscriber : subscribers) {
 				subscriber.receive(msg);
