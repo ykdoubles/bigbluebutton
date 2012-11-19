@@ -33,7 +33,7 @@ public class UserEventRecorder implements IMeetingListener {
 		ev.setUserId(p.intUserID);
 		ev.setName(p.name);
 		ev.setMeetingId(session);
-		ev.setStatus(p.getStatus().toString());
+		//ev.setStatus(p.getStatus().toString());
 		ev.setRole(p.getRole());
 
 		recorder.record(session, ev);

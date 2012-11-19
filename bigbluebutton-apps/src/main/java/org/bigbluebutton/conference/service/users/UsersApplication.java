@@ -29,7 +29,7 @@ import org.bigbluebutton.conference.messages.in.users.UserAssignPresenter;
 import org.bigbluebutton.conference.messages.in.users.UserJoin;
 import org.bigbluebutton.conference.messages.in.users.UserKick;
 import org.bigbluebutton.conference.messages.in.users.UserLeave;
-import org.bigbluebutton.conference.messages.in.users.UserStatusChange;
+//import org.bigbluebutton.conference.messages.in.users.UserStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UsersQuery;
 import org.bigbluebutton.conference.vo.StatusVO;
 import org.bigbluebutton.conference.vo.UserVO;
@@ -49,7 +49,7 @@ public class UsersApplication {
 	}
 			
 	public void setParticipantStatus(String meetingID, String userid, String status, Object value) {
-		messageInGW.accept(new UserStatusChange(meetingID, userid, status, value));
+		//messageInGW.accept(new UserStatusChange(meetingID, userid, status, value));
 	}
 	
 	public void kickUser(String meetingID, String userID) {
