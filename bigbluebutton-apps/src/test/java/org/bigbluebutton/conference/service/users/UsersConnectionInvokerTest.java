@@ -3,17 +3,15 @@ package org.bigbluebutton.conference.service.users;
 import static org.easymock.EasyMock.*;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.bigbluebutton.conference.ClientMessage;
 import org.bigbluebutton.conference.IConnectionInvokerService;
 import org.bigbluebutton.conference.Role;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
+import org.bigbluebutton.conference.messages.out.users.UserKicked;
+import org.bigbluebutton.conference.messages.out.users.UserLeft;
 import org.bigbluebutton.conference.vo.UserVO;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -21,11 +19,15 @@ import org.testng.annotations.Test;
 public class UsersConnectionInvokerTest {
 	//private IMessageOut messageOut;
 	UsersConnectionInvoker usersConnectionInvoker;
-	UserJoined userJoinedMsg;
+	IConnectionInvokerService connInvokerService;
+	String meetingID = "1234567890";
+	
 	
 	@BeforeTest
 	public void init(){
 		usersConnectionInvoker = new UsersConnectionInvoker();
+		connInvokerService = createMock(IConnectionInvokerService.class);
+		usersConnectionInvoker.setConnInvokerService(connInvokerService);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -38,19 +40,13 @@ public class UsersConnectionInvokerTest {
 		throw new RuntimeException("Test not implemented");
 	}
 	  
-	@BeforeMethod
-	public void setupJoinedTestEnvironment(){
-		String meetingID = "1234567890";
-		UserVO user = new UserVO("1111", "ext1111", Role.VIEWER, "John Doe");
-		userJoinedMsg = new UserJoined(meetingID, user);
-	}
-	  
 	@Test
 	public void accept_UserJoined() {
-		IConnectionInvokerService connInvokerService = createMock(IConnectionInvokerService.class);
-		usersConnectionInvoker.setConnInvokerService(connInvokerService);
+		UserVO user = new UserVO("1111", "ext1111", Role.VIEWER, "John Doe");
+		UserJoined userJoinedMsg = new UserJoined(meetingID, user);
+		reset(connInvokerService);
 		
-		Map<String, Object> message = new HashMap<String, Object>();	
+		Map<String, Object> message = new HashMap<String, Object>();
 		message.put("meetingID", userJoinedMsg.meetingID);
 		UserVO.toMap(userJoinedMsg.user, message);
 		
@@ -64,15 +60,44 @@ public class UsersConnectionInvokerTest {
 		
 	}
 	
-	  @Test(enabled=false)
-	  public void handleUserKicked() {
-	    throw new RuntimeException("Test not implemented");
-	  }
+	@Test
+	public void handleUserLeft() {
+		reset(connInvokerService);
+		
+		UserLeft userLeftMsg = new UserLeft(meetingID,"1111");
+		
+		Map<String, Object> message = new HashMap<String, Object>();	
+		message.put("meetingID", userLeftMsg.meetingID);
+		message.put("userID", userLeftMsg.userID);
+		
+		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, userLeftMsg.meetingID, "UserLeftCommand", message);
+		connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(m));
+		
+		replay(connInvokerService);
+		
+		usersConnectionInvoker.accept(userLeftMsg);
+		verify(connInvokerService);
+		
+	}
 	
-	  @Test(enabled=false)
-	  public void handleUserLeft() {
-	    throw new RuntimeException("Test not implemented");
-	  }
+	@Test
+	public void handleUserKicked() {
+		reset(connInvokerService);
+		UserKicked userKickedMsg = new UserKicked(meetingID, "1111");
+		
+		Map<String, Object> message = new HashMap<String, Object>();	
+		message.put("meetingID", userKickedMsg.meetingID);
+		message.put("userID", userKickedMsg.userID);
+		
+		ClientMessage cm = new ClientMessage(ClientMessage.DIRECT, userKickedMsg.userID, "UserKickCommand", message);
+		
+		connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(cm));
+		
+		replay(connInvokerService);
+		
+		usersConnectionInvoker.accept(userKickedMsg);
+		verify(connInvokerService);
+	}
 	
 	  @Test(enabled=false)
 	  public void handleUserPresenterChanged() {
