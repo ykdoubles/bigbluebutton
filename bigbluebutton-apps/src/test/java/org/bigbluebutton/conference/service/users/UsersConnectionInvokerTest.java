@@ -1,6 +1,6 @@
 package org.bigbluebutton.conference.service.users;
 
-import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,17 +14,23 @@ import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 
 public class UsersConnectionInvokerTest {
 	//private IMessageOut messageOut;
-	IConnectionInvokerService connInvokerService;
-	UserJoined msg;
+	UsersConnectionInvoker usersConnectionInvoker;
+	UserJoined userJoinedMsg;
+	
+	@BeforeTest
+	public void init(){
+		usersConnectionInvoker = new UsersConnectionInvoker();
+	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void accept_IllegalArgumentException() {
-		new UsersConnectionInvoker().accept(null);
+		usersConnectionInvoker.accept(null);
 	}
 	
 	@Test(enabled=false)
@@ -33,37 +39,29 @@ public class UsersConnectionInvokerTest {
 	}
 	  
 	@BeforeMethod
-	public void setupMocks(){
-		connInvokerService = createMock(IConnectionInvokerService.class);
+	public void setupJoinedTestEnvironment(){
+		String meetingID = "1234567890";
 		UserVO user = new UserVO("1111", "ext1111", Role.VIEWER, "John Doe");
-		
-		msg = new UserJoined("1234567890", user);
+		userJoinedMsg = new UserJoined(meetingID, user);
 	}
 	  
 	@Test
-	public void shouldBeValidUserJoined() {
+	public void accept_UserJoined() {
+		IConnectionInvokerService connInvokerService = createMock(IConnectionInvokerService.class);
+		usersConnectionInvoker.setConnInvokerService(connInvokerService);
+		
 		Map<String, Object> message = new HashMap<String, Object>();	
-		message.put("meetingID", msg.meetingID);
-		UserVO.toMap(msg.user, message);
+		message.put("meetingID", userJoinedMsg.meetingID);
+		UserVO.toMap(userJoinedMsg.user, message);
 		
-		Set<String> actualKeys = message.keySet();
-		Set<String> expectedKeys = new HashSet<String>();
-		expectedKeys.add("meetingID");
-		expectedKeys.add("intUserID");
-		expectedKeys.add("extUserID");
-		expectedKeys.add("name");
-		expectedKeys.add("role");
-		expectedKeys.add("presenter");
-		expectedKeys.add("hasHandRaised");
-		expectedKeys.add("hasVideo");
-		expectedKeys.add("hasAudio");
-		expectedKeys.add("audioStreamName");
-		expectedKeys.add("videoStreamName");
+		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, userJoinedMsg.meetingID, "UserJoinedCommand", message);
+		connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(m));
 		
-		Assert.assertEquals(actualKeys,expectedKeys);
+		replay(connInvokerService);
 		
-		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, msg.meetingID, "UserJoinedCommand", message);
-		connInvokerService.sendMessage(m);
+		usersConnectionInvoker.accept(userJoinedMsg);
+		verify(connInvokerService);
+		
 	}
 	
 	  @Test(enabled=false)

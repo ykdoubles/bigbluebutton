@@ -26,10 +26,12 @@ public class UsersConnectionInvoker implements IMessageOutListener {
 	
 	@Override
 	public void accept(IMessageOut message) {
+		
 		if(message == null){
 			log.error("IMessageOut is null");
 			throw new IllegalArgumentException();
 		}
+		
 		if (message instanceof MeetingStarted) {
 			
 		} else if (message instanceof MeetingEnded) {
