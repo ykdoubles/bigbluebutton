@@ -54,6 +54,8 @@ public class UsersMessagePublisher implements IMessageOutListener {
 	}
 		
 	public void setMessagePublisher(IMessagePublisher pub) {
+		if( pub == null )
+			throw new IllegalArgumentException();
 		publisher = pub;
 	}
 }

@@ -1,7 +1,7 @@
-usePlugin 'java'
-usePlugin 'scala'
-usePlugin 'war'
-usePlugin 'eclipse'
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'war'
+apply plugin: 'eclipse'
 
 version = '0.81'
 jar.enabled = true
@@ -10,10 +10,10 @@ def appName = 'bigbluebutton'
 
 archivesBaseName = appName 
 
-task resolveDeps(dependsOn: configurations.default.buildArtifacts, type: Copy) {
+task resolveDeps(type: Copy) {
     into('lib')
     from configurations.default
-    from configurations.default.allArtifacts*.file
+    from configurations.default.allArtifacts.files
 }
 
 repositories {
@@ -117,7 +117,8 @@ dependencies {
 }
 
 test {
-	useTestNG() 
+	useTestNG()
+	enableTestReport() 
 }
 
 war.doLast {

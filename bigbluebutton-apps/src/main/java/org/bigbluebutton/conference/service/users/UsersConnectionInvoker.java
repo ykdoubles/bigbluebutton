@@ -28,7 +28,7 @@ public class UsersConnectionInvoker implements IMessageOutListener {
 	public void accept(IMessageOut message) {
 		
 		if(message == null){
-			log.error("IMessageOut is null");
+			log.debug("IMessageOut is null");
 			throw new IllegalArgumentException();
 		}
 		
@@ -122,6 +122,8 @@ public class UsersConnectionInvoker implements IMessageOutListener {
 	}
 	
 	public void setConnInvokerService(IConnectionInvokerService connInvokerService) {
+		if(connInvokerService == null)
+			throw new IllegalArgumentException();
 		this.connInvokerService = connInvokerService;
 	}
 }
