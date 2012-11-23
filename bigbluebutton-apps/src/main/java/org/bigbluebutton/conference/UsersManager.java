@@ -24,10 +24,10 @@ public class UsersManager {
      * 
      * @return The new user.
      */
-	public UserVO addUser(UserVO newUser) {
+	public void addUser(UserVO newUser) {
 		User us = new User(newUser.intUserID, newUser.name, newUser.role, newUser.extUserID);			
 		users.put(us.intUserID, us);		
-		return toUserVO(us);
+		//return toUserVO(us);
 	}
 
 	/**

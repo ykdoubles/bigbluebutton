@@ -58,6 +58,9 @@ public class Meeting {
 	private boolean hasEnded = false;
 	
 	public Meeting(String meetingID, String meetingName, IMessageOutGateway outGW) {
+		if(outGW == null)
+			throw new IllegalArgumentException();
+		
 		this.meetingID = meetingID;
 		this.meetingName = meetingName;
 		msgOutGW = outGW;		
@@ -156,13 +159,15 @@ public class Meeting {
 			return;
 		}
 		
-		UserVO uvo = usersMgr.addUser(msg.user);	
+		//TODO: This method has been changed to just use the userVO sent from the UserJoin Msg
+		//UserVO uvo = usersMgr.addUser(msg.user);
+		usersMgr.addUser(msg.user);
 		
 		if (log.isDebugEnabled()) {
-			log.debug("User [{}, {}] has joined [{}]", new Object [] {uvo.intUserID, uvo.name, meetingName});
+			log.debug("User [{}, {}] has joined [{}]", new Object [] {msg.user.intUserID, msg.user.name, meetingName});
 		}
 		
-		msgOutGW.accept(new UserJoined(meetingID, uvo));		
+		msgOutGW.accept(new UserJoined(meetingID, msg.user));		
 		makeSomebodyPresenter();
 	}
 	

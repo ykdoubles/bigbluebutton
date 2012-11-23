@@ -173,6 +173,7 @@ public class UsersConnectionInvokerTest {
 		replay(connInvokerService);
 		
 		usersConnectionInvoker.accept(usersQueryMsg);
+		verify(connInvokerService);
 	}
 	
 	@Test(expectedExceptions = IllegalArgumentException.class)
