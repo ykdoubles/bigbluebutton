@@ -13,7 +13,6 @@ import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
-import org.bigbluebutton.conference.service.users.MessageOutMatcher;
 import org.bigbluebutton.conference.vo.NewPresenterVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.red5.compatibility.flex.messaging.io.ArrayCollection;
@@ -45,8 +44,8 @@ public class MeetingTest {
 	public void ProcessMessage_WhenUsersQuery_ShouldMessageOutGatewayAccept(){
 		
 		//Insert a new user, so we can test with 2 users...
-		UserJoin newUser = new UserJoin(meetingID, test_viewer);
-		meeting.processMessage(newUser);
+		//UserJoin newUser = new UserJoin(meetingID, test_viewer);
+		//meeting.processMessage(newUser);
 		
 		reset(msgOutGW);
 		UsersQuery msg = new UsersQuery(this.meetingID, this.test_moderator.intUserID);
@@ -63,7 +62,7 @@ public class MeetingTest {
 		verify(msgOutGW);
 	}*/
 	
-	@Test//(groups={"user.moderator.join"},dependsOnGroups={"meeting.start"})
+	@Test(groups={"user.moderator.join"},dependsOnGroups={"meeting.start"})
 	public void ProcessMessage_WhenModeratorJoin_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
@@ -95,7 +94,7 @@ public class MeetingTest {
 		verify(msgOutGW);
 	}*/
 	
-	@Test//(groups = {"meeting.start"})
+	@Test(groups = {"meeting.start"})
 	public void ProcessMessage_WhenMeetingStart_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		MeetingStart msg = new MeetingStart(this.meetingID);

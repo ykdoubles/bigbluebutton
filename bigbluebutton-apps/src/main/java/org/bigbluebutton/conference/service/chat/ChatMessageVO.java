@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChatMessageVO {
+	
+	public static final String PUBLIC_TYPE = "PUBLIC";
+	public static final String PRIVATE_TYPE = "PRIVATE";
+	
+	
     // The type of chat (PUBLIC or PRIVATE)
     public String chatType;
     

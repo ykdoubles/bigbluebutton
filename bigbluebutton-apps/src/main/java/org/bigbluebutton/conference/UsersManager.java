@@ -22,12 +22,15 @@ public class UsersManager {
      * @param newUser
      * 			The user that has joined.
      * 
-     * @return The new user.
+     * @return A boolean indicating if adding user was successful.
      */
-	public void addUser(UserVO newUser) {
-		User us = new User(newUser.intUserID, newUser.name, newUser.role, newUser.extUserID);			
-		users.put(us.intUserID, us);		
-		//return toUserVO(us);
+	public boolean addUser(UserVO newUser) {
+		if(!users.containsKey(newUser.intUserID)){
+			User us = new User(newUser.intUserID, newUser.name, newUser.role, newUser.extUserID);			
+			users.put(us.intUserID, us);
+			return true;
+		}
+		return false;
 	}
 
 	/**

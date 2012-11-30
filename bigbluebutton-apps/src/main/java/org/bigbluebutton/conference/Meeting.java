@@ -161,7 +161,9 @@ public class Meeting {
 		
 		//TODO: This method has been changed to just use the userVO sent from the UserJoin Msg
 		//UserVO uvo = usersMgr.addUser(msg.user);
-		usersMgr.addUser(msg.user);
+		if(!usersMgr.addUser(msg.user)){
+			log.debug("User already exists");
+		}
 		
 		if (log.isDebugEnabled()) {
 			log.debug("User [{}, {}] has joined [{}]", new Object [] {msg.user.intUserID, msg.user.name, meetingName});
