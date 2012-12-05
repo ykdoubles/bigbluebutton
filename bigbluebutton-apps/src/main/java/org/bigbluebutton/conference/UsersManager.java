@@ -94,6 +94,7 @@ public class UsersManager {
 			if (part.isModerator()) {
 				curPresenterUserID = part.intUserID;
 				presenterAssignedBy = curPresenterUserID;
+				part.becomePresenter();
 				return new NewPresenterVO(curPresenterUserID, part.name, false, presenterAssignedBy);
 			}
 		}
@@ -179,7 +180,7 @@ public class UsersManager {
 	}
 
 	private UserVO toUserVO(User u) {
-		UserVO uvo = new UserVO(u.intUserID, u.name, u.extUserID, u.role);
+		UserVO uvo = new UserVO(u.intUserID, u.extUserID, u.role , u.name);
 		uvo.presenter = u.isPresenter();
 		uvo.hasAudio = u.hasAudio();
 		uvo.hasVideo = u.hasVideo();

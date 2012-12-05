@@ -38,6 +38,7 @@ import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.messages.out.users.UserKicked;
 import org.bigbluebutton.conference.messages.out.users.UserLeft;
 import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
+import org.bigbluebutton.conference.messages.out.users.UserVideoStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
 import org.bigbluebutton.conference.vo.NewPresenterVO;
@@ -114,7 +115,7 @@ public class Meeting {
 		}	
 		
 		if (usersMgr.hasVideo(msg.userID, msg.hasVideo, msg.streamName)) {
-			msgOutGW.accept(new UserVoiceStatusChanged(meetingID, msg.userID, msg.hasVideo, msg.streamName));
+			msgOutGW.accept(new UserVideoStatusChanged(meetingID, msg.userID, msg.hasVideo, msg.streamName));
 		}	
 	}
 	
