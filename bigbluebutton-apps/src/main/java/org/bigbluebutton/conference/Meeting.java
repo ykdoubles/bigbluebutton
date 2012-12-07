@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.bigbluebutton.conference.exceptions.PresenterChangeException;
 import org.bigbluebutton.conference.exceptions.SamePresenterChangeException;
 import org.bigbluebutton.conference.messages.in.IMessageIn;
+import org.bigbluebutton.conference.messages.in.chat.PublicChatHistoryQuery;
+import org.bigbluebutton.conference.messages.in.chat.PublicChatMessageSend;
 import org.bigbluebutton.conference.messages.in.meetings.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.meetings.MeetingStart;
 import org.bigbluebutton.conference.messages.in.users.UserAssignPresenter;
@@ -32,6 +34,8 @@ import org.bigbluebutton.conference.messages.in.users.UserLeave;
 import org.bigbluebutton.conference.messages.in.users.UserVideoStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UserVoiceStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UsersQuery;
+import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
+import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.users.UserHandStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
@@ -41,6 +45,7 @@ import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVideoStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
+import org.bigbluebutton.conference.service.chat.ChatManager;
 import org.bigbluebutton.conference.vo.NewPresenterVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.red5.logging.Red5LoggerFactory;
@@ -54,6 +59,7 @@ public class Meeting {
 	public final String meetingName;
 	
 	private final UsersManager usersMgr = new UsersManager();
+	private final ChatManager chatMgr = new ChatManager();
 	private final IMessageOutGateway msgOutGW;
 	
 	private boolean hasEnded = false;
@@ -87,8 +93,29 @@ public class Meeting {
 		} else if (msg instanceof UserVideoStatusChange) {
 			handleUserVideoStatusChange((UserVideoStatusChange) msg);
 		}
+		//Chat Handlers
+		else if(msg instanceof PublicChatMessageSend){
+			handlePublicChatMessageSend((PublicChatMessageSend) msg);
+		} else if (msg instanceof PublicChatHistoryQuery){
+			handlePublicChatHistoryQuery((PublicChatHistoryQuery) msg);
+		}
 	}
 	
+	private void handlePublicChatHistoryQuery(PublicChatHistoryQuery msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling public chat query for meeting [{}] from [{}]",msg.meetingID ,msg.userID);
+		}
+		msgOutGW.accept(new PublicChatHistoryQueryReply(msg.meetingID, msg.userID, chatMgr.getChatMessages()));
+	}
+
+	private void handlePublicChatMessageSend(PublicChatMessageSend msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling public chat message for meeting [{}] from [{}]",msg.meetingID,msg.chatVO.fromUsername);
+		}
+		chatMgr.addChatMessage(msg.chatVO);
+		msgOutGW.accept(new PublicChatMessageSent(msg.meetingID, msg.chatVO));
+	}
+
 	private void handleUserHandStatusChange(UserHandStatusChange msg) {
 		if (log.isDebugEnabled()) {
 			log.debug("Handling users hand for meeting [{}] [{}]", meetingID, meetingName);

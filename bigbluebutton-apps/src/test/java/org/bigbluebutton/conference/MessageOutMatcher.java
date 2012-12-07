@@ -2,9 +2,10 @@ package org.bigbluebutton.conference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import org.bigbluebutton.conference.messages.out.IMessageOut;
+import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
+import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.users.UserHandStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
@@ -14,10 +15,10 @@ import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVideoStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
+import org.bigbluebutton.conference.service.chat.ChatMessageVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.red5.compatibility.flex.messaging.io.ArrayCollection;
 import org.testng.Assert;
 
 public class MessageOutMatcher implements IArgumentMatcher{
@@ -149,6 +150,47 @@ public class MessageOutMatcher implements IArgumentMatcher{
 			Assert.assertEquals(uk_actual.meetingID, uk_expected.meetingID);
 			Assert.assertEquals(uk_actual.userID, uk_expected.userID);
 			return true;
+		}else if(arg0 instanceof PublicChatMessageSent){
+			PublicChatMessageSent pcms_actual = (PublicChatMessageSent) actual;
+			PublicChatMessageSent pcms_expected = (PublicChatMessageSent) arg0;
+			
+			Assert.assertEquals(pcms_actual.meetingID, pcms_expected.meetingID);
+			Assert.assertEquals(pcms_actual.chatVO, pcms_expected.chatVO);
+			return true;
+		}else if(arg0 instanceof PublicChatHistoryQueryReply){
+			PublicChatHistoryQueryReply pchqr_actual = (PublicChatHistoryQueryReply) actual;
+			PublicChatHistoryQueryReply pchqr_expected = (PublicChatHistoryQueryReply) arg0;
+			
+			Assert.assertEquals(pchqr_actual.meetingID, pchqr_expected.meetingID);
+			Assert.assertEquals(pchqr_actual.userID, pchqr_expected.userID);
+			
+			//We will need to compare that both collections has the same size of users
+			Assert.assertEquals(pchqr_actual.all_messages.size(), pchqr_expected.all_messages.size());
+			
+			//Now, we need to check that it has the same users
+			for(ChatMessageVO chatvo_actual : pchqr_actual.all_messages){
+				boolean valid = false;
+				
+				for(ChatMessageVO chatvo_expected : pchqr_expected.all_messages){
+					if(chatvo_actual.fromTime == chatvo_expected.fromTime){
+						valid = true;
+						Assert.assertEquals(chatvo_actual.chatType, chatvo_expected.chatType);
+						Assert.assertEquals(chatvo_actual.fromUserID, chatvo_expected.fromUserID);
+						Assert.assertEquals(chatvo_actual.fromUsername, chatvo_expected.fromUsername);
+						Assert.assertEquals(chatvo_actual.fromColor, chatvo_expected.fromColor);
+						Assert.assertEquals(chatvo_actual.fromLang, chatvo_expected.fromLang);
+						Assert.assertEquals(chatvo_actual.fromTimezoneOffset, chatvo_expected.fromTimezoneOffset);
+						Assert.assertEquals(chatvo_actual.message, chatvo_expected.message);
+						
+					}
+				}
+				
+				if(!valid){
+					return false;
+				}
+			}
+			return true;
+			
 		}
 		
 		return false;
