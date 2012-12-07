@@ -167,18 +167,13 @@
 				windowEvent.window = new NetworkStatsWindow();
 				d.dispatchEvent(windowEvent);
 			}
-			
-      private function showAlert():void
-      {
-          Notification.show( "Notify this", "Hello world", 2500, "bottomright", null, true);
-      }
-      
+			     
 		]]>
 	</mx:Script>	
 	<mx:HBox id="addedBtns"/>
 	<mx:Spacer width="100%"/>
 	<views:LanguageSelector id="langSelector" visible="false" />
-  <mx:Button label="Notify!" click="showAlert()" height="22" toolTip="Click to simulate disconnection" />
+
 <!--
   <mx:Button label="DISCONNECT!" click="BBB.initConnectionManager().forceClose()" height="22" toolTip="Click to simulate disconnection" />
 -->

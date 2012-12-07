@@ -19,7 +19,7 @@
 	colorsConfiguration: 2,2;
 	positioning: percentage;
 	gradientType: linear,radial;
-	fillColors: #6267DB, #FFFFFF,#95A2F1, #FFFFFF;
+	fillColors: #B7BABC, #FFFFFF,#B7BABC, #FFFFFF;
 	fillAlphas:  1,1,1,0;
 	gradientRatio: 0,255,0,119;
 	angle: 90,0;
@@ -28,9 +28,9 @@
 	spreadMethod: pad,pad;
 	interpolationMethod: rgb,linearRGB;
 	focalPointRatio: 0,0;
-	cornerRadius: 9;
+	cornerRadius: 2;
 	borderThickness: 1;
-	borderColors: #2C2C7B, #FFFFFF;
+	borderColors: #B7BABC, #FFFFFF;
 	borderAlphas: 1,1;
 	bordergradientRatio: 0,255;
 	borderAngle: -90;
