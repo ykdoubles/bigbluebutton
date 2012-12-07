@@ -38,9 +38,9 @@ public class MeetingTest {
 	
 	private Meeting meeting;
 	private IMessageOutGateway msgOutGW;
-	private UserVO test_moderator;
-	private UserVO test_viewer;
-	private ChatMessageVO test_chat_msg;
+	private UserVO testModerator;
+	private UserVO testViewer;
+	private ChatMessageVO testChatMsg;
 	final String meetingID = "0123456789";
 	
 	@BeforeTest
@@ -49,18 +49,18 @@ public class MeetingTest {
 		
 		meeting = new Meeting(this.meetingID, "Test Meeting", msgOutGW);
 		
-		test_moderator = new UserVO("1111", "ext1111", Role.MODERATOR, "John Doe");
-		test_viewer = new UserVO("1112", "ext1112", Role.VIEWER, "Janet Doe");
+		testModerator = new UserVO("1111", "ext1111", Role.MODERATOR, "John Doe");
+		testViewer = new UserVO("1112", "ext1112", Role.VIEWER, "Janet Doe");
 		
-		test_chat_msg =  new ChatMessageVO();
-		test_chat_msg.chatType = ChatMessageVO.PUBLIC_TYPE; 
-		test_chat_msg.fromUserID = test_moderator.intUserID;
-		test_chat_msg.fromUsername = test_viewer.name;
-		test_chat_msg.fromColor = "0";
-		test_chat_msg.fromTime = Double.valueOf(System.currentTimeMillis());   
-		test_chat_msg.fromTimezoneOffset = Long.valueOf(0);
-		test_chat_msg.fromLang = "en"; 	 
-		test_chat_msg.message = "This is a test message";
+		testChatMsg =  new ChatMessageVO();
+		testChatMsg.chatType = ChatMessageVO.PUBLIC_TYPE; 
+		testChatMsg.fromUserID = testModerator.intUserID;
+		testChatMsg.fromUsername = testModerator.name;
+		testChatMsg.fromColor = "0";
+		testChatMsg.fromTime = Double.valueOf(System.currentTimeMillis());   
+		testChatMsg.fromTimezoneOffset = Long.valueOf(0);
+		testChatMsg.fromLang = "en"; 	 
+		testChatMsg.message = "This is a test message";
 	}
 	
 	@Test(expectedExceptions=IllegalArgumentException.class)
@@ -86,12 +86,12 @@ public class MeetingTest {
 		reset(msgOutGW);
 		
 		//First, it should join the moderator to the meeting...
-		UserJoin msg = new UserJoin(meetingID, test_moderator);
+		UserJoin msg = new UserJoin(meetingID, testModerator);
 		
 		//Then, like it's moderator, this is the new presenter...
-		NewPresenterVO newPresenter = new NewPresenterVO(this.test_moderator.intUserID, this.test_moderator.name, false, this.test_moderator.intUserID);
+		NewPresenterVO newPresenter = new NewPresenterVO(this.testModerator.intUserID, this.testModerator.name, false, this.testModerator.intUserID);
 		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserJoined(meetingID, test_moderator),new UserPresenterChanged(meetingID,newPresenter)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserJoined(meetingID, testModerator),new UserPresenterChanged(meetingID,newPresenter)));
 		expectLastCall().times(2);
 		
 		replay(msgOutGW);
@@ -104,9 +104,9 @@ public class MeetingTest {
 	public void ProcessMessage_WhenViewerJoin_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		UserJoin msg = new UserJoin(meetingID, test_viewer);
+		UserJoin msg = new UserJoin(meetingID, testViewer);
 		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserJoined(meetingID, test_viewer)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserJoined(meetingID, testViewer)));
 		
 		replay(msgOutGW);
 		
@@ -117,13 +117,13 @@ public class MeetingTest {
 	@Test(groups={"user.tests"},dependsOnGroups={"user.moderator.join","user.viewer.join"})
 	public void ProcessMessage_WhenUsersQuery_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
-		UsersQuery msg = new UsersQuery(this.meetingID, this.test_moderator.intUserID);
+		UsersQuery msg = new UsersQuery(this.meetingID, this.testModerator.intUserID);
 		
 		Collection<UserVO> pm = new ArrayList<UserVO>();
-		pm.add(test_moderator);
-		pm.add(test_viewer);
+		pm.add(testModerator);
+		pm.add(testViewer);
 		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UsersQueryReply(meetingID, this.test_moderator.intUserID, pm)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UsersQueryReply(meetingID, this.testModerator.intUserID, pm)));
 		
 		replay(msgOutGW);
 		
@@ -136,10 +136,10 @@ public class MeetingTest {
 		reset(msgOutGW);
 		
 		//Create a Message with the Assign Presenter procedure...
-		UserAssignPresenter msg = new UserAssignPresenter(meetingID, this.test_viewer.intUserID, this.test_moderator.intUserID);
+		UserAssignPresenter msg = new UserAssignPresenter(meetingID, this.testViewer.intUserID, this.testModerator.intUserID);
 		
 		//Create a NewPresenterVO which is the value sent by the messageOutGateway
-		NewPresenterVO npv = new NewPresenterVO(this.test_viewer.intUserID, this.test_viewer.name, true, this.test_moderator.intUserID);
+		NewPresenterVO npv = new NewPresenterVO(this.testViewer.intUserID, this.testViewer.name, true, this.testModerator.intUserID);
 		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserPresenterChanged(meetingID, npv)));
 		
 		replay(msgOutGW);
@@ -152,8 +152,8 @@ public class MeetingTest {
 	public void ProcessMessage_WhenUserRaiseHand_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		UserHandStatusChange msg = new UserHandStatusChange(meetingID, this.test_viewer.intUserID, true, "");
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserHandStatusChanged(meetingID,this.test_viewer.intUserID,true,"")));
+		UserHandStatusChange msg = new UserHandStatusChange(meetingID, this.testViewer.intUserID, true, "");
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserHandStatusChanged(meetingID,this.testViewer.intUserID,true,"")));
 		
 		replay(msgOutGW);
 		
@@ -165,8 +165,8 @@ public class MeetingTest {
 	public void ProcessMessage_WhenUserJoinsAudio_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		UserVoiceStatusChange msg = new UserVoiceStatusChange(this.meetingID,this.test_viewer.intUserID,true,"streamTest");
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserVoiceStatusChanged(meetingID,this.test_viewer.intUserID,true,"streamTest")));
+		UserVoiceStatusChange msg = new UserVoiceStatusChange(this.meetingID,this.testViewer.intUserID,true,"streamTest");
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserVoiceStatusChanged(meetingID,this.testViewer.intUserID,true,"streamTest")));
 		
 		replay(msgOutGW);
 		
@@ -178,8 +178,8 @@ public class MeetingTest {
 	public void ProcessMessage_WhenUserShareWebcam_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		UserVideoStatusChange msg = new UserVideoStatusChange(this.meetingID,this.test_viewer.intUserID,true,"streamTest");
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserVideoStatusChanged(meetingID,this.test_viewer.intUserID,true,"streamTest")));
+		UserVideoStatusChange msg = new UserVideoStatusChange(this.meetingID,this.testViewer.intUserID,true,"streamTest");
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserVideoStatusChanged(meetingID,this.testViewer.intUserID,true,"streamTest")));
 		
 		replay(msgOutGW);
 		
@@ -199,9 +199,9 @@ public class MeetingTest {
 		
 		
 		
-		PublicChatMessageSend msg = new PublicChatMessageSend(meetingID, test_chat_msg);
+		PublicChatMessageSend msg = new PublicChatMessageSend(meetingID, testChatMsg);
 		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PublicChatMessageSent(meetingID, test_chat_msg)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PublicChatMessageSent(meetingID, testChatMsg)));
 		
 		replay(msgOutGW);
 		
@@ -213,11 +213,11 @@ public class MeetingTest {
 	public void ProcessMessage_WhenPublicChatHistoryRequested_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		PublicChatHistoryQuery msg = new PublicChatHistoryQuery(meetingID,this.test_viewer.intUserID);
+		PublicChatHistoryQuery msg = new PublicChatHistoryQuery(meetingID,this.testViewer.intUserID);
 		Collection<ChatMessageVO> all_messages = new ArrayList<ChatMessageVO>();
-		all_messages.add(test_chat_msg);
+		all_messages.add(testChatMsg);
 		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PublicChatHistoryQueryReply(meetingID, this.test_viewer.intUserID,all_messages)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PublicChatHistoryQueryReply(meetingID, this.testViewer.intUserID,all_messages)));
 		
 		replay(msgOutGW);
 		
@@ -231,12 +231,12 @@ public class MeetingTest {
 	public void ProcessMessage_WhenUserLeave_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		UserLeave msg = new UserLeave(this.meetingID,this.test_viewer.intUserID);
+		UserLeave msg = new UserLeave(this.meetingID,this.testViewer.intUserID);
 		
 		//like test_viewer is the presenter, the new presenter is the moderator
-		NewPresenterVO newPresenter = new NewPresenterVO(this.test_moderator.intUserID, this.test_moderator.name, false, this.test_moderator.intUserID);
+		NewPresenterVO newPresenter = new NewPresenterVO(this.testModerator.intUserID, this.testModerator.name, false, this.testModerator.intUserID);
 		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserLeft(meetingID,this.test_viewer.intUserID),new UserPresenterChanged(meetingID,newPresenter)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserLeft(meetingID,this.testViewer.intUserID),new UserPresenterChanged(meetingID,newPresenter)));
 		expectLastCall().times(2);
 		
 		replay(msgOutGW);
@@ -251,7 +251,7 @@ public class MeetingTest {
 		MeetingForceEnd msg = new MeetingForceEnd(this.meetingID);
 		
 		//like we have only one user, it should kick just one user
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserKicked(meetingID,test_moderator.intUserID)));
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserKicked(meetingID,testModerator.intUserID)));
 		
 		replay(msgOutGW);
 		

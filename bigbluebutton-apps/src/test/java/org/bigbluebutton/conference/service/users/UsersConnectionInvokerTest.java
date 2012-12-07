@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.bigbluebutton.conference.ClientMessage;
+import org.bigbluebutton.conference.ClientMessageMatcher;
 import org.bigbluebutton.conference.IConnectionInvokerService;
 import org.bigbluebutton.conference.Role;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingEnded;

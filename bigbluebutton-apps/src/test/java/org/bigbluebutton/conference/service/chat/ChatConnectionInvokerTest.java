@@ -5,14 +5,18 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bigbluebutton.conference.ClientMessage;
+import org.bigbluebutton.conference.ClientMessageMatcher;
 import org.bigbluebutton.conference.IConnectionInvokerService;
 import org.bigbluebutton.conference.messages.in.chat.PublicChatMessageSend;
+import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
+import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingEnded;
-import org.bigbluebutton.conference.service.users.ClientMessageMatcher;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -21,12 +25,23 @@ public class ChatConnectionInvokerTest {
 	ChatConnectionInvoker chatConnectionInvoker;
 	IConnectionInvokerService connInvokerService;
 	String meetingID = "0123456789";
+	ChatMessageVO testChatMsg;
 	
 	@BeforeTest
 	public void init(){
 		chatConnectionInvoker = new ChatConnectionInvoker();
 		connInvokerService = createMock(IConnectionInvokerService.class);
 		chatConnectionInvoker.setConnInvokerService(connInvokerService);
+		
+		testChatMsg =  new ChatMessageVO();
+		testChatMsg.chatType = ChatMessageVO.PUBLIC_TYPE; 
+		testChatMsg.fromUserID = "1111";
+		testChatMsg.fromUsername = "John Doe";
+		testChatMsg.fromColor = "0";
+		testChatMsg.fromTime = Double.valueOf(System.currentTimeMillis());   
+		testChatMsg.fromTimezoneOffset = Long.valueOf(0);
+		testChatMsg.fromLang = "en"; 	 
+		testChatMsg.message = "This is a test message";
 	}
 	
 	@Test(expectedExceptions=IllegalArgumentException.class)
@@ -35,32 +50,42 @@ public class ChatConnectionInvokerTest {
 	}
 	
 	@Test
-	public void Accept_WhenNewPublicMessage_ShouldSendMessage() {
+	public void Accept_WhenPublicChatMessageSent_ShouldSendMessage() {
 		reset(connInvokerService);
-		/*ChatMessageVO cm = new ChatMessageVO();
-		cm.chatType = ChatMessageVO.PUBLIC_TYPE;
-		cm.fromUserID = "1111";
-		cm.fromUsername = "John Doe";
-		cm.fromLang = "en";
-		cm.fromColor = "0";
-		cm.fromTime = 12.0;
-		cm.fromTimezoneOffset = (long) 0;
-		cm.message = "Test Message";
-		*/
-		//PublicChatMessageSend pcms = new PublicChatMessageSend(meetingID, cm);
 		
-		/*MeetingEnded me = new MeetingEnded(meetingID);
-		
+		PublicChatMessageSent pcms = new PublicChatMessageSent(meetingID, testChatMsg);
 		Map<String,Object> msg = new HashMap<String,Object>();
-		msg.put("meetingID", me.meetingID);
+		msg.put("meetingID", pcms.meetingID);
+		msg.putAll(pcms.chatVO.toMap());
 		
-		ClientMessage cm = new ClientMessage(ClientMessage.BROADCAST, me.meetingID, "UserLogoutCommand", msg);
+		ClientMessage cm = new ClientMessage(ClientMessage.BROADCAST, pcms.meetingID, "PublicChatMessageSentCommand", msg);
 		connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(cm));
+		
 		
 		replay(connInvokerService);
 		
-		usersConnectionInvoker.accept(me);
-		verify(connInvokerService);*/
+		chatConnectionInvoker.accept(pcms);
+		verify(connInvokerService);	
+	}
+	
+	@Test(enabled = false)
+	public void Accept_WhenPublicChatHistoryQueryReply_ShouldSendMessage() {
+		reset(connInvokerService);
+		
+		Collection<ChatMessageVO> all_messages = new ArrayList<ChatMessageVO>();
+		all_messages.add(testChatMsg);
+		
+		PublicChatHistoryQueryReply pcms = new PublicChatHistoryQueryReply(this.meetingID, "1112" , all_messages);
+		
+		
+		//ClientMessage cm = new ClientMessage(ClientMessage.BROADCAST, pcms.meetingID, "PublicChatMessageSentCommand", msg);
+		//connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(cm));
+		
+		
+		replay(connInvokerService);
+		
+		chatConnectionInvoker.accept(pcms);
+		verify(connInvokerService);	
 	}
 
 }

@@ -1,4 +1,4 @@
-package org.bigbluebutton.conference.service.users;
+package org.bigbluebutton.conference;
 
 import org.bigbluebutton.conference.ClientMessage;
 import org.easymock.EasyMock;

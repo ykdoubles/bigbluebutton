@@ -47,7 +47,7 @@ public class MessageOutMatcher implements IArgumentMatcher{
 	}
 
 	@Override
-	public boolean matches(Object arg0) {
+	public boolean matches(Object expectedObj) {
 		if(actuals == null){
 			return false;
 		}
@@ -55,42 +55,45 @@ public class MessageOutMatcher implements IArgumentMatcher{
 		if(actuals.size() == 0)
 			return false;
 		
-		IMessageOut actual = actuals.remove(0);
+		IMessageOut actualObj = actuals.remove(0);
 		
-		if(arg0 instanceof MeetingStarted){
-			MeetingStarted ms_expected = (MeetingStarted) arg0;
-			Assert.assertEquals(((MeetingStarted)actual).meetingID, ms_expected.meetingID);
+		if(expectedObj instanceof MeetingStarted){
+			MeetingStarted actual = (MeetingStarted) actualObj;
+			MeetingStarted expected = (MeetingStarted) expectedObj;
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
 			return true;
-		}else if(arg0 instanceof UserJoined){
-			UserJoined us_expected = (UserJoined) arg0;
-			Assert.assertEquals(((UserJoined)actual).meetingID, us_expected.meetingID);
-			Assert.assertEquals(((UserJoined)actual).user, us_expected.user);
-			return true;
-		}else if(arg0 instanceof UserPresenterChanged){
-			UserPresenterChanged upc_actual = (UserPresenterChanged) actual;
-			UserPresenterChanged upc_expected = (UserPresenterChanged) arg0;
+		}else if(expectedObj instanceof UserJoined){
+			UserJoined actual = (UserJoined)actualObj;
+			UserJoined expected = (UserJoined) expectedObj;
 			
-			Assert.assertEquals(upc_actual.meetingID, upc_expected.meetingID);
-			Assert.assertEquals(upc_actual.pres.newPresenterUserID, upc_expected.pres.newPresenterUserID);
-			Assert.assertEquals(upc_actual.pres.newPresenterName, upc_expected.pres.newPresenterName);
-			Assert.assertEquals(upc_actual.pres.assignedByUser, upc_expected.pres.assignedByUser);
-			Assert.assertEquals(upc_actual.pres.assignedByUserID, upc_expected.pres.assignedByUserID);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.user, expected.user);
 			return true;
-		}else if(arg0 instanceof UsersQueryReply){
-			UsersQueryReply uqr_actual = (UsersQueryReply) actual;
-			UsersQueryReply uqr_expected = (UsersQueryReply) arg0;
+		}else if(expectedObj instanceof UserPresenterChanged){
+			UserPresenterChanged actual = (UserPresenterChanged) actualObj;
+			UserPresenterChanged expected = (UserPresenterChanged) expectedObj;
 			
-			Assert.assertEquals(uqr_actual.meetingID, uqr_expected.meetingID);
-			Assert.assertEquals(uqr_actual.userID, uqr_expected.userID);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.pres.newPresenterUserID, expected.pres.newPresenterUserID);
+			Assert.assertEquals(actual.pres.newPresenterName, expected.pres.newPresenterName);
+			Assert.assertEquals(actual.pres.assignedByUser, expected.pres.assignedByUser);
+			Assert.assertEquals(actual.pres.assignedByUserID, expected.pres.assignedByUserID);
+			return true;
+		}else if(expectedObj instanceof UsersQueryReply){
+			UsersQueryReply actual = (UsersQueryReply) actualObj;
+			UsersQueryReply expected = (UsersQueryReply) expectedObj;
+			
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
 			
 			//We will need to compare that both collections has the same size of users
-			Assert.assertEquals(uqr_actual.users.size(), uqr_expected.users.size());
+			Assert.assertEquals(actual.users.size(), expected.users.size());
 			
 			//Now, we need to check that it has the same users
-			for(UserVO uservo_actual : uqr_actual.users){
+			for(UserVO uservo_actual : actual.users){
 				boolean valid = false;
 				
-				for(UserVO uservo_expected : uqr_expected.users){
+				for(UserVO uservo_expected : expected.users){
 					if(uservo_actual.intUserID.equalsIgnoreCase(uservo_expected.intUserID)){
 						valid = true;
 						Assert.assertEquals(uservo_actual.extUserID, uservo_expected.extUserID);
@@ -105,82 +108,82 @@ public class MessageOutMatcher implements IArgumentMatcher{
 			}
 			
 			return true;
-		}else if(arg0 instanceof UserHandStatusChanged){
-			UserHandStatusChanged uhsc_actual = (UserHandStatusChanged) actual;
-			UserHandStatusChanged uhsc_expected = (UserHandStatusChanged) arg0;
+		}else if(expectedObj instanceof UserHandStatusChanged){
+			UserHandStatusChanged actual = (UserHandStatusChanged) actualObj;
+			UserHandStatusChanged expected = (UserHandStatusChanged) expectedObj;
 			
-			Assert.assertEquals(uhsc_actual.meetingID, uhsc_expected.meetingID);
-			Assert.assertEquals(uhsc_actual.userID, uhsc_expected.userID);
-			Assert.assertEquals(uhsc_actual.raised, uhsc_expected.raised);
-			Assert.assertEquals(uhsc_actual.setByUserID, uhsc_expected.setByUserID);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
+			Assert.assertEquals(actual.raised, expected.raised);
+			Assert.assertEquals(actual.setByUserID, expected.setByUserID);
 			return true;
 		}
-		else if(arg0 instanceof UserVoiceStatusChanged){
-			UserVoiceStatusChanged uvsc_actual = (UserVoiceStatusChanged) actual;
-			UserVoiceStatusChanged uvsc_expected = (UserVoiceStatusChanged) arg0;
+		else if(expectedObj instanceof UserVoiceStatusChanged){
+			UserVoiceStatusChanged actual = (UserVoiceStatusChanged) actualObj;
+			UserVoiceStatusChanged expected = (UserVoiceStatusChanged) expectedObj;
 			
-			Assert.assertEquals(uvsc_actual.meetingID, uvsc_expected.meetingID);
-			Assert.assertEquals(uvsc_actual.userID, uvsc_expected.userID);
-			Assert.assertEquals(uvsc_actual.hasVoice, uvsc_expected.hasVoice);
-			Assert.assertEquals(uvsc_actual.streamName, uvsc_expected.streamName);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
+			Assert.assertEquals(actual.hasVoice, expected.hasVoice);
+			Assert.assertEquals(actual.streamName, expected.streamName);
 			return true;
 		}
-		else if(arg0 instanceof UserVideoStatusChanged){
-			UserVideoStatusChanged uvsc_actual = (UserVideoStatusChanged) actual;
-			UserVideoStatusChanged uvsc_expected = (UserVideoStatusChanged) arg0;
+		else if(expectedObj instanceof UserVideoStatusChanged){
+			UserVideoStatusChanged actual = (UserVideoStatusChanged) actualObj;
+			UserVideoStatusChanged expected = (UserVideoStatusChanged) expectedObj;
 			
-			Assert.assertEquals(uvsc_actual.meetingID, uvsc_expected.meetingID);
-			Assert.assertEquals(uvsc_actual.userID, uvsc_expected.userID);
-			Assert.assertEquals(uvsc_actual.hasVideo, uvsc_expected.hasVideo);
-			Assert.assertEquals(uvsc_actual.streamName, uvsc_expected.streamName);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
+			Assert.assertEquals(actual.hasVideo, expected.hasVideo);
+			Assert.assertEquals(actual.streamName, expected.streamName);
 			return true;
 		}
-		else if(arg0 instanceof UserLeft){
-			UserLeft ul_actual = (UserLeft) actual;
-			UserLeft ul_expected = (UserLeft) arg0;
+		else if(expectedObj instanceof UserLeft){
+			UserLeft actual = (UserLeft) actualObj;
+			UserLeft expected = (UserLeft) expectedObj;
 			
-			Assert.assertEquals(ul_actual.meetingID, ul_expected.meetingID);
-			Assert.assertEquals(ul_actual.userID, ul_expected.userID);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
 			return true;
 		}
-		else if(arg0 instanceof UserKicked){
-			UserKicked uk_actual = (UserKicked) actual;
-			UserKicked uk_expected = (UserKicked) arg0;
+		else if(expectedObj instanceof UserKicked){
+			UserKicked actual = (UserKicked) actualObj;
+			UserKicked expected = (UserKicked) expectedObj;
 			
-			Assert.assertEquals(uk_actual.meetingID, uk_expected.meetingID);
-			Assert.assertEquals(uk_actual.userID, uk_expected.userID);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
 			return true;
-		}else if(arg0 instanceof PublicChatMessageSent){
-			PublicChatMessageSent pcms_actual = (PublicChatMessageSent) actual;
-			PublicChatMessageSent pcms_expected = (PublicChatMessageSent) arg0;
+		}else if(expectedObj instanceof PublicChatMessageSent){
+			PublicChatMessageSent actual = (PublicChatMessageSent) actualObj;
+			PublicChatMessageSent expected = (PublicChatMessageSent) expectedObj;
 			
-			Assert.assertEquals(pcms_actual.meetingID, pcms_expected.meetingID);
-			Assert.assertEquals(pcms_actual.chatVO, pcms_expected.chatVO);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.chatVO, expected.chatVO);
 			return true;
-		}else if(arg0 instanceof PublicChatHistoryQueryReply){
-			PublicChatHistoryQueryReply pchqr_actual = (PublicChatHistoryQueryReply) actual;
-			PublicChatHistoryQueryReply pchqr_expected = (PublicChatHistoryQueryReply) arg0;
+		}else if(expectedObj instanceof PublicChatHistoryQueryReply){
+			PublicChatHistoryQueryReply actual = (PublicChatHistoryQueryReply) actualObj;
+			PublicChatHistoryQueryReply expected = (PublicChatHistoryQueryReply) expectedObj;
 			
-			Assert.assertEquals(pchqr_actual.meetingID, pchqr_expected.meetingID);
-			Assert.assertEquals(pchqr_actual.userID, pchqr_expected.userID);
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.userID, expected.userID);
 			
 			//We will need to compare that both collections has the same size of users
-			Assert.assertEquals(pchqr_actual.all_messages.size(), pchqr_expected.all_messages.size());
+			Assert.assertEquals(actual.all_messages.size(), expected.all_messages.size());
 			
 			//Now, we need to check that it has the same users
-			for(ChatMessageVO chatvo_actual : pchqr_actual.all_messages){
+			for(ChatMessageVO chatvoActual : actual.all_messages){
 				boolean valid = false;
 				
-				for(ChatMessageVO chatvo_expected : pchqr_expected.all_messages){
-					if(chatvo_actual.fromTime == chatvo_expected.fromTime){
+				for(ChatMessageVO chatvoExpected : expected.all_messages){
+					if(chatvoActual.fromTime == chatvoExpected.fromTime){
 						valid = true;
-						Assert.assertEquals(chatvo_actual.chatType, chatvo_expected.chatType);
-						Assert.assertEquals(chatvo_actual.fromUserID, chatvo_expected.fromUserID);
-						Assert.assertEquals(chatvo_actual.fromUsername, chatvo_expected.fromUsername);
-						Assert.assertEquals(chatvo_actual.fromColor, chatvo_expected.fromColor);
-						Assert.assertEquals(chatvo_actual.fromLang, chatvo_expected.fromLang);
-						Assert.assertEquals(chatvo_actual.fromTimezoneOffset, chatvo_expected.fromTimezoneOffset);
-						Assert.assertEquals(chatvo_actual.message, chatvo_expected.message);
+						Assert.assertEquals(chatvoActual.chatType, chatvoExpected.chatType);
+						Assert.assertEquals(chatvoActual.fromUserID, chatvoExpected.fromUserID);
+						Assert.assertEquals(chatvoActual.fromUsername, chatvoExpected.fromUsername);
+						Assert.assertEquals(chatvoActual.fromColor, chatvoExpected.fromColor);
+						Assert.assertEquals(chatvoActual.fromLang, chatvoExpected.fromLang);
+						Assert.assertEquals(chatvoActual.fromTimezoneOffset, chatvoExpected.fromTimezoneOffset);
+						Assert.assertEquals(chatvoActual.message, chatvoExpected.message);
 						
 					}
 				}
