@@ -35,11 +35,15 @@
   
   <mx:Script>
     <![CDATA[
-      import com.asfusion.mate.events.Dispatcher;      
-      import flash.events.Event;      
+      import com.asfusion.mate.events.Dispatcher;
+      import com.hydraframework.components.growler.model.GrowlDescriptor;
+      
+      import flash.events.Event;
+      
       import mx.controls.Alert;
       import mx.managers.HistoryManager;
-      import mx.utils.URLUtil;      
+      import mx.utils.URLUtil;
+      
       import org.bigbluebutton.common.LogUtil;
       import org.bigbluebutton.common.events.AddUIComponentToMainCanvas;
       import org.bigbluebutton.core.BBB;
@@ -283,14 +287,39 @@
         globalDispatcher.dispatchEvent(new ShortcutEvent(keyCombos[keyPress]));
       }
     }
+/*      
+      private function handleGrowlButtonClick(event:MouseEvent):void
+      {
+        this.growler.growl(
+          new GrowlDescriptor(
+            this.wTitle.text,
+            this.wDescription.text,
+            this.wAction.text,
+            parseInt(this.wColor.text),
+            this.wNotification.text
+          )
+        );
+      }
+*/      
     ]]>
   </mx:Script>
   
   <apimap:ExternalApiEventMap/>
   <coreMap:BbbCoreEventMap/>
   <maps:ApplicationEventMap />	
+  <maps:NotificationsEventMap />
   <views:MainApplicationShell id="mainShell"/>	
-  
+<!--  
+  <growl:Growler 
+    top="5" 
+    height="{this.height-10}" 
+    growlerClass="{wGrowlClass.selectedItem.data as Class}" 
+    id="growler" 
+    x="{this.width-growler.width}" 
+    horizontalGap="5"
+    verticalGap="5"
+    />
+-->  
   <mate:Listener type="{BBBEvent.LOGIN_EVENT}" method="handleLoginEvent"/>
   <mate:Listener type="{BBBEvent.RECEIVED_PUBLIC_CHAT_MESSAGE_EVENT}" method="handleReceivedPublicChatMessageEvent"/>
   <mate:Listener type="{BBBEvent.USER_VOICE_JOINED}" method="handleAddedListenerEvent"/>

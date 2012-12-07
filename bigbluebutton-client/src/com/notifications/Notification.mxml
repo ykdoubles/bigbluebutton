@@ -289,7 +289,7 @@ Please contact me at afoucal@free.fr.
 			{
 				// Check and set the notificationParent
 				if (!notificationParent)
-					notificationParent = Sprite(Application.application); 
+					notificationParent = Sprite(FlexGlobals.topLevelApplication); 
 
 				// Check and set the gaps betwen the Notification and the borders of the parent
 				var hg:Number = getStyle( 'horizontalGap' );
