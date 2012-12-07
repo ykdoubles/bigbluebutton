@@ -31,6 +31,8 @@
   preloader="org.bigbluebutton.main.model.BigBlueButtonPreloader"
   applicationComplete="hotkeyCapture()">
   
+  <mx:Style source="/assets/styles/styles.css" />
+  
   <mx:Script>
     <![CDATA[
       import com.asfusion.mate.events.Dispatcher;      
