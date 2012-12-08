@@ -25,6 +25,7 @@
   xmlns:apimap="org.bigbluebutton.main.api.maps.*"
   xmlns:coreMap="org.bigbluebutton.core.controllers.maps.*"
   xmlns:mate="http://mate.asfusion.com/"
+  xmlns:growl="com.hydraframework.components.growler.*"
   xmlns:m="library://melomel/2010"
   pageTitle="BigBlueButton" 
   layout="absolute" preinitialize="init()"
@@ -37,6 +38,7 @@
     <![CDATA[
       import com.asfusion.mate.events.Dispatcher;
       import com.hydraframework.components.growler.model.GrowlDescriptor;
+      import com.hydraframework.demos.growler.growls.DefaultGrowl;
       
       import flash.events.Event;
       
@@ -48,6 +50,7 @@
       import org.bigbluebutton.common.events.AddUIComponentToMainCanvas;
       import org.bigbluebutton.core.BBB;
       import org.bigbluebutton.core.EventBroadcaster;
+      import org.bigbluebutton.core.events.GrowlEvent;
       import org.bigbluebutton.core.managers.ConfigManager2;
       import org.bigbluebutton.main.api.ExternalApiCallbacks;
       import org.bigbluebutton.main.events.BBBEvent;
@@ -287,20 +290,14 @@
         globalDispatcher.dispatchEvent(new ShortcutEvent(keyCombos[keyPress]));
       }
     }
-/*      
-      private function handleGrowlButtonClick(event:MouseEvent):void
+           
+      private function handleGrowlEvent(event:GrowlEvent):void
       {
         this.growler.growl(
-          new GrowlDescriptor(
-            this.wTitle.text,
-            this.wDescription.text,
-            this.wAction.text,
-            parseInt(this.wColor.text),
-            this.wNotification.text
-          )
+          new GrowlDescriptor(event.title, event.description, event.action, event.color, event.notification)
         );
       }
-*/      
+      
     ]]>
   </mx:Script>
   
@@ -309,20 +306,16 @@
   <maps:ApplicationEventMap />	
   <maps:NotificationsEventMap />
   <views:MainApplicationShell id="mainShell"/>	
-<!--  
-  <growl:Growler 
-    top="5" 
-    height="{this.height-10}" 
-    growlerClass="{wGrowlClass.selectedItem.data as Class}" 
-    id="growler" 
-    x="{this.width-growler.width}" 
-    horizontalGap="5"
-    verticalGap="5"
-    />
--->  
+  
+  <growl:Growler top="5" height="{this.height-10}" 
+    growlerClass="{DefaultGrowl as Class}" id="growler" 
+    x="{this.width-growler.width}" horizontalGap="5" verticalGap="5" />
+
+  
   <mate:Listener type="{BBBEvent.LOGIN_EVENT}" method="handleLoginEvent"/>
   <mate:Listener type="{BBBEvent.RECEIVED_PUBLIC_CHAT_MESSAGE_EVENT}" method="handleReceivedPublicChatMessageEvent"/>
   <mate:Listener type="{BBBEvent.USER_VOICE_JOINED}" method="handleAddedListenerEvent"/>
   <mate:Listener type="{BBBEvent.PRESENTATION_CONVERTED}" method="handlePresentationConversion"/>
   <mate:Listener type="{BBBEvent.VIDEO_STARTED}" method="videoHasStarted"/>
+  <mate:Listener type="{GrowlEvent.NOTIFICATION_EVENT}" method="handleGrowlEvent"/>
 </mx:Application>

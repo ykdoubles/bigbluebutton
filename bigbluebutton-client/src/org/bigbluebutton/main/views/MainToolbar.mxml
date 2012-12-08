@@ -124,15 +124,15 @@
 					addedBtns.removeChild(event.button as UIComponent);
 			}
 			
-			private function realignButtons():void{
-				for each (var button:UIComponent in addedBtns.getChildren()){
+			private function realignButtons():void {
+				for each (var button:UIComponent in addedBtns.getChildren()) {
 					var toolbarComponent:IBbbToolbarComponent = button as IBbbToolbarComponent;
 					if (toolbarComponent.getAlignment() == ALIGN_LEFT) addedBtns.setChildIndex(button, 0);
 					else if (toolbarComponent.getAlignment() == ALIGN_RIGHT) addedBtns.setChildIndex(button, addedBtns.numChildren - 1);
 				}
 			}
 						
-			private function gotConfigParameters(e:ConfigEvent):void{
+			private function gotConfigParameters(e:ConfigEvent):void {
 				langSelector.visible = e.config.languageEnabled;
 				DEFAULT_HELP_URL = e.config.helpURL;
 			}
@@ -143,7 +143,7 @@
 				d.dispatchEvent(e);
 			}
 			
-			private function showSettingsButton(e:SettingsEvent):void{
+			private function showSettingsButton(e:SettingsEvent):void {
 				var b:Button = new Button();
 				b.label = ResourceUtil.getInstance().getString('bbb.mainToolbar.settingsBtn');
 				b.toolTip = ResourceUtil.getInstance().getString('bbb.mainToolbar.settingsBtn.toolTip');
@@ -151,7 +151,7 @@
 				this.addChild(b);
 			}
 			
-			private function openSettings(e:Event = null):void{
+			private function openSettings(e:Event = null):void {
 				var d:Dispatcher = new Dispatcher();
 				d.dispatchEvent(new SettingsEvent(SettingsEvent.OPEN_SETTINGS_PANEL));
 			}
@@ -177,6 +177,7 @@
 <!--
   <mx:Button label="DISCONNECT!" click="BBB.initConnectionManager().forceClose()" height="22" toolTip="Click to simulate disconnection" />
 -->
+  
 	<mx:Button label="{ResourceUtil.getInstance().getString('bbb.mainToolbar.shortcutBtn')}" click="onShortcutButtonClick()" height="22" toolTip="{ResourceUtil.getInstance().getString('bbb.mainToolbar.shortcutBtn.toolTip')}" />
 	<mx:LinkButton id="helpBtn" label="{ResourceUtil.getInstance().getString('bbb.mainToolbar.helpBtn')}" visible="{showHelpBtn}" click="onHelpButtonClicked()" height="22"/>
 	<mx:Button label="{ResourceUtil.getInstance().getString('bbb.mainToolbar.logoutBtn')}" id="btnLogout" 

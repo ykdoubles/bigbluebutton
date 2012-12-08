@@ -1,5 +1,6 @@
 package org.bigbluebutton.main.maps
 {
+  import com.asfusion.mate.events.Dispatcher;
   import com.notifications.Notification;
   
   import flash.external.ExternalInterface;
@@ -8,6 +9,7 @@ package org.bigbluebutton.main.maps
   import org.bigbluebutton.core.EventConstants;
   import org.bigbluebutton.core.UsersUtil;
   import org.bigbluebutton.core.events.CoreEvent;
+  import org.bigbluebutton.core.events.GrowlEvent;
   import org.bigbluebutton.core.managers.UserManager;
   import org.bigbluebutton.main.events.BBBEvent;
   import org.bigbluebutton.main.events.UserJoinedEvent;
@@ -95,7 +97,17 @@ package org.bigbluebutton.main.maps
       
       var title:String = "Public chat message from " + event.message.fromUsername;
       var message:String = event.message.message;
-      notify(message, title);
+//      notify(message, title);
+      
+      var gEvent:GrowlEvent = new GrowlEvent(GrowlEvent.NOTIFICATION_EVENT);
+      gEvent.title = title;
+      gEvent.color = 0x00CCEE;
+      gEvent.action = "Click Me";
+      gEvent.description = message;
+      gEvent.notification = message;
+      
+      var gDispatcher:Dispatcher = new Dispatcher();
+//      gDispatcher.dispatchEvent(gEvent);
     }
     
     public function handleNewPrivateChatEvent(event:CoreEvent):void {
@@ -117,7 +129,7 @@ package org.bigbluebutton.main.maps
       
       var title:String = "Private chat message from " + event.message.fromUsername;
       var message:String = event.message.message;
-      notify(message, title);
+//      notify(message, title);
     }
         
     public function handleUserJoinedEvent(event:UserJoinedEvent):void {
@@ -135,7 +147,7 @@ package org.bigbluebutton.main.maps
       
       var title:String = "New user joined";
       var message:String = "User " + user.name + " has joined.";
-      notify(message, title);
+//      notify(message, title);
     }    
 
     public function handleUserLeftEvent(event:UserLeftEvent):void {
@@ -152,7 +164,7 @@ package org.bigbluebutton.main.maps
       
       var title:String = "User left";
       var message:String = "User " + user.name + " has left.";
-      notify(message, title);        
+//      notify(message, title);        
     }  
     
     private function notify(message:String, title:String, iconClass:Class=null):void {
