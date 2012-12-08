@@ -1,0 +1,8 @@
+
+Some components used in BigBlueButton are from 3rd-party individuals and organizations.
+
+We try to list them here. If we miss something, please let us know.
+
+1. http://lukesh.wordpress.com/2009/04/04/rawr-flexgrowl-component-available/
+2. http://afoucal.free.fr/index.php/2010/07/20/flex-notifications-a-new-version-available/
+ 
