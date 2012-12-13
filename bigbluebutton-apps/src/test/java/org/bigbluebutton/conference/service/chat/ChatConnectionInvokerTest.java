@@ -68,7 +68,7 @@ public class ChatConnectionInvokerTest {
 		verify(connInvokerService);	
 	}
 	
-	@Test(enabled = false)
+	@Test
 	public void Accept_WhenPublicChatHistoryQueryReply_ShouldSendMessage() {
 		reset(connInvokerService);
 		
@@ -76,11 +76,19 @@ public class ChatConnectionInvokerTest {
 		all_messages.add(testChatMsg);
 		
 		PublicChatHistoryQueryReply pcms = new PublicChatHistoryQueryReply(this.meetingID, "1112" , all_messages);
+		Map<String,Object> msg = new HashMap<String,Object>();
+		msg.put("count", pcms.all_messages.size());
+		
+		Map<String, Object> pm = new HashMap<String, Object>();
+	    for(ChatMessageVO chatObj : pcms.all_messages){
+	    	Map<String, Object> m = chatObj.toMap();
+	    	pm.put(Double.toString(chatObj.fromTime), m);
+		}
+		msg.put("messages", pm);
 		
 		
-		//ClientMessage cm = new ClientMessage(ClientMessage.BROADCAST, pcms.meetingID, "PublicChatMessageSentCommand", msg);
-		//connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(cm));
-		
+		ClientMessage cm = new ClientMessage(ClientMessage.DIRECT, pcms.userID, "PublicChatHistoryQueryReply", msg);
+		connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(cm));
 		
 		replay(connInvokerService);
 		

@@ -154,19 +154,17 @@ public class UsersConnectionInvokerTest {
 		Map<String, Object> message = new HashMap<String, Object>();
 		message.put("count", usersQueryMsg.users.size());
 		
-		if (usersQueryMsg.users.size() > 0) {
-			Collection<UserVO> pc = usersQueryMsg.users;
-	    	Map<String, Object> pm = new HashMap<String, Object>();
-	    	for (Iterator<UserVO> it = pc.iterator(); it.hasNext();) {
-	    		UserVO uv = (UserVO) it.next();
+		Map<String, Object> pm = new HashMap<String, Object>();
+	    for (Iterator<UserVO> it = usersQueryMsg.users.iterator(); it.hasNext();) {
+	    	UserVO uv = (UserVO) it.next();
 	    		
-	    		Map<String, Object> m = new HashMap<String, Object>();
-	    		UserVO.toMap(uv, m);
+	    	Map<String, Object> m = new HashMap<String, Object>();
+	    	UserVO.toMap(uv, m);
 	    		
-	    		pm.put(uv.intUserID, m); 
-	    	}  
-	    	message.put("users", pm);
-		}		
+	    	pm.put(uv.intUserID, m); 
+	    }  
+	    message.put("users", pm);
+				
 		
 		ClientMessage m = new ClientMessage(ClientMessage.DIRECT, usersQueryMsg.userID, "UsersListQueryReply", message);
 		connInvokerService.sendMessage(ClientMessageMatcher.eqClientMessage(m));

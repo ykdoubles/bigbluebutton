@@ -6,6 +6,7 @@ import org.bigbluebutton.conference.messages.out.IMessageOut;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.messages.out.users.UserLeft;
+import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
 import org.bigbluebutton.conference.service.messaging.IMessagePublisher;
 import org.bigbluebutton.conference.service.messaging.MessagingConstants;
 import org.bigbluebutton.conference.service.messaging.RedisMessage;
