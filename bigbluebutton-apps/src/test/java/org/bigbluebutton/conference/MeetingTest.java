@@ -10,6 +10,9 @@ import org.bigbluebutton.conference.messages.in.chat.PublicChatHistoryQuery;
 import org.bigbluebutton.conference.messages.in.chat.PublicChatMessageSend;
 import org.bigbluebutton.conference.messages.in.meetings.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.meetings.MeetingStart;
+import org.bigbluebutton.conference.messages.in.presentation.PresentationRemove;
+import org.bigbluebutton.conference.messages.in.presentation.PresentationShare;
+import org.bigbluebutton.conference.messages.in.presentation.PresentationSlideChange;
 import org.bigbluebutton.conference.messages.in.users.UserAssignPresenter;
 import org.bigbluebutton.conference.messages.in.users.UserHandStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UserJoin;
@@ -20,6 +23,9 @@ import org.bigbluebutton.conference.messages.in.users.UsersQuery;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationRemoved;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationShared;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationSlideChanged;
 import org.bigbluebutton.conference.messages.out.users.UserHandStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.messages.out.users.UserKicked;
@@ -41,6 +47,7 @@ public class MeetingTest {
 	private UserVO testModerator;
 	private UserVO testViewer;
 	private ChatMessageVO testChatMsg;
+	private String presentationName;
 	final String meetingID = "0123456789";
 	
 	@BeforeTest
@@ -61,6 +68,8 @@ public class MeetingTest {
 		testChatMsg.fromTimezoneOffset = Long.valueOf(0);
 		testChatMsg.fromLang = "en"; 	 
 		testChatMsg.message = "This is a test message";
+		
+		presentationName = "Default";
 	}
 	
 	@Test(expectedExceptions=IllegalArgumentException.class)
@@ -187,6 +196,38 @@ public class MeetingTest {
 		verify(msgOutGW);
 	}
 	
+	@Test(groups={"user.leave"},dependsOnGroups={"user.tests"})
+	public void ProcessMessage_WhenUserLeave_ShouldMessageOutGatewayAccept(){
+		reset(msgOutGW);
+		
+		UserLeave msg = new UserLeave(this.meetingID,this.testViewer.intUserID);
+		
+		//like test_viewer is the presenter, the new presenter is the moderator
+		NewPresenterVO newPresenter = new NewPresenterVO(this.testModerator.intUserID, this.testModerator.name, false, this.testModerator.intUserID);
+		
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserLeft(meetingID,this.testViewer.intUserID),new UserPresenterChanged(meetingID,newPresenter)));
+		expectLastCall().times(2);
+		
+		replay(msgOutGW);
+		
+		meeting.processMessage(msg);
+		verify(msgOutGW);
+	}
+	
+	@Test(groups={"meeting.end"},dependsOnGroups={"user.leave"})
+	public void ProcessMessage_WhenMeetingForceEnd_ShouldMessageOutGatewayAccept(){
+		reset(msgOutGW);
+		MeetingForceEnd msg = new MeetingForceEnd(this.meetingID);
+		
+		//like we have only one user, it should kick just one user
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserKicked(meetingID,testModerator.intUserID)));
+		
+		replay(msgOutGW);
+		
+		meeting.processMessage(msg);
+		verify(msgOutGW);
+	}
+	
 	
 	/*
 	 * MODULE: Chat
@@ -225,19 +266,18 @@ public class MeetingTest {
 		verify(msgOutGW);
 	}
 	
-	
-	
-	@Test(groups={"user.leave"},dependsOnGroups={"user.tests"})
-	public void ProcessMessage_WhenUserLeave_ShouldMessageOutGatewayAccept(){
+	/*
+	 * 
+	 * MODULE: Presentation
+	 * 
+	 * */
+	@Test(groups={"presentation.tests"},dependsOnGroups={"user.moderator.join","user.viewer.join"})
+	public void ProcessMessage_WhenPresentationShare_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
 		
-		UserLeave msg = new UserLeave(this.meetingID,this.testViewer.intUserID);
+		PresentationShare msg = new PresentationShare(meetingID, presentationName, true); 
 		
-		//like test_viewer is the presenter, the new presenter is the moderator
-		NewPresenterVO newPresenter = new NewPresenterVO(this.testModerator.intUserID, this.testModerator.name, false, this.testModerator.intUserID);
-		
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserLeft(meetingID,this.testViewer.intUserID),new UserPresenterChanged(meetingID,newPresenter)));
-		expectLastCall().times(2);
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PresentationShared(meetingID, presentationName, true)));
 		
 		replay(msgOutGW);
 		
@@ -245,13 +285,13 @@ public class MeetingTest {
 		verify(msgOutGW);
 	}
 	
-	@Test(groups={"meeting.end"},dependsOnGroups={"user.leave"})
-	public void ProcessMessage_WhenMeetingForceEnd_ShouldMessageOutGatewayAccept(){
+	@Test(groups={"presentation.tests"},dependsOnGroups={"user.moderator.join","user.viewer.join"})
+	public void ProcessMessage_WhenPresentationRemove_ShouldMessageOutGatewayAccept(){
 		reset(msgOutGW);
-		MeetingForceEnd msg = new MeetingForceEnd(this.meetingID);
 		
-		//like we have only one user, it should kick just one user
-		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new UserKicked(meetingID,testModerator.intUserID)));
+		PresentationRemove msg = new PresentationRemove(meetingID, presentationName); 
+		
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PresentationRemoved(meetingID, presentationName)));
 		
 		replay(msgOutGW);
 		
@@ -259,6 +299,18 @@ public class MeetingTest {
 		verify(msgOutGW);
 	}
 	
-	
+	@Test(groups={"presentation.tests"},dependsOnGroups={"user.moderator.join","user.viewer.join"})
+	public void ProcessMessage_WhenPresentationSlideChange_ShouldMessageOutGatewayAccept(){
+		reset(msgOutGW);
+		
+		PresentationSlideChange msg = new PresentationSlideChange(meetingID, 1); 
+		
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PresentationSlideChanged(meetingID, msg.slideNum)));
+		
+		replay(msgOutGW);
+		
+		meeting.processMessage(msg);
+		verify(msgOutGW);
+	}
 	
 }

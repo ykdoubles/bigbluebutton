@@ -7,6 +7,9 @@ import org.bigbluebutton.conference.messages.out.IMessageOut;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationRemoved;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationShared;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationSlideChanged;
 import org.bigbluebutton.conference.messages.out.users.UserHandStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.messages.out.users.UserKicked;
@@ -194,6 +197,25 @@ public class MessageOutMatcher implements IArgumentMatcher{
 			}
 			return true;
 			
+		}else if(expectedObj instanceof PresentationShared){
+			PresentationShared actual = (PresentationShared) actualObj;
+			PresentationShared expected = (PresentationShared) expectedObj;
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.presentationName, expected.presentationName);
+			Assert.assertEquals(actual.share, expected.share);
+			return true;
+		}else if(expectedObj instanceof PresentationRemoved){
+			PresentationRemoved actual = (PresentationRemoved) actualObj;
+			PresentationRemoved expected = (PresentationRemoved) expectedObj;
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.presentationName, expected.presentationName);
+			return true;
+		}else if(expectedObj instanceof PresentationSlideChanged){
+			PresentationSlideChanged actual = (PresentationSlideChanged) actualObj;
+			PresentationSlideChanged expected = (PresentationSlideChanged) expectedObj;
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.slideNum, expected.slideNum);
+			return true;
 		}
 		
 		return false;

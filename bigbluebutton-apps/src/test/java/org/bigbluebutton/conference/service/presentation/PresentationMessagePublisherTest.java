@@ -1,43 +1,41 @@
-package org.bigbluebutton.conference.service.chat;
+package org.bigbluebutton.conference.service.presentation;
 
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 
 import java.util.HashMap;
 
 import org.bigbluebutton.conference.RedisMessageMatcher;
-import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.service.messaging.IMessagePublisher;
 import org.bigbluebutton.conference.service.messaging.MessagingConstants;
 import org.bigbluebutton.conference.service.messaging.RedisMessage;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class ChatMessagePublisherTest {
-	
-	private ChatMessagePublisher chatMessagePublisher;
+public class PresentationMessagePublisherTest {
+	private PresentationMessagePublisher presentationMessagePublisher;
 	private IMessagePublisher publisher;
 	final String meetingID = "0123456789";
-	ChatMessageVO testChatMsg;
+	final String presentationName = "Default";
 	
 	@BeforeTest
 	public void init(){
-		chatMessagePublisher = new ChatMessagePublisher();
+		presentationMessagePublisher = new PresentationMessagePublisher();
 		publisher = createMock(IMessagePublisher.class);
-		chatMessagePublisher.setMessagePublisher(publisher);
+		presentationMessagePublisher.setMessagePublisher(publisher);
 	}
 	
 	@Test(expectedExceptions=IllegalArgumentException.class)
 	public void SetMessagePublisher_WhenParamIsNull_ShouldThrowException(){
-		chatMessagePublisher.setMessagePublisher(null);
+		presentationMessagePublisher.setMessagePublisher(null);
 	}
 	
-	@Test
+	@Test(enabled=false)
 	public void Accept_WhenUserJoined_ShouldPublishMessage(){
-		reset(publisher);
+		/*reset(publisher);
 		
 		testChatMsg =  new ChatMessageVO();
 		testChatMsg.chatType = ChatMessageVO.PUBLIC_TYPE; 
@@ -68,7 +66,6 @@ public class ChatMessagePublisherTest {
 		replay(publisher);
 		
 		chatMessagePublisher.accept(msg);
-		verify(publisher);
+		verify(publisher);*/
 	}
-
 }

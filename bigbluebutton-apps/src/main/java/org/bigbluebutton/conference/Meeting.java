@@ -27,6 +27,9 @@ import org.bigbluebutton.conference.messages.in.chat.PublicChatHistoryQuery;
 import org.bigbluebutton.conference.messages.in.chat.PublicChatMessageSend;
 import org.bigbluebutton.conference.messages.in.meetings.MeetingForceEnd;
 import org.bigbluebutton.conference.messages.in.meetings.MeetingStart;
+import org.bigbluebutton.conference.messages.in.presentation.PresentationRemove;
+import org.bigbluebutton.conference.messages.in.presentation.PresentationShare;
+import org.bigbluebutton.conference.messages.in.presentation.PresentationSlideChange;
 import org.bigbluebutton.conference.messages.in.users.UserAssignPresenter;
 import org.bigbluebutton.conference.messages.in.users.UserHandStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UserJoin;
@@ -37,6 +40,9 @@ import org.bigbluebutton.conference.messages.in.users.UsersQuery;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationRemoved;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationShared;
+import org.bigbluebutton.conference.messages.out.presentation.PresentationSlideChanged;
 import org.bigbluebutton.conference.messages.out.users.UserHandStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserJoined;
 import org.bigbluebutton.conference.messages.out.users.UserKicked;
@@ -99,8 +105,39 @@ public class Meeting {
 		} else if (msg instanceof PublicChatHistoryQuery){
 			handlePublicChatHistoryQuery((PublicChatHistoryQuery) msg);
 		}
+		//Presentation Handlers
+		else if(msg instanceof PresentationShare){
+			handlePresentationShare((PresentationShare) msg);
+		}
+		else if(msg instanceof PresentationRemove){
+			handlePresentationRemove((PresentationRemove) msg);
+		}
+		else if(msg instanceof PresentationSlideChange){
+			handlePresentationSlideChange((PresentationSlideChange) msg);
+		}
 	}
 	
+	private void handlePresentationSlideChange(PresentationSlideChange msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling slide change for meeting [{}]",msg.meetingID);
+		}
+		msgOutGW.accept(new PresentationSlideChanged(msg.meetingID, msg.slideNum));
+	}
+
+	private void handlePresentationRemove(PresentationRemove msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling presentation [{}] share for meeting [{}]",msg.presentationName ,msg.meetingID);
+		}
+		msgOutGW.accept(new PresentationRemoved(msg.meetingID, msg.presentationName));
+	}
+
+	private void handlePresentationShare(PresentationShare msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling presentation [{}] share for meeting [{}]",msg.presentationName ,msg.meetingID);
+		}
+		msgOutGW.accept(new PresentationShared(msg.meetingID, msg.presentationName, msg.share));
+	}
+
 	private void handlePublicChatHistoryQuery(PublicChatHistoryQuery msg) {
 		if(log.isDebugEnabled()){
 			log.debug("Handling public chat query for meeting [{}] from [{}]",msg.meetingID ,msg.userID);
