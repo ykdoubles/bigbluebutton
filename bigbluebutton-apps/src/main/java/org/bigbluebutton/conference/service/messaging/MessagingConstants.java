@@ -18,4 +18,7 @@ public class MessagingConstants {
 	public static final String USER_STATUS_CHANGE_EVENT = "UserStatusChangeEvent";
 	
 	public static final String PUBLIC_CHAT_MESSAGE_SENT_EVENT = "PublicChatMessageSent";
+	public static final String PRESENTATION_SHARED = "PresentationShared";
+	public static final String PRESENTATION_REMOVED = "PresentationRemoved";
+	public static final String PRESENTATION_SLIDE_CHANGED = "PresentationSlideChanged";
 }
