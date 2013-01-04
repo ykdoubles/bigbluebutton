@@ -37,6 +37,8 @@ import org.bigbluebutton.conference.messages.in.users.UserLeave;
 import org.bigbluebutton.conference.messages.in.users.UserVideoStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UserVoiceStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UsersQuery;
+import org.bigbluebutton.conference.messages.in.whiteboard.WhiteboardAnnotationHistory;
+import org.bigbluebutton.conference.messages.in.whiteboard.WhiteboardAnnotationSend;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
@@ -51,11 +53,17 @@ import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVideoStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
+import org.bigbluebutton.conference.messages.out.whiteboard.WhiteboardAnnotationHistoryReply;
+import org.bigbluebutton.conference.messages.out.whiteboard.WhiteboardAnnotationSent;
 import org.bigbluebutton.conference.service.chat.ChatManager;
+import org.bigbluebutton.conference.service.whiteboard.shapes.Annotation;
 import org.bigbluebutton.conference.vo.NewPresenterVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.red5.logging.Red5LoggerFactory;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class Meeting {
@@ -115,7 +123,30 @@ public class Meeting {
 		else if(msg instanceof PresentationSlideChange){
 			handlePresentationSlideChange((PresentationSlideChange) msg);
 		}
+		//Whiteboard Handlers
+		else if(msg instanceof WhiteboardAnnotationSend){
+			handleWhiteboardAnnotationSend((WhiteboardAnnotationSend) msg);
+		}
+		else if(msg instanceof WhiteboardAnnotationHistory){
+			handleWhiteboardAnnotationHistory((WhiteboardAnnotationHistory) msg);
+		}
 	}
+	
+	private void handleWhiteboardAnnotationHistory(
+			WhiteboardAnnotationHistory msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling whiteboard annotation for  [{}]",msg.meetingID);
+		}
+		msgOutGW.accept(new WhiteboardAnnotationHistoryReply(msg.meetingID, msg.message.get("presentationID").toString(), Integer.parseInt(msg.message.get("pageNumber").toString())));
+	}
+
+	private void handleWhiteboardAnnotationSend(WhiteboardAnnotationSend msg) {
+		if(log.isDebugEnabled()){
+			log.debug("Handling whiteboard annotation for  [{}]",msg.meetingID);
+		}
+		msgOutGW.accept(new WhiteboardAnnotationSent(msg.meetingID, msg.annotation));
+	}
+
 	
 	private void handlePresentationSlideChange(PresentationSlideChange msg) {
 		if(log.isDebugEnabled()){

@@ -4,6 +4,7 @@ import static org.easymock.EasyMock.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 import org.bigbluebutton.conference.Meeting;
 import org.bigbluebutton.conference.messages.in.chat.PublicChatHistoryQuery;
@@ -20,6 +21,8 @@ import org.bigbluebutton.conference.messages.in.users.UserLeave;
 import org.bigbluebutton.conference.messages.in.users.UserVideoStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UserVoiceStatusChange;
 import org.bigbluebutton.conference.messages.in.users.UsersQuery;
+import org.bigbluebutton.conference.messages.in.whiteboard.WhiteboardAnnotationHistory;
+import org.bigbluebutton.conference.messages.in.whiteboard.WhiteboardAnnotationSend;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatHistoryQueryReply;
 import org.bigbluebutton.conference.messages.out.chat.PublicChatMessageSent;
 import org.bigbluebutton.conference.messages.out.meetings.MeetingStarted;
@@ -34,7 +37,10 @@ import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVideoStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
+import org.bigbluebutton.conference.messages.out.whiteboard.WhiteboardAnnotationHistoryReply;
+import org.bigbluebutton.conference.messages.out.whiteboard.WhiteboardAnnotationSent;
 import org.bigbluebutton.conference.service.chat.ChatMessageVO;
+import org.bigbluebutton.conference.service.whiteboard.shapes.Annotation;
 import org.bigbluebutton.conference.vo.NewPresenterVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.testng.annotations.BeforeTest;
@@ -306,6 +312,45 @@ public class MeetingTest {
 		PresentationSlideChange msg = new PresentationSlideChange(meetingID, 1); 
 		
 		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new PresentationSlideChanged(meetingID, msg.slideNum)));
+		
+		replay(msgOutGW);
+		
+		meeting.processMessage(msg);
+		verify(msgOutGW);
+	}
+	
+	/*
+	 * Module: Whiteboard
+	 * 
+	 * */
+	@Test(groups={"whiteboard.tests"},dependsOnGroups={"presentation.tests"})
+	public void ProcessMessage_WhenWhiteboardAnnotationSend_ShouldMessageOutGatewayAccept(){
+		reset(msgOutGW);
+		
+		//TODO: Define and test properties for the annotation object
+		Annotation an = new Annotation(new HashMap<String, Object>());
+		
+		WhiteboardAnnotationSend msg = new WhiteboardAnnotationSend(meetingID, an);
+		
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new WhiteboardAnnotationSent(meetingID, an)));
+		
+		replay(msgOutGW);
+		
+		meeting.processMessage(msg);
+		verify(msgOutGW);
+	}
+	@Test(groups={"whiteboard.tests"},dependsOnGroups={"presentation.tests"})
+	public void ProcessMessage_WhenWhiteboardAnnotationHistory_ShouldMessageOutGatewayAccept(){
+		reset(msgOutGW);
+		
+		//TODO: Instead of receiving a hashmap, wouldn't be better to receive params?
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		//TODO: ID or Name?
+		param.put("presentationID", this.presentationName);
+		param.put("pageNumber", 1);
+		
+		WhiteboardAnnotationHistory msg = new WhiteboardAnnotationHistory(meetingID, param);
+		msgOutGW.accept(MessageOutMatcher.eqMessageOut(new WhiteboardAnnotationHistoryReply(meetingID,this.presentationName,1)));
 		
 		replay(msgOutGW);
 		

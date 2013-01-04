@@ -18,6 +18,8 @@ import org.bigbluebutton.conference.messages.out.users.UserPresenterChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVideoStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UserVoiceStatusChanged;
 import org.bigbluebutton.conference.messages.out.users.UsersQueryReply;
+import org.bigbluebutton.conference.messages.out.whiteboard.WhiteboardAnnotationHistoryReply;
+import org.bigbluebutton.conference.messages.out.whiteboard.WhiteboardAnnotationSent;
 import org.bigbluebutton.conference.service.chat.ChatMessageVO;
 import org.bigbluebutton.conference.vo.UserVO;
 import org.easymock.EasyMock;
@@ -215,6 +217,21 @@ public class MessageOutMatcher implements IArgumentMatcher{
 			PresentationSlideChanged expected = (PresentationSlideChanged) expectedObj;
 			Assert.assertEquals(actual.meetingID, expected.meetingID);
 			Assert.assertEquals(actual.slideNum, expected.slideNum);
+			return true;
+		}
+		else if(expectedObj instanceof WhiteboardAnnotationSent){
+			WhiteboardAnnotationSent actual = (WhiteboardAnnotationSent) actualObj;
+			WhiteboardAnnotationSent expected = (WhiteboardAnnotationSent) expectedObj;
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.annotation, expected.annotation);
+			return true;
+		}
+		else if(expectedObj instanceof WhiteboardAnnotationHistoryReply){
+			WhiteboardAnnotationHistoryReply actual = (WhiteboardAnnotationHistoryReply) actualObj;
+			WhiteboardAnnotationHistoryReply expected = (WhiteboardAnnotationHistoryReply) expectedObj;
+			Assert.assertEquals(actual.meetingID, expected.meetingID);
+			Assert.assertEquals(actual.presentationID, expected.presentationID);
+			Assert.assertEquals(actual.pageNum, expected.pageNum);
 			return true;
 		}
 		
