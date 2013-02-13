@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.bigbluebutton.conference.messages.ClientMessage;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
@@ -12,27 +11,44 @@ import org.red5.server.api.service.ServiceUtils;
 import org.red5.server.api.so.ISharedObject;
 
 public class MeetingScope {
-	private ConcurrentHashMap<String, ISharedObject> whiteboardSOs;
-	private ConcurrentHashMap<String, ISharedObject> presentationSOs;
+	private ISharedObject whiteboardSO;
+	private ISharedObject presentationSO;
 	
 	private final IScope scope;
 	private final String meetingID;
 	
 	private final Map<String, IConnection> conns;
 
-	public MeetingScope(String meetingID, IScope scope) {
+	public MeetingScope(String meetingID, IScope scope, ISharedObject whiteBoardSO, ISharedObject presentationSO) {
 		this.meetingID = meetingID;
 		this.scope = scope;
+		this.whiteboardSO = whiteBoardSO;
+		this.presentationSO = presentationSO;
+		
 		conns = new ConcurrentHashMap<String, IConnection>();
-		whiteboardSOs = new ConcurrentHashMap<String, ISharedObject>();
-		presentationSOs = new ConcurrentHashMap<String, ISharedObject>();
 	}
 	
 	public String getMeetingID() {
 		return meetingID;
 	}
 	
-	public void broadcastMessage(ClientMessage message) {
+	private void sendMessageToUser(ClientMessage message) {
+		IConnection conn = conns.get(message.getDest());
+		if (conn != null) {
+			if (conn.isConnected()) {
+				List<Object> params = new ArrayList<Object>();
+				params.add(message.getMessageName());
+				params.add(message.getMessage());
+				ServiceUtils.invokeOnConnection(conn, "onMessageFromServer", params.toArray());
+			}
+		}
+	}
+	
+	private void sendMessageUsingSharedObject(ClientMessage message) {
+		whiteboardSO.sendMessage("logout", new ArrayList());
+	}
+	
+	private void broadcastMessage(ClientMessage message) {
 		List<Object> params = new ArrayList<Object>();
 		params.add(message.getMessageName());
 		params.add(message.getMessage());
@@ -48,14 +64,6 @@ public class MeetingScope {
 	}
 	
 	public void sendMessage(ClientMessage message) {
-		IConnection conn = conns.get(message.getDest());
-		if (conn != null) {
-			if (conn.isConnected()) {
-				List<Object> params = new ArrayList<Object>();
-				params.add(message.getMessageName());
-				params.add(message.getMessage());
-				ServiceUtils.invokeOnConnection(conn, "onMessageFromServer", params.toArray());
-			}
-		}
+		
 	}
 }

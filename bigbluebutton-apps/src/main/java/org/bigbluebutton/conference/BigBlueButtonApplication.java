@@ -143,7 +143,6 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	public String getMyUserId() {
 		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
 		assert bbbSession != null;
-		//return Long.toString(bbbSession.getClientID());
 		return bbbSession.getInternalUserID();
 	}
 	
