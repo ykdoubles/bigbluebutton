@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.bigbluebutton.conference.messages.ClientMessage;
+
+import org.bigbluebutton.conference.messages.BroadcastMessage;
+import org.bigbluebutton.conference.messages.IMessage;
+import org.bigbluebutton.conference.messages.UserMessage;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.service.ServiceUtils;
@@ -32,7 +35,7 @@ public class MeetingScope {
 		return meetingID;
 	}
 	
-	private void sendMessageToUser(ClientMessage message) {
+	private void sendMessageToUser(UserMessage message) {
 		IConnection conn = conns.get(message.getDest());
 		if (conn != null) {
 			if (conn.isConnected()) {
@@ -44,11 +47,11 @@ public class MeetingScope {
 		}
 	}
 	
-	private void sendMessageUsingSharedObject(ClientMessage message) {
+	private void sendMessageUsingSharedObject(IMessage message) {
 		whiteboardSO.sendMessage("logout", new ArrayList());
 	}
 	
-	private void broadcastMessage(ClientMessage message) {
+	private void broadcastMessage(BroadcastMessage message) {
 		List<Object> params = new ArrayList<Object>();
 		params.add(message.getMessageName());
 		params.add(message.getMessage());
@@ -63,7 +66,13 @@ public class MeetingScope {
 		conns.remove(userID);
 	}
 	
-	public void sendMessage(ClientMessage message) {
-		
+	public void sendMessage(IMessage message) {
+		if (message instanceof BroadcastMessage) {
+			broadcastMessage((BroadcastMessage)message);
+		} else if (message instanceof UserMessage){
+			sendMessageToUser((UserMessage) message);
+		} else {
+			sendMessageUsingSharedObject(message);
+		}
 	}
 }

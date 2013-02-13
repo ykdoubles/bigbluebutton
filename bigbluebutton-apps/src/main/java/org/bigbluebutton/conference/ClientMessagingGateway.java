@@ -6,8 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.bigbluebutton.conference.messages.ClientMessage;
+import org.bigbluebutton.conference.messages.AddConnectionMessage;
 import org.bigbluebutton.conference.messages.IMessage;
+import org.bigbluebutton.conference.messages.UserMessage;
 import org.red5.server.api.IConnection;
 
 public class ClientMessagingGateway implements IClientMessagingGateway {
@@ -16,13 +17,13 @@ public class ClientMessagingGateway implements IClientMessagingGateway {
 	
 	private final Map<String, MeetingScope> meetingScopes;
 
-	private BlockingQueue<ClientMessage> messages;
+	private BlockingQueue<IMessage> messages;
 	private volatile boolean send = false;
 	private Runnable sender;
 
 	public ClientMessagingGateway() {
 		meetingScopes = new ConcurrentHashMap<String, MeetingScope>();
-		messages = new LinkedBlockingQueue<ClientMessage>();
+		messages = new LinkedBlockingQueue<IMessage>();
 	}
 	
 	@Override
@@ -32,7 +33,8 @@ public class ClientMessagingGateway implements IClientMessagingGateway {
 
 	@Override
 	public void addUserConnection(String meetingID, IConnection conn, String userID) {
-
+		AddConnectionMessage cm = new AddConnectionMessage(meetingID, userID, conn);
+		sendMessage(cm);
 	}
 	
 	public void removeMeetingScope(String meetingID) {
@@ -44,10 +46,10 @@ public class ClientMessagingGateway implements IClientMessagingGateway {
 	}
 	
 	public void sendMessage(IMessage message) {
-		
+		messages.offer(message);
 	}
 	
-	private void sendMessageToClient(IMessage message) {
+	private void sendMessageToClient(UserMessage message) {
 		MeetingScope meeting = meetingScopes.get(message.getDest());
 		if (meeting != null) {
 			meeting.sendMessage(message);
@@ -59,10 +61,10 @@ public class ClientMessagingGateway implements IClientMessagingGateway {
 		sender = new Runnable() {
 			public void run() {
 				while (send) {
-					ClientMessage msg;
+					IMessage msg;
 					try {
 						msg = messages.take();
-						sendMessageToClient(msg);
+						sendMessageToClient((UserMessage) msg);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
