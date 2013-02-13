@@ -1,4 +1,4 @@
-usePlugin 'java'
+apply plugin: 'java'
 sourceCompatibility=1.6
 targetCompatibility=1.6
 
@@ -26,6 +26,7 @@ jar.doFirst {
 	* do not want to sign and manage 2 jar files.
 	**/'''
 
-   jar.merge('../common/build/libs/bbb-deskshare-common-0.8.jar')
+   //jar.merge('../common/build/libs/bbb-deskshare-common-0.8.jar')
+   jar.from zipTree('../common/build/libs/bbb-deskshare-common-0.8.jar')
 }
 
