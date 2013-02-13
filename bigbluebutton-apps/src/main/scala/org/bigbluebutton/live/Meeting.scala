@@ -1,4 +1,4 @@
-package org.bigbluebutton.webconf
+package org.bigbluebutton.live
 
 import scala.actors.Actor
 import scala.actors.Actor._
@@ -17,6 +17,7 @@ class Meeting extends Actor {
 	    react {
 	      case userJoin: UserJoin => {
 	        handleUserJoin(userJoin)
+	        sender ! new UserLeft("foo")
 	      }
 	    }
 	  }
