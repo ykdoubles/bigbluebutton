@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.bigbluebutton.conference.messages.ClientMessage;
 import org.red5.server.api.Red5;
 
 public class BigBlueButtonService {

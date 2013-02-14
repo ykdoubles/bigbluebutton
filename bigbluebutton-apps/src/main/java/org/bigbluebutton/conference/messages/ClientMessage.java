@@ -16,11 +16,11 @@
 * with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 *
 */
-package org.bigbluebutton.conference;
+package org.bigbluebutton.conference.messages;
 
 import java.util.Map;
 
-public class ClientMessage {
+public class ClientMessage implements IMessage {
 	public static final String BROADCAST = "broadcast";
 	public static final String DIRECT = "direct";
 	
