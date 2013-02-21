@@ -66,7 +66,6 @@ public class ClientMessagingGateway implements IClientMessagingGateway {
 						msg = messages.take();
 						sendMessageToClient((UserMessage) msg);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
