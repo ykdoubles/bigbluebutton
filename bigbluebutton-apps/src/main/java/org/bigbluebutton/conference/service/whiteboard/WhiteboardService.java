@@ -23,22 +23,19 @@ import java.util.Map;
 
 import org.bigbluebutton.conference.BigBlueButtonSession;
 import org.bigbluebutton.conference.Constants;
+import org.bigbluebutton.conference.IBigBlueButtonGateway;
 import org.bigbluebutton.conference.service.whiteboard.shapes.Annotation;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
+import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
 
 public class WhiteboardService {
 
 	private static Logger log = Red5LoggerFactory.getLogger(WhiteboardService.class, "bigbluebutton");
 	
-	private WhiteboardApplication application;
-	
-	public void setWhiteboardApplication(WhiteboardApplication a){
-		log.debug("Setting whiteboard application instance");
-		this.application = a;
-	}
-	
+	private IBigBlueButtonGateway bbbGW;
+		
 	public void sendAnnotation(Map<String, Object> annotation) {
 //		for (Map.Entry<String, Object> entry : annotation.entrySet()) {
 //		    String key = entry.getKey();
@@ -53,9 +50,13 @@ public class WhiteboardService {
 //		    }
 //		}
 		
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		
+		
 		Annotation a = new Annotation(annotation);
 		
-		application.sendAnnotation(a);
+		bbbGW.sendAnnotation(meetingID, a);
 	}
 	
 	private String pointsToString(ArrayList<Double> points){
@@ -71,48 +72,72 @@ public class WhiteboardService {
 
 	}
 	
-	public void setActivePage(Map<String, Object> message){		
-		log.info("WhiteboardApplication - Getting number of shapes for page: " + (Integer) message.get("pageNum"));
-		application.changePage((Integer) message.get("pageNum"));
+	public void setActivePage(String page){		
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		Integer pageNum = new Integer(page);
+		bbbGW.changePage(meetingID, pageNum);
 	}
 	
 	public void requestAnnotationHistory(Map<String, Object> message) {
 		log.info("WhiteboardApplication - requestAnnotationHistory");
-		application.sendAnnotationHistory(getBbbSession().getInternalUserID(), 
-				(String) message.get("presentationID"), (Integer) message.get("pageNumber"));
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		String requesterID = getMyUserId();
+		bbbGW.sendAnnotationHistory(meetingID, requesterID);
 	}
 		
 	public void clear() {
 		log.info("WhiteboardApplication - Clearing board");
-		application.clear();
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		bbbGW.clearAnnotations(meetingID);
 	}
 	
 	public void undo() {
 		log.info("WhiteboardApplication - Deleting last graphic");
-		application.undo();
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		bbbGW.undoAnnotation(meetingID);
 	}
 	
 	public void toggleGrid() {
 		log.info("WhiteboardApplication - Toggling grid mode");
-		application.toggleGrid();
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		bbbGW.toggleGrid(meetingID);
 	}
 	
 	public void setActivePresentation(Map<String, Object> message) {		
 		log.info("WhiteboardApplication - Setting active presentation: " + (String)message.get("presentationID"));
-		application.setActivePresentation((String)message.get("presentationID"), (Integer) message.get("numberOfSlides"));
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();		
+		bbbGW.setActivePresentation(meetingID, (String)message.get("presentationID"), (Integer) message.get("numberOfSlides"));
 	}
 	
 	public void enableWhiteboard(Map<String, Object> message) {
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();	
 		log.info("WhiteboardApplication - Setting whiteboard enabled: " + (Boolean)message.get("enabled"));
-		application.enableWhiteboard((Boolean)message.get("enabled"));
+		Boolean enable = (Boolean)message.get("enabled");
+		bbbGW.enableWhiteboard(meetingID, enable);
 	}
 	
 	public void isWhiteboardEnabled() {
-		application.isWhiteboardEnabled(getBbbSession().getInternalUserID());
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();	
+		String requesterID = getMyUserId();
+		bbbGW.isWhiteboardEnabled(meetingID, requesterID);
 	}
 	
-	private BigBlueButtonSession getBbbSession() {
-		return (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+	public void setBigBlueButtonGateway(IBigBlueButtonGateway bbbGW) {
+		this.bbbGW = bbbGW;
+	}
+	
+	private String getMyUserId() {
+		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+		assert bbbSession != null;
+		return bbbSession.getInternalUserID();
 	}
 	
 }

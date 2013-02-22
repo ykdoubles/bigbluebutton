@@ -11,7 +11,7 @@ import org.bigbluebutton.conference.messages.IMessage;
 import org.bigbluebutton.conference.messages.UserMessage;
 import org.red5.server.api.IConnection;
 
-public class ClientMessagingGateway implements IClientMessagingGateway {
+public class ClientMessagingGateway { //implements IClientMessagingGateway {
 	private static final int NTHREADS = 1;
 	private static final Executor exec = Executors.newFixedThreadPool(NTHREADS);
 	
@@ -24,17 +24,6 @@ public class ClientMessagingGateway implements IClientMessagingGateway {
 	public ClientMessagingGateway() {
 		meetingScopes = new ConcurrentHashMap<String, MeetingScope>();
 		messages = new LinkedBlockingQueue<IMessage>();
-	}
-	
-	@Override
-	public void addMeetingScope(MeetingScope meeting) {
-		meetingScopes.put(meeting.getMeetingID(), meeting);
-	}
-
-	@Override
-	public void addUserConnection(String meetingID, IConnection conn, String userID) {
-		AddConnectionMessage cm = new AddConnectionMessage(meetingID, userID, conn);
-		sendMessage(cm);
 	}
 	
 	public void removeMeetingScope(String meetingID) {

@@ -19,12 +19,7 @@
 package org.bigbluebutton.conference.service.voice;
 import org.slf4j.Logger;import org.red5.server.api.Red5;import org.red5.server.api.scope.IScope;
 import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.IBigBlueButtonGateway;
-import org.red5.logging.Red5LoggerFactory;
-import org.bigbluebutton.webconference.voice.ConferenceService;import java.util.ArrayList;import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.bigbluebutton.webconference.voice.Participant;
+import org.red5.logging.Red5LoggerFactory;
 public class VoiceService {
 	
 	private static Logger log = Red5LoggerFactory.getLogger( VoiceService.class, "bigbluebutton" );
@@ -37,25 +32,7 @@ public class VoiceService {
 		String requesterID = getMyUserId();
 		bbbGW.sendVoiceUsers(meetingID, requesterID);
 	}
-	
-	private Map<Integer, Map> arrayListToMap(ArrayList<Participant> alp) {
-		log.debug("Converting arraylist to Map " + alp.size());
-		Map<Integer, Map> result = new HashMap();
 		
-		for (Participant p : alp) {
-			Map<String, Object> pmap = new HashMap();
-			pmap.put("participant", p.getId());
-			pmap.put("name", p.getName());
-			pmap.put("muted", p.isMuted());
-			pmap.put("talking", p.isTalking());
-			pmap.put("locked", p.isMuteLocked());
-			log.debug("[" + p.getId() + "," + p.getName() + "," + p.isMuted() + "," + p.isTalking() + "]");
-			result.put(p.getId(), pmap);
-		}
-		
-		return result;
-	}
-	
 	public void muteAllUsers(boolean mute) {
 		IScope scope = Red5.getConnectionLocal().getScope();
 		String meetingID = scope.getName();
