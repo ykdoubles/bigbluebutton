@@ -40,7 +40,9 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	private RecorderApplication recorderApplication;
 	private AbstractApplicationContext appCtx;
 	private ConnectionInvokerService connInvokerService;
-		
+	private IBigBlueButtonGateway bbbGW;
+	private IClientMessagingGateway clientGW;
+	
 	@Override
     public boolean appStart(IScope app) {
         log.debug("Starting BigBlueButton "); 
@@ -50,18 +52,13 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         appCtx.registerShutdownHook();
         return super.appStart(app);
     }
-    
-	@Override
-    public void appStop(IScope app) {
-        log.debug("Stopping BigBlueButton ");
-        super.appStop(app);
-    }
-    
+        
 	@Override
     public boolean roomStart(IScope room) {
     	log.debug("Starting room [" + room.getName() + "].");
-    	assert participantsApplication != null;
-    	connInvokerService.addScope(room.getName(), room);
+    	String meetingID = room.getName();
+    	clientGW.addScope(room.getName(), room);
+    	bbbGW.createMeeting(meetingID);
     	return super.roomStart(room);
     }	
 	
@@ -168,6 +165,10 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
 		System.out.print("Setting conn invoket service!!!!");
 		this.connInvokerService = connInvokerService;
+	}
+	
+	public void setBigBlueButtonGateway(IBigBlueButtonGateway bbbGW) {
+		this.bbbGW = bbbGW;
 	}
 	
 	private class ShutdownHookListener implements ApplicationListener<ApplicationEvent> {
