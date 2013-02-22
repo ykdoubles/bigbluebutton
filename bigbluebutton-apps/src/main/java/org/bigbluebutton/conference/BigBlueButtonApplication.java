@@ -18,66 +18,88 @@
 */
 package org.bigbluebutton.conference;
 
-import java.util.Iterator;
-import java.util.Set;
-import org.red5.server.api.Red5;import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
-import org.bigbluebutton.conference.service.recorder.RecorderApplication;
+import org.red5.server.api.Red5;
 import org.red5.logging.Red5LoggerFactory;
-import org.red5.server.adapter.IApplication;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.IConnection;
-import org.red5.server.api.IContext;
 import org.red5.server.api.scope.IScope;
+import org.red5.server.api.so.ISharedObject;
 import org.slf4j.Logger;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.support.AbstractApplicationContext;
 
 public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	private static Logger log = Red5LoggerFactory.getLogger(BigBlueButtonApplication.class, "bigbluebutton");
 
-	private ParticipantsApplication participantsApplication;
-	private RecorderApplication recorderApplication;
-	private AbstractApplicationContext appCtx;
-	private ConnectionInvokerService connInvokerService;
 	private IBigBlueButtonGateway bbbGW;
 	private IClientMessagingGateway clientGW;
+	
+	private static final String USERS_SO = "participantsSO"; 
+	private static final String LAYOUT_SO = "layoutSO"; 
+	private static final String POLL_SO = "pollSO"; 
+	private static final String PRESENTATION_SO = "presentationSO"; 
+	private static final String VOICE_SO = "meetMeUsersSO";
 	
 	@Override
     public boolean appStart(IScope app) {
         log.debug("Starting BigBlueButton "); 
-        IContext context = app.getContext();
-        appCtx = (AbstractApplicationContext) context.getApplicationContext();
-        appCtx.addApplicationListener(new ShutdownHookListener());
-        appCtx.registerShutdownHook();
         return super.appStart(app);
     }
         
 	@Override
-    public boolean roomStart(IScope room) {
-    	log.debug("Starting room [" + room.getName() + "].");
-    	String meetingID = room.getName();
-    	clientGW.addScope(room.getName(), room);
-    	bbbGW.createMeeting(meetingID);
-    	return super.roomStart(room);
+    public boolean roomStart(IScope meeting) {
+		String meetingID = meeting.getName();
+    	log.debug("Starting meeting [" + meetingID + "].");
+    	
+    	if (!hasSharedObject(meeting, USERS_SO)) {
+    		if (! createSharedObject(meeting, USERS_SO, false)) {   
+    			log.error("Failed to create users shared object for meeting id = [" + meetingID + "]"); 			
+    		}    		
+    	}  	
+    	
+    	if (!hasSharedObject(meeting, LAYOUT_SO)) {
+    		if (! createSharedObject(meeting, LAYOUT_SO, false)) {   
+    			log.error("Failed to create layout shared object for meeting id = [" + meetingID + "]"); 			
+    		}    		
+    	}  
+    	
+    	if (!hasSharedObject(meeting, POLL_SO)) {
+    		if (! createSharedObject(meeting, POLL_SO, false)) {   
+    			log.error("Failed to create poll shared object for meeting id = [" + meetingID + "]"); 			
+    		}    		
+    	}  
+    	
+    	if (!hasSharedObject(meeting, PRESENTATION_SO)) {
+    		if (! createSharedObject(meeting, PRESENTATION_SO, false)) {   
+    			log.error("Failed to create presentation shared object for meeting id = [" + meetingID + "]"); 			
+    		}    		
+    	}  
+    	
+    	if (!hasSharedObject(meeting, VOICE_SO)) {
+    		if (! createSharedObject(meeting, VOICE_SO, false)) {   
+    			log.error("Failed to create voice shared object for meeting id = [" + meetingID + "]"); 			
+    		}    		
+    	}  
+    	    	
+    	ISharedObject usersSO = getSharedObject(meeting, USERS_SO);
+    	ISharedObject layoutSO = getSharedObject(meeting, LAYOUT_SO);
+    	ISharedObject pollSO = getSharedObject(meeting, POLL_SO);
+    	ISharedObject presentationSO = getSharedObject(meeting, PRESENTATION_SO);
+    	ISharedObject voiceSO = getSharedObject(meeting, VOICE_SO);
+    	
+    	clientGW.addScope(meetingID, meeting, usersSO, layoutSO, pollSO, presentationSO, voiceSO);
+    	    	
+    	return super.roomStart(meeting);
     }	
 	
 	@Override
-    public void roomStop(IScope room) {
-    	log.debug("Stopping room [" + room.getName() + "].");
-    	super.roomStop(room);
-    	assert participantsApplication != null;
-    	participantsApplication.destroyRoom(room.getName());
-    	BigBlueButtonSession bbbSession = getBbbSession();
-    	assert bbbSession != null;
-
-    	/**
-    	 * Need to figure out if the next 2 lines should be removed. (ralam nov 25, 2010).
-    	 */
-		assert recorderApplication != null;
-		recorderApplication.destroyRecordSession(bbbSession.getSessionName());
-		connInvokerService.removeScope(room.getName());
-		log.debug("Stopped room [" + room.getName() + "].");
+    public void roomStop(IScope meeting) {
+		String meetingID = meeting.getName();
+		
+    	log.debug("Stopping meeting [" + meetingID + "].");
+    	   	
+    	bbbGW.endMeeting(meetingID);
+    	clientGW.removeScope(meetingID);
+    	
+    	super.roomStop(meeting);
     }
     
 	@Override
@@ -86,54 +108,49 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         int remotePort = Red5.getConnectionLocal().getRemotePort();
         String username = ((String) params[0]).toString();
         String role = ((String) params[1]).toString();
-        String conference = ((String)params[2]).toString();
+        String internalMeetingID = ((String)params[2]).toString();
 
         /*
          * Convert the id to Long because it gets converted to ascii decimal
          * equivalent (i.e. zero (0) becomes 48) if we don't.
          */
         long clientID = Long.parseLong(Red5.getConnectionLocal().getClient().getId());
-        String sessionName = ((String)params[3]).toString();
+        String meetingName = ((String)params[3]).toString();
         log.info("[clientid=" + clientID + "] connected from " + remoteHost + ":" + remotePort + ".");
         
         String voiceBridge = ((String) params[4]).toString();
-		String room = sessionName;
-		assert recorderApplication != null;
-		boolean record = (Boolean)params[5];
-		log.debug("record value - [" + record + "]"); 
+
+		boolean recorded = (Boolean)params[5];
+		log.debug("record value - [" + recorded + "]"); 
 
     	String externalUserID = ((String) params[6]).toString();
     	String internalUserID = ((String) params[7]).toString();
-    	    	
-		if (record == true) {
-			recorderApplication.createRecordSession(sessionName);
-		}
-			
-    	BigBlueButtonSession bbbSession = new BigBlueButtonSession(sessionName, clientID, internalUserID,  username, role, 
-    			conference, room, voiceBridge, record, externalUserID);
+    	    				
+    	BigBlueButtonSession bbbSession = new BigBlueButtonSession(internalMeetingID, meetingName, clientID, internalUserID,  username, role, 
+    			internalMeetingID, internalMeetingID, voiceBridge, recorded, externalUserID);
         connection.setAttribute(Constants.SESSION, bbbSession);        
         
-        String debugInfo = "internalUserID=" + internalUserID + ",username=" + username + ",role=" +  role + ",conference=" + conference + "," + 
-        					"session=" + sessionName + ",voiceConf=" + voiceBridge + ",room=" + room + ",externalUserid=" + externalUserID;
-		log.debug("User [{}] connected to room [{}]", debugInfo, room); 
-		participantsApplication.createRoom(room);
+        String debugInfo = "internalUserID=" + internalUserID + ",username=" + username + ",role=" +  role + ",internalMeetingID=" + internalMeetingID + "," + 
+        					"session=" + internalMeetingID + ",voiceConf=" + voiceBridge + ",room=" + internalMeetingID + ",externalUserid=" + externalUserID;
+		log.debug("User [{}] connected to room [{}]", debugInfo, internalMeetingID); 
+		
+		bbbGW.createMeeting(internalMeetingID, meetingName, voiceBridge, recorded);
+		
+		bbbGW.joinUser(internalMeetingID, internalUserID, username, role, externalUserID, false, false, false);
+		clientGW.addConnection(internalMeetingID, bbbSession.getInternalUserID(), connection);
+		
         super.roomConnect(connection, params);
         
-        connInvokerService.addConnection(bbbSession.getInternalUserID(), connection);
+        
     	return true;
 	}
 
 	@Override
 	public void roomDisconnect(IConnection conn) {
-        String remoteHost = Red5.getConnectionLocal().getRemoteAddress();
-        int remotePort = Red5.getConnectionLocal().getRemotePort();    	
-        String clientId = Red5.getConnectionLocal().getClient().getId();
-    	log.info("[clientid=" + clientId + "] disconnnected from " + remoteHost + ":" + remotePort + ".");
+
+    	BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+    	clientGW.removeConnection(bbbSession.getMeetingID(), getBbbSession().getInternalUserID());
     	
-    	connInvokerService.removeConnection(getBbbSession().getInternalUserID());
-    	
-		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
-		log.info("User [" + bbbSession.getUsername() + "] disconnected from room [" + bbbSession.getRoom() +"]");
 		super.roomDisconnect(conn);
 	}
 	
@@ -142,44 +159,16 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		assert bbbSession != null;
 		return bbbSession.getInternalUserID();
 	}
-	
-	public void setParticipantsApplication(ParticipantsApplication a) {
-		participantsApplication = a;
-	}
-	
-	public void setRecorderApplication(RecorderApplication a) {
-		recorderApplication = a;
-	}
-	
-	public void setApplicationListeners(Set<IApplication> listeners) {
-		Iterator<IApplication> iter = listeners.iterator();
-		while (iter.hasNext()) {
-			super.addListener((IApplication) iter.next());
-		}
-	}
-		
+				
 	private BigBlueButtonSession getBbbSession() {
 		return (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
-	}
-
-	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
-		System.out.print("Setting conn invoket service!!!!");
-		this.connInvokerService = connInvokerService;
 	}
 	
 	public void setBigBlueButtonGateway(IBigBlueButtonGateway bbbGW) {
 		this.bbbGW = bbbGW;
 	}
 	
-	private class ShutdownHookListener implements ApplicationListener<ApplicationEvent> {
-
-		@Override
-		public void onApplicationEvent(ApplicationEvent event) {
-			if (event instanceof org.springframework.context.event.ContextStoppedEvent) {
-				log.info("Received shutdown event. Red5 is shutting down. Destroying all rooms.");
-				participantsApplication.destroyAllRooms();
-			}			
-		}
-		
+	public void setClientMessagingGateway(IClientMessagingGateway clientGW) {
+		this.clientGW = clientGW;
 	}
 }
