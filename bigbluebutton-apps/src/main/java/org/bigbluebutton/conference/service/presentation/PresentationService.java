@@ -17,27 +17,27 @@
 *
 */
 package org.bigbluebutton.conference.service.presentation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;import org.red5.server.api.Red5;import org.red5.server.api.scope.IScope;
-import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
+import org.bigbluebutton.conference.BigBlueButtonSession;
+import org.bigbluebutton.conference.Constants;
+import org.bigbluebutton.conference.IBigBlueButtonGateway;
 
 public class PresentationService {	
 	private static Logger log = Red5LoggerFactory.getLogger( PresentationService.class, "bigbluebutton" );
 	
-	private ParticipantsApplication participantsApplication;
-	private PresentationApplication presentationApplication;
-
-	public void removePresentation(String name) {
-		log.debug("removePresentation " + name);
+	private IBigBlueButtonGateway bbbGW;
+	
+	public void removePresentation(String presentationID) {
+		log.debug("removePresentation " + presentationID);
 		IScope scope = Red5.getConnectionLocal().getScope();
-		presentationApplication.removePresentation(scope.getName(), name);
+		String meetingID = scope.getName();
+		bbbGW.removePresentation(meetingID, presentationID);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getPresentationInfo() {
+	public void sendPresentationInfo() {
+/**
 		log.debug("Getting presentation information.");
 		IScope scope = Red5.getConnectionLocal().getScope();
 		ArrayList<String> curPresenter = participantsApplication.getCurrentPresenter(scope.getName());
@@ -80,40 +80,50 @@ public class PresentationService {
 		presentationInfo.put("presentations", presentationNames);
 		
 		log.info("getPresentationInfo::service - Sending presentation information...");
-		return presentationInfo;
+**/
+		
+		IScope scope = Red5.getConnectionLocal().getScope();
+		String meetingID = scope.getName();
+		String requesterID = getMyUserId();
+		
+		bbbGW.sendPresentationInfo(meetingID, requesterID);				
 	}
 	
 	public void gotoSlide(int slideNum) {
 		log.debug("Request to go to slide " + slideNum);
 		IScope scope = Red5.getConnectionLocal().getScope();
-		presentationApplication.gotoSlide(scope.getName(), slideNum);
+		String meetingID = scope.getName();
+		bbbGW.gotoSlide(meetingID, slideNum);
 	}
 	
-	public void sharePresentation(String presentationName, Boolean share) {
-		log.debug("Request to go to sharePresentation " + presentationName + " " + share);
+	public void sharePresentation(String presentationID, Boolean share) {
+		log.debug("Request to go to sharePresentation " + presentationID + " " + share);
 		IScope scope = Red5.getConnectionLocal().getScope();
-		presentationApplication.sharePresentation(scope.getName(), presentationName, share);
+		String meetingID = scope.getName();
+		bbbGW.sharePresentation(meetingID, presentationID, share);
 	}
 	
 	public void sendCursorUpdate(Double xPercent,Double yPercent) {
 		log.debug("Request update cursor[" + xPercent + "," + yPercent + "]" );
 		IScope scope = Red5.getConnectionLocal().getScope();
-		presentationApplication.sendCursorUpdate(scope.getName(), xPercent, yPercent);
+		String meetingID = scope.getName();
+		bbbGW.sendCursorUpdate(meetingID, xPercent, yPercent);
 	}
 	
-	public void resizeAndMoveSlide(Double xOffset,Double yOffset,Double widthRatio,Double heightRatio) {
+	public void resizeAndMoveSlide(Double xOffset, Double yOffset, Double widthRatio, Double heightRatio) {
 		log.debug("Request to resize and move slide[" + xOffset + "," + yOffset + "," + widthRatio + "," + heightRatio);
 		IScope scope = Red5.getConnectionLocal().getScope();
-		presentationApplication.resizeAndMoveSlide(scope.getName(), xOffset, yOffset, widthRatio, heightRatio);
+		String meetingID = scope.getName();
+		bbbGW.resizeAndMoveSlide(meetingID, xOffset, yOffset, widthRatio, heightRatio);
 	}
-
-	public void setParticipantsApplication(ParticipantsApplication a) {
-	    log.debug("Setting participants application");
-	    participantsApplication = a;
+		
+	public void setBigBlueButtonGateway(IBigBlueButtonGateway bbbGW) {
+		this.bbbGW = bbbGW;
 	}
 	
-	public void setPresentationApplication(PresentationApplication a) {
-		log.debug("Setting Presentation Applications");
-		presentationApplication = a;
+	public String getMyUserId() {
+		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+		assert bbbSession != null;
+		return bbbSession.getInternalUserID();
 	}
 }

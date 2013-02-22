@@ -147,9 +147,13 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 
 	@Override
 	public void roomDisconnect(IConnection conn) {
-
     	BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
-    	clientGW.removeConnection(bbbSession.getMeetingID(), getBbbSession().getInternalUserID());
+    	String meetingID = bbbSession.getMeetingID();
+    	String userID = getBbbSession().getInternalUserID();
+    	
+    	bbbGW.leaveUser(meetingID, userID);
+    	
+    	clientGW.removeConnection(meetingID, userID);
     	
 		super.roomDisconnect(conn);
 	}

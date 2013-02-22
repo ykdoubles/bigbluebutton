@@ -20,17 +20,20 @@ package org.bigbluebutton.conference.service.chat;
 
 import java.util.Map;
 import org.slf4j.Logger;
+import org.bigbluebutton.conference.BigBlueButtonSession;
+import org.bigbluebutton.conference.Constants;
+import org.bigbluebutton.conference.IBigBlueButtonGateway;
 import org.red5.logging.Red5LoggerFactory;import org.red5.server.api.Red5;
 
 public class ChatService {
 	
 	private static Logger log = Red5LoggerFactory.getLogger( ChatService.class, "bigbluebutton" );
 	
-	private ChatApplication application;
+	private IBigBlueButtonGateway bbbGW;
 
 	public void sendPublicChatHistory() {
 		String meetingID = Red5.getConnectionLocal().getScope().getName();
-		application.sendPublicChatHistory(meetingID);
+		bbbGW.sendPublicChatHistory(meetingID, getMyUserId());
 	}
 	
 	public void sendPublicMessage(Map<String, Object> msg) {
@@ -48,15 +51,16 @@ public class ChatService {
 		chatObj.toUsername = msg.get("toUsername").toString();
 		chatObj.message = msg.get("message").toString();
 	
-		application.sendPublicMessage(meetingID, chatObj);
+		bbbGW.sendPublicMessage(meetingID, chatObj);
 	}
 	
-	public void setChatApplication(ChatApplication a) {
-		log.debug("Setting Chat Applications");
-		application = a;
+	public void setBigBlueButtonGateway(IBigBlueButtonGateway bbbGW) {
+		this.bbbGW = bbbGW;
 	}
 	
 	public void sendPrivateMessage(Map<String, Object> msg){
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+		
 		ChatMessageVO chatObj = new ChatMessageVO();
 		chatObj.chatType = msg.get("chatType").toString();  
 		chatObj.fromUserID = msg.get("fromUserID").toString();
@@ -69,7 +73,13 @@ public class ChatService {
 		chatObj.toUsername = msg.get("toUsername").toString();
 		chatObj.message = msg.get("message").toString();
 	
-		application.sendPrivateMessage(chatObj);
+		bbbGW.sendPrivateMessage(meetingID, chatObj);
 
+	}
+	
+	public String getMyUserId() {
+		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+		assert bbbSession != null;
+		return bbbSession.getInternalUserID();
 	}
 }

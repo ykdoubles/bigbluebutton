@@ -17,8 +17,10 @@
 * Author: Felipe Cecagno <felipe@mconf.org>
 */
 package org.bigbluebutton.conference.service.layout;
-import java.util.List;
 
+import org.bigbluebutton.conference.BigBlueButtonSession;
+import org.bigbluebutton.conference.Constants;
+import org.bigbluebutton.conference.IBigBlueButtonGateway;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
 import org.slf4j.Logger;
@@ -27,28 +29,33 @@ public class LayoutService {
 	
 	private static Logger log = Red5LoggerFactory.getLogger( LayoutService.class, "bigbluebutton" );
 	
-	private LayoutApplication application;
+	private IBigBlueButtonGateway bbbGW;
 
-	public List<Object> init() {
-		log.debug("Initializing layout");
-		String roomName = Red5.getConnectionLocal().getScope().getName();
-		return application.currentLayout(roomName);
+	public void getCurrentLayout() {
+		log.debug("getCurrentLayout");
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+		bbbGW.sendCurrentLayout(meetingID, getMyUserId());
 	}
 	
-	public void lock(String userId, String layout) {
+	public void lock(String userID, String layoutID) {
 		log.debug("Layout locked");
-		String roomName = Red5.getConnectionLocal().getScope().getName();
-		application.lockLayout(roomName, userId, layout);
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+		bbbGW.lockLayout(meetingID, userID, layoutID);
 	}
 	
 	public void unlock() {
 		log.debug("Layout unlocked");
-		String roomName = Red5.getConnectionLocal().getScope().getName();
-		application.unlockLayout(roomName);
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+		bbbGW.unlockLayout(meetingID);
 	}
 	
-	public void setLayoutApplication(LayoutApplication a) {
-		log.debug("Setting layout application");
-		application = a;
+	public void setBigBlueButtonGateway(IBigBlueButtonGateway bbbGW) {
+		this.bbbGW = bbbGW;
+	}
+	
+	public String getMyUserId() {
+		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
+		assert bbbSession != null;
+		return bbbSession.getInternalUserID();
 	}
 }
