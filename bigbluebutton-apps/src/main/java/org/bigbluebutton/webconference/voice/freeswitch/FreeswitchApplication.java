@@ -19,15 +19,13 @@
 package org.bigbluebutton.webconference.voice.freeswitch;
 
 import java.io.File;
-import java.util.Observable;
 import org.bigbluebutton.webconference.voice.ConferenceServiceProvider;
-import org.bigbluebutton.webconference.voice.events.ConferenceEventListener;
+import org.bigbluebutton.webconference.voice.events.VoiceEventListener;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.BroadcastConferenceCommand;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.EjectParticipantCommand;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.PopulateRoomCommand;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.MuteParticipantCommand;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.RecordConferenceCommand;
-import org.freeswitch.esl.client.IEslEventListener;
 import org.freeswitch.esl.client.inbound.Client;
 import org.freeswitch.esl.client.inbound.InboundConnectionFailure;
 import org.freeswitch.esl.client.manager.ManagerConnection;
@@ -36,11 +34,11 @@ import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 
-public class FreeswitchApplication extends Observable implements ConferenceServiceProvider {
+public class FreeswitchApplication implements ConferenceServiceProvider {
     private static Logger log = Red5LoggerFactory.getLogger(FreeswitchApplication.class, "bigbluebutton");
 
     private ManagerConnection manager;
-    private ConferenceEventListener conferenceEventListener;
+    private VoiceEventListener voiceEventListener;
     private FreeswitchHeartbeatMonitor heartbeatMonitor;
     private boolean debug = false;
  
@@ -54,7 +52,7 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
     
     private volatile boolean connected = false;
     
-    private IEslEventListener eslEventListener;
+    private FreeswitchEslListener eslEventListener;
     
     private final Integer USER = 0; /* not used for now */
        
@@ -78,9 +76,9 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
     }
     
     private void startHeartbeatMonitor() {      
-        if(heartbeatMonitor == null) { //Only startup once. as startup will be called for reconnect.
+        if (heartbeatMonitor == null) { //Only startup once. as startup will be called for reconnect.
             heartbeatMonitor = new FreeswitchHeartbeatMonitor(manager, this);
-            this.addObserver(heartbeatMonitor);
+            eslEventListener.setHeartbeatListener(heartbeatMonitor);
             heartbeatMonitor.start();
         }   	
     }
@@ -96,7 +94,7 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
         if (c.canSend()) {
         	PopulateRoomCommand prc = new PopulateRoomCommand(room, USER);
             EslMessage response = c.sendSyncApiCommand(prc.getCommand(), prc.getCommandArgs());
-            prc.handleResponse(response, conferenceEventListener);        	
+            prc.handleResponse(response, voiceEventListener);        	
         } else {
         	log.warn("Can't send populate room request to FreeSWITCH as we are not connected.");
         	// Let's see if we can recover the connection.
@@ -146,7 +144,7 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
         	RecordConferenceCommand rcc = new RecordConferenceCommand(room, USER, true, voicePath);
         	log.debug(rcc.getCommand() + " " + rcc.getCommandArgs());
         	EslMessage response = manager.getESLClient().sendSyncApiCommand(rcc.getCommand(), rcc.getCommandArgs());
-            rcc.handleResponse(response, conferenceEventListener);       	
+            rcc.handleResponse(response, voiceEventListener);       	
         }else {
         	log.warn("Can't send record request to FreeSWITCH as we are not connected.");
         	// Let's see if we can recover the connection.
@@ -175,7 +173,7 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
         	BroadcastConferenceCommand rcc = new BroadcastConferenceCommand(room, USER, true, shoutPath);
         	log.debug(rcc.getCommand() + rcc.getCommandArgs());
         	EslMessage response = manager.getESLClient().sendSyncApiCommand(rcc.getCommand(), rcc.getCommandArgs());
-            rcc.handleResponse(response, conferenceEventListener);       	
+            rcc.handleResponse(response, voiceEventListener);       	
         }else {
         	log.warn("Can't send record request to FreeSWITCH as we are not connected.");
         	// Let's see if we can recover the connection.
@@ -187,8 +185,8 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
         this.manager = manager;
     }
 
-    public void setConferenceEventListener(ConferenceEventListener listener) {
-        this.conferenceEventListener = listener;
+    public void setConferenceEventListener(VoiceEventListener listener) {
+        this.voiceEventListener = listener;
     }
 
     public void setDebugNullConferenceAction(boolean enabled) {
@@ -223,7 +221,7 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
     	icecastStreamExtension = ext;
     }
     
-    public void setEslEventListener(IEslEventListener l) {
+    public void setEslEventListener(FreeswitchEslListener l) {
     	eslEventListener = l;
     }
 

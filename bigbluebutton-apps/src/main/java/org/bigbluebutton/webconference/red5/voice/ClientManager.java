@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.bigbluebutton.webconference.voice.events.ConferenceEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantJoinedEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantLeftEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantLockedEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantMutedEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantTalkingEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserJoinedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserLeftEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserLockedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserMutedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserTalkingEvent;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.so.ISharedObject;
 import org.slf4j.Logger;
@@ -114,20 +114,20 @@ public class ClientManager implements ClientNotifier {
 		}
 	}	
 	
-	public void handleConferenceEvent(ConferenceEvent event) {
-		if (event instanceof ParticipantJoinedEvent) {
-			ParticipantJoinedEvent pje = (ParticipantJoinedEvent) event;
+	public void handleConferenceEvent(VoiceEvent event) {
+		if (event instanceof VoiceUserJoinedEvent) {
+			VoiceUserJoinedEvent pje = (VoiceUserJoinedEvent) event;
 			joined(pje.getRoom(), pje.getParticipantId(), pje.getCallerIdName(), pje.getMuted(), pje.getSpeaking(), pje.isLocked());
-		} else if (event instanceof ParticipantLeftEvent) {		
+		} else if (event instanceof VoiceUserLeftEvent) {		
 			left(event.getRoom(), event.getParticipantId());		
-		} else if (event instanceof ParticipantMutedEvent) {
-			ParticipantMutedEvent pme = (ParticipantMutedEvent) event;
+		} else if (event instanceof VoiceUserMutedEvent) {
+			VoiceUserMutedEvent pme = (VoiceUserMutedEvent) event;
 			muted(pme.getRoom(), pme.getParticipantId(), pme.isMuted());
-		} else if (event instanceof ParticipantTalkingEvent) {
-			ParticipantTalkingEvent pte = (ParticipantTalkingEvent) event;
+		} else if (event instanceof VoiceUserTalkingEvent) {
+			VoiceUserTalkingEvent pte = (VoiceUserTalkingEvent) event;
 			talking(pte.getRoom(), pte.getParticipantId(), pte.isTalking());
-		} else if (event instanceof ParticipantLockedEvent) {
-			ParticipantLockedEvent ple = (ParticipantLockedEvent) event;
+		} else if (event instanceof VoiceUserLockedEvent) {
+			VoiceUserLockedEvent ple = (VoiceUserLockedEvent) event;
 			locked(ple.getRoom(), ple.getParticipantId(), ple.isLocked());
 		}
 	}

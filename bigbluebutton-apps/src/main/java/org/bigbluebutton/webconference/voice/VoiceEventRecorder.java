@@ -19,13 +19,13 @@
 package org.bigbluebutton.webconference.voice;
 
 import org.bigbluebutton.conference.service.recorder.RecorderApplication;
-import org.bigbluebutton.webconference.voice.events.ConferenceEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantJoinedEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantLeftEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantLockedEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantMutedEvent;
-import org.bigbluebutton.webconference.voice.events.ParticipantTalkingEvent;
-import org.bigbluebutton.webconference.voice.events.StartRecordingEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserJoinedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserLeftEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserLockedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserMutedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceUserTalkingEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceRecordingStartedEvent;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
@@ -34,26 +34,26 @@ public class VoiceEventRecorder {
 	
 	private RecorderApplication recorder;
 	
-	public void recordConferenceEvent(ConferenceEvent event, String room) {
-		if (event instanceof ParticipantJoinedEvent) {
+	public void recordConferenceEvent(VoiceEvent event, String room) {
+		if (event instanceof VoiceUserJoinedEvent) {
 			recordParticipantJoinedEvent(event, room);
-		} else if (event instanceof ParticipantLeftEvent) {		
+		} else if (event instanceof VoiceUserLeftEvent) {		
 			recordParticipantLeftEvent(event, room);
-		} else if (event instanceof ParticipantMutedEvent) {
+		} else if (event instanceof VoiceUserMutedEvent) {
 			recordParticipantMutedEvent(event, room);
-		} else if (event instanceof ParticipantTalkingEvent) {
+		} else if (event instanceof VoiceUserTalkingEvent) {
 			recordParticipantTalkingEvent(event, room);
-		} else if (event instanceof ParticipantLockedEvent) {
+		} else if (event instanceof VoiceUserLockedEvent) {
 			recordParticipantLockedEvent(event, room);
-		} else if (event instanceof StartRecordingEvent) {
+		} else if (event instanceof VoiceRecordingStartedEvent) {
 			recordStartRecordingEvent(event, room);
 		} else {
 			log.debug("Processing UnknownEvent " + event.getClass().getName() + " for room: " + event.getRoom() );
 		}		
 	}
 	
-	private void recordStartRecordingEvent(ConferenceEvent event, String room) {
-		StartRecordingEvent sre = (StartRecordingEvent) event;
+	private void recordStartRecordingEvent(VoiceEvent event, String room) {
+		VoiceRecordingStartedEvent sre = (VoiceRecordingStartedEvent) event;
 		StartRecordingVoiceRecordEvent evt = new StartRecordingVoiceRecordEvent(sre.startRecord());
 		evt.setMeetingId(room);
 		evt.setTimestamp(System.currentTimeMillis());
@@ -64,8 +64,8 @@ public class VoiceEventRecorder {
 		recorder.record(room, evt);
 	}
 	
-	private void recordParticipantJoinedEvent(ConferenceEvent event, String room) {
-		ParticipantJoinedEvent pje = (ParticipantJoinedEvent) event;
+	private void recordParticipantJoinedEvent(VoiceEvent event, String room) {
+		VoiceUserJoinedEvent pje = (VoiceUserJoinedEvent) event;
 
 		ParticipantJoinedVoiceRecordEvent evt = new ParticipantJoinedVoiceRecordEvent();
 		evt.setMeetingId(room);
@@ -81,7 +81,7 @@ public class VoiceEventRecorder {
 		recorder.record(room, evt);
 	}
 
-	private void recordParticipantLeftEvent(ConferenceEvent event, String room) {
+	private void recordParticipantLeftEvent(VoiceEvent event, String room) {
 		ParticipantLeftVoiceRecordEvent evt = new ParticipantLeftVoiceRecordEvent();
 		evt.setMeetingId(room);
 		evt.setTimestamp(System.currentTimeMillis());
@@ -91,8 +91,8 @@ public class VoiceEventRecorder {
 		recorder.record(room, evt);
 	}
 	
-	private void recordParticipantMutedEvent(ConferenceEvent event, String room) {
-		ParticipantMutedEvent pme = (ParticipantMutedEvent) event;
+	private void recordParticipantMutedEvent(VoiceEvent event, String room) {
+		VoiceUserMutedEvent pme = (VoiceUserMutedEvent) event;
 		
 		ParticipantMutedVoiceRecordEvent evt = new ParticipantMutedVoiceRecordEvent();
 		evt.setMeetingId(room);
@@ -104,8 +104,8 @@ public class VoiceEventRecorder {
 		recorder.record(room, evt);
 	}
 	
-	private void recordParticipantTalkingEvent(ConferenceEvent event, String room) {
-		ParticipantTalkingEvent pte = (ParticipantTalkingEvent) event;
+	private void recordParticipantTalkingEvent(VoiceEvent event, String room) {
+		VoiceUserTalkingEvent pte = (VoiceUserTalkingEvent) event;
 	
 		ParticipantTalkingVoiceRecordEvent evt = new ParticipantTalkingVoiceRecordEvent();
 		evt.setMeetingId(room);
@@ -117,8 +117,8 @@ public class VoiceEventRecorder {
 		recorder.record(room, evt);
 	}
 	
-	private void recordParticipantLockedEvent(ConferenceEvent event, String room) {
-		ParticipantLockedEvent ple = (ParticipantLockedEvent) event;
+	private void recordParticipantLockedEvent(VoiceEvent event, String room) {
+		VoiceUserLockedEvent ple = (VoiceUserLockedEvent) event;
 
 		ParticipantLockedVoiceRecordEvent evt = new ParticipantLockedVoiceRecordEvent();
 		evt.setMeetingId(room);

@@ -21,7 +21,6 @@ package org.bigbluebutton.webconference.voice.freeswitch;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import org.bigbluebutton.webconference.voice.ConferenceServiceProvider;
 import org.bigbluebutton.webconference.voice.commands.EjectVoiceUser;
 import org.bigbluebutton.webconference.voice.commands.GetVoiceUsers;
 import org.bigbluebutton.webconference.voice.commands.IVoiceCommand;
@@ -32,13 +31,13 @@ import org.slf4j.Logger;
 public class FreeswitchServiceProvider {
 	private static Logger log = Red5LoggerFactory.getLogger(FreeswitchServiceProvider.class, "bigbluebutton");
 	
-	private static final int NTHREADS = 4;
+	private static final int NTHREADS = 1;
 	private static final Executor exec = Executors.newFixedThreadPool(NTHREADS);
 	private BlockingQueue<IVoiceCommand> messages;
 	private volatile boolean send = false;
 	private Runnable sender;
 	
-	private ConferenceServiceProvider appDelegate;
+	private FreeswitchApplication freeswitch;
 	
 	public void start() {
 		send = true;
@@ -77,11 +76,11 @@ public class FreeswitchServiceProvider {
 	}
 	
 	private void record(String room, String meetingid){
-    	appDelegate.record(room,meetingid);
+    	freeswitch.record(room,meetingid);
     }
 
 	private void broadcast(String room, String meetingid){
-    	appDelegate.broadcast(room,meetingid);
+    	freeswitch.broadcast(room,meetingid);
     }
 	
 	private void eject(EjectVoiceUser msg) {
@@ -89,7 +88,7 @@ public class FreeswitchServiceProvider {
 	}
 
 	private void mute(String room, Integer participant, Boolean mute) {
-		appDelegate.mute(room, participant, mute);
+		freeswitch.mute(room, participant, mute);
 	}
 
 	private void populateRoom(GetVoiceUsers msg) {
@@ -97,8 +96,7 @@ public class FreeswitchServiceProvider {
 	}
 
 	public void setFreeswitchApplication(FreeswitchApplication f) {
-		appDelegate = f;
-		
+		freeswitch = f;		
     }
 
 }

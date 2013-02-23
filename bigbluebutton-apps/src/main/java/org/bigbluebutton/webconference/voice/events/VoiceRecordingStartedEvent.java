@@ -18,17 +18,34 @@
 */
 package org.bigbluebutton.webconference.voice.events;
 
-public class ParticipantMutedEvent extends ConferenceEvent {
+public class VoiceRecordingStartedEvent extends VoiceEvent {
 
-	private final boolean muted;
+	private String timestamp;
+	private String filename;
+	private boolean record;
 	
-	public ParticipantMutedEvent(Integer participantId, String room, boolean muted) {
+	public VoiceRecordingStartedEvent(Integer participantId, String room, boolean record) {
 		super(participantId, room);
-		this.muted = muted;
+		this.record =  record;
+	}
+	
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
 	}
 
-	public boolean isMuted() {
-		return muted;
+	public void setRecordingFilename(String filename) {
+		this.filename = filename;
 	}
-
+	
+	public String getTimestamp() {
+		return timestamp;
+	}
+	
+	public String getRecordingFilename() {
+		return filename;
+	}
+	
+	public boolean startRecord() {
+		return record;
+	}
 }

@@ -21,12 +21,12 @@ package org.bigbluebutton.webconference.voice;
 import java.util.ArrayList;
 
 import org.bigbluebutton.webconference.red5.voice.ClientManager;
-import org.bigbluebutton.webconference.voice.events.ConferenceEvent;
-import org.bigbluebutton.webconference.voice.events.ConferenceEventListener;
-import org.bigbluebutton.webconference.voice.events.ParticipantLockedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceEventListener;
+import org.bigbluebutton.webconference.voice.events.VoiceUserLockedEvent;
 import org.bigbluebutton.webconference.voice.internal.RoomManager;
 
-public class ConferenceService implements ConferenceEventListener {
+public class ConferenceService implements VoiceEventListener {
 	private RoomManager roomMgr;
 	private ConferenceServiceProvider confProvider;
 	private ClientManager clientManager;
@@ -54,7 +54,7 @@ public class ConferenceService implements ConferenceEventListener {
 	public void lock(Integer participant, String room, Boolean lock) {
 		if (roomMgr.hasParticipant(room, participant)) {
 //			roomMgr.lockParticipant(participant, room, lock);
-			ParticipantLockedEvent ple = new ParticipantLockedEvent(participant, room, lock);
+			VoiceUserLockedEvent ple = new VoiceUserLockedEvent(participant, room, lock);
 			handleConferenceEvent(ple);
 		}			
 	}
@@ -117,7 +117,7 @@ public class ConferenceService implements ConferenceEventListener {
 		return roomMgr.getParticipants(room);
 	}
 	
-	public void handleConferenceEvent(ConferenceEvent event) {
+	public void handleConferenceEvent(VoiceEvent event) {
 		roomMgr.processConferenceEvent(event);
 		clientManager.handleConferenceEvent(event);
 	}

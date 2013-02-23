@@ -25,8 +25,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.bigbluebutton.webconference.voice.events.ConferenceEventListener;
-import org.bigbluebutton.webconference.voice.events.ParticipantJoinedEvent;
+import org.bigbluebutton.webconference.voice.events.VoiceEventListener;
+import org.bigbluebutton.webconference.voice.events.VoiceUserJoinedEvent;
 import org.bigbluebutton.webconference.voice.freeswitch.response.ConferenceMember;
 import org.bigbluebutton.webconference.voice.freeswitch.response.XMLResponseConferenceListParser;
 import org.freeswitch.esl.client.transport.message.EslMessage;
@@ -56,7 +56,7 @@ public class RecordConferenceCommand extends FreeswitchCommand {
 		return SPACE + getRoom() + SPACE + action + SPACE + recordPath;
 	}
 
-	public void handleResponse(EslMessage response, ConferenceEventListener eventListener) {
+	public void handleResponse(EslMessage response, VoiceEventListener eventListener) {
 
         //Test for Known Conference
 
@@ -93,12 +93,12 @@ public class RecordConferenceCommand extends FreeswitchCommand {
             sp.parse(bs, confXML);
 
             //Maybe move this to XMLResponseConferenceListParser, sendConfrenceEvents ?
-            ParticipantJoinedEvent pj;
+            VoiceUserJoinedEvent pj;
 
             for(ConferenceMember member : confXML.getConferenceList()) {
                 log.debug("conf list member [{}] for room [{}].", member.getId(), confXML.getConferenceRoom());
                 //Foreach found member in conference create a JoinedEvent
-                pj = new ParticipantJoinedEvent(member.getId(), confXML.getConferenceRoom(),
+                pj = new VoiceUserJoinedEvent(member.getId(), confXML.getConferenceRoom(),
                                 member.getCallerId(), member.getCallerIdName(), member.getMuted(), member.getSpeaking());
                 eventListener.handleConferenceEvent(pj);
             }

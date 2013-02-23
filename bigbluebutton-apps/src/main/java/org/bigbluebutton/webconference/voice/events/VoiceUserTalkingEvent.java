@@ -18,10 +18,17 @@
 */
 package org.bigbluebutton.webconference.voice.events;
 
-public class UnknownConferenceEvent extends ConferenceEvent {
+public class VoiceUserTalkingEvent extends VoiceEvent {
 
-	public UnknownConferenceEvent(Integer participantId, String room) {
+	private final boolean talking;
+	
+	public VoiceUserTalkingEvent(Integer participantId, String room, boolean talking) {
 		super(participantId, room);
+		this.talking = talking;
+	}
+
+	public boolean isTalking() {
+		return talking;
 	}
 
 }

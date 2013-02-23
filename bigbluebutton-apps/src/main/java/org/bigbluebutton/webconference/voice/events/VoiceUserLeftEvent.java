@@ -18,7 +18,9 @@
 */
 package org.bigbluebutton.webconference.voice.events;
 
-public interface ConferenceEventListener {
+public class VoiceUserLeftEvent extends VoiceEvent {
 
-	public void handleConferenceEvent(ConferenceEvent event);
+	public VoiceUserLeftEvent(Integer participantId, String room) {
+		super(participantId, room);
+	}
 }

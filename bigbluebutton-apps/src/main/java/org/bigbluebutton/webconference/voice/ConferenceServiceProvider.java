@@ -18,7 +18,7 @@
 */
 package org.bigbluebutton.webconference.voice;
 
-import org.bigbluebutton.webconference.voice.events.ConferenceEventListener;
+import org.bigbluebutton.webconference.voice.events.VoiceEventListener;
 
 public interface ConferenceServiceProvider {
 	public boolean startup();
@@ -28,5 +28,5 @@ public interface ConferenceServiceProvider {
 	public void eject(String room, Integer participant);
 	public void record(String room, String meetingid);
 	public void broadcast(String room, String meetingid);
-	public void setConferenceEventListener(ConferenceEventListener l);
+	public void setConferenceEventListener(VoiceEventListener l);
 }
