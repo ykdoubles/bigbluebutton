@@ -175,4 +175,6 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	public void setClientMessagingGateway(IClientMessagingGateway clientGW) {
 		this.clientGW = clientGW;
 	}
+	
+	//public void setVoice
 }

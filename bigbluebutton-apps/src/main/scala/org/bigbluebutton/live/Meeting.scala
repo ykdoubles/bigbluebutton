@@ -2,17 +2,21 @@ package org.bigbluebutton.live
 
 import scala.actors.Actor
 import scala.actors.Actor._
-import scala.collection.immutable.HashMap
+import scala.collection.mutable.HashMap
 import org.bigbluebutton.live.MessageIn._
+import org.bigbluebutton.conference.IClientMessagingGateway
 
-class Meeting extends Actor {
+object Meeting {
+  case class MeetingVO(meetingID : String, meetingName : String, voiceBridge : String, recorded : Boolean)
+}
 
+class Meeting(meetingVO : Meeting.MeetingVO, voiceGW : IVoiceGateway, recorderGW : IRecordingGateway, clientGW : IClientMessagingGateway) extends Actor {
+  
   private val users = new HashMap[String, User]
   
-  	def act() = {
+  def act() = {
 	  loop {
 	    react {
-	        case createMeeting : CreateMeeting => handleCreateMeetingMessage(createMeeting)
 	        case endMeeting : EndMeeting => handleEndMeetingMessage(endMeeting)
 	        case joinUser : JoinUser => handleJoinUserMessage(joinUser)
 	        case leaveUser : LeaveUser => handleLeaveUserMessage(leaveUser)
@@ -50,22 +54,21 @@ class Meeting extends Actor {
 	    }
 	  }
   	}
-  	
-  private def handleCreateMeetingMessage(msg : CreateMeeting) : Unit = {
- 
+  	  	
+  private def handleEndMeetingMessage(msg : EndMeeting) : Unit = {
+	  if (meetingVO.recorded) {
+	    recorderGW.stopRecording(meetingVO.meetingID);
+	  }
   }
-  	
-	private def handleEndMeetingMessage(msg : EndMeeting) : Unit = {
-	  
-	}
 	
-	private def handleJoinUserMessage(msg : JoinUser) : Unit = {
-	  
-	}
+  private def handleJoinUserMessage(msg : JoinUser) : Unit = {
+	  val user = new User(msg.userID, msg.username, msg.role, msg.externUserID)
+	  users += user.userID -> user
+  }
 	
-	private def handleLeaveUserMessage(msg : LeaveUser) : Unit = {
+  private def handleLeaveUserMessage(msg : LeaveUser) : Unit = {
 	  
-	}
+  }
 	
 	private def handleAssignPresenterMessage(msg : AssignPresenter) : Unit = {
 	  

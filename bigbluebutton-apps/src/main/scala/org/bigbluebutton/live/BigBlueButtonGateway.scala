@@ -6,6 +6,8 @@ import org.bigbluebutton.conference.service.whiteboard.shapes.Annotation
 
 class BigBlueButtonGateway extends IBigBlueButtonGateway {
   
+  val meetingsManager : MeetingsManager = new MeetingsManager();
+  
   // Meeting
   def createMeeting(meetingID : String, meetingName : String, voiceBridge : String, recorded : Boolean) : Unit = {
     

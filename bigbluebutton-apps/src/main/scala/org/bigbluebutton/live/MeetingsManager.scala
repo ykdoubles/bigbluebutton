@@ -3,9 +3,14 @@ package org.bigbluebutton.live
 import scala.actors.Actor
 import scala.actors.Actor._
 import org.bigbluebutton.live.MessageIn._
-import scala.collection.immutable.HashMap
+import scala.collection.mutable.HashMap
+import org.bigbluebutton.conference.IClientMessagingGateway
+import org.slf4j.Logger
+import org.red5.logging.Red5LoggerFactory
 
-class MeetingsManager extends Actor {
+class MeetingsManager(voiceGW : IVoiceGateway, recorderGW : IRecordingGateway, clientGW : IClientMessagingGateway) extends Actor {
+  private val log : Logger = Red5LoggerFactory.getLogger("MeetingsManager", "bigbluebutton");
+  
   private val meetings = new HashMap[String, Meeting]
   
   def act() = {
@@ -54,22 +59,38 @@ class MeetingsManager extends Actor {
  
   private def handleCreateMeetingMessage(msg : CreateMeeting) : Unit = {
     meetings.get(msg.meetingID) match {
-      case Some(m) => m ! msg
+      case Some(m) => {
+        // Should be an error. Why are we getting a new create?
+      }
       case None => {
-  	      
+        val meetingVO = new Meeting.MeetingVO(msg.meetingID, msg.meetingName, msg.voiceBridge, msg.recorded)
+  	      val meeting = new Meeting(meetingVO, voiceGW, recorderGW, clientGW);
+  	      meetings += msg.meetingID -> meeting
+  	      meeting ! msg
       }
   	}
   }
   	
-	private def handleEndMeetingMessage(msg : EndMeeting) : Unit = {
-	  
-	}
+  private def handleEndMeetingMessage(msg : EndMeeting) : Unit = {
+	meetings.get(msg.meetingID) match {
+		case Some(m) => {
+			m ! msg
+			meetings -= msg.meetingID
+		}
+		case None => // do nothing?
+	}	  
+  }
+  	
+  private def handleJoinUserMessage(msg : JoinUser) : Unit = {
+    meetings.get(msg.meetingID) match {
+		case Some(m) => {
+	      m ! msg
+	    }
+	    case None => // do nothing
+    }	  
+  }
 	
-	private def handleJoinUserMessage(msg : JoinUser) : Unit = {
-	  
-	}
-	
-	private def handleLeaveUserMessage(msg : LeaveUser) : Unit = {
+  private def handleLeaveUserMessage(msg : LeaveUser) : Unit = {
 	  
 	}
 	
