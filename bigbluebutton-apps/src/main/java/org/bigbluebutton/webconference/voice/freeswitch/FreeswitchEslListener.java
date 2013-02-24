@@ -194,6 +194,10 @@ public class FreeswitchEslListener implements IEslEventListener {
     	return e.getEventHeaders().get("Event-Date-Timestamp");
     }
     
+    public void setVoiceEventListener(VoiceEventListener l) {
+    	voiceEventListener = l;
+    }
+    
     public void setHeartbeatListener(IHearbeatListener l) {
     	hbListener = l;
     }

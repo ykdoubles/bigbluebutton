@@ -19,7 +19,6 @@
 package org.bigbluebutton.webconference.voice.freeswitch;
 
 import java.io.File;
-import org.bigbluebutton.webconference.voice.ConferenceServiceProvider;
 import org.bigbluebutton.webconference.voice.events.VoiceEventListener;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.BroadcastConferenceCommand;
 import org.bigbluebutton.webconference.voice.freeswitch.actions.EjectParticipantCommand;
@@ -34,14 +33,12 @@ import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 
-public class FreeswitchApplication implements ConferenceServiceProvider {
+public class FreeswitchApplication {
     private static Logger log = Red5LoggerFactory.getLogger(FreeswitchApplication.class, "bigbluebutton");
 
     private ManagerConnection manager;
     private VoiceEventListener voiceEventListener;
     private FreeswitchHeartbeatMonitor heartbeatMonitor;
-    private boolean debug = false;
- 
     private String icecastProtocol = "shout";
     private String icecastHost = "localhost";
     private int icecastPort = 8000;
@@ -50,13 +47,10 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
     private String icecastStreamExtension = ".mp3";
     private Boolean icecastBroadcast = false;
     
-    private volatile boolean connected = false;
-    
     private FreeswitchEslListener eslEventListener;
     
     private final Integer USER = 0; /* not used for now */
        
-    @Override
     public boolean startup() {    	
     	connectUntilSuccessOrTimeout();
         startHeartbeatMonitor();
@@ -67,28 +61,25 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
     	try {
     		manager.connect();
     		if (manager.getESLClient().canSend()) {
-        		connected = true;
         		manager.getESLClient().addEventListener(eslEventListener);
     		}
     	} catch (InboundConnectionFailure e) {
-    		connected = false;
+    		log.error("Failed to connect to FreeSWITCH ESL");
     	}
     }
     
     private void startHeartbeatMonitor() {      
-        if (heartbeatMonitor == null) { //Only startup once. as startup will be called for reconnect.
+        if (heartbeatMonitor == null) {
             heartbeatMonitor = new FreeswitchHeartbeatMonitor(manager, this);
             eslEventListener.setHeartbeatListener(heartbeatMonitor);
             heartbeatMonitor.start();
         }   	
     }
     
-    @Override
     public void shutdown() {
         heartbeatMonitor.stop();
     }
 
-    @Override
     public void populateRoom(String room) {       
         Client c = manager.getESLClient();
         if (c.canSend()) {
@@ -102,7 +93,6 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
         }
     }
 
-    @Override
     public void mute(String room, Integer participant, Boolean mute) {
     	Client c = manager.getESLClient();
         if (c.canSend()) {
@@ -117,7 +107,6 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
 
     }
 
-    @Override
     public void eject(String room, Integer participant) {
         Client c = manager.getESLClient();
         if (c.canSend()) {
@@ -131,7 +120,6 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
         }
     }
     
-    @Override
     public void record(String room, String meetingid){
     	String RECORD_DIR = "/var/freeswitch/meetings";        
     	String voicePath = RECORD_DIR + File.separatorChar + meetingid + "-" + System.currentTimeMillis() + ".wav";
@@ -152,7 +140,6 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
         }
     }
 
-    @Override
     public void broadcast(String room, String meetingid) {        
         if (icecastBroadcast) {
         	broadcastToIcecast(room, meetingid);
@@ -187,10 +174,6 @@ public class FreeswitchApplication implements ConferenceServiceProvider {
 
     public void setConferenceEventListener(VoiceEventListener listener) {
         this.voiceEventListener = listener;
-    }
-
-    public void setDebugNullConferenceAction(boolean enabled) {
-        this.debug = enabled;
     }
     
     public void setIcecastProtocol(String protocol) {

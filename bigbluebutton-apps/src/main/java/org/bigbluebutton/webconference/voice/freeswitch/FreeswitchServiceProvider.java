@@ -76,7 +76,7 @@ public class FreeswitchServiceProvider {
 	}
 	
 	private void record(String room, String meetingid){
-    	freeswitch.record(room,meetingid);
+    	freeswitch.record(room, meetingid);
     }
 
 	private void broadcast(String room, String meetingid){
