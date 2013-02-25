@@ -2,7 +2,7 @@ package org.bigbluebutton.live
 
 import scala.actors.Actor
 import scala.actors.Actor._
-import scala.collection.mutable.HashMap
+
 import org.bigbluebutton.live.MessageIn._
 import org.bigbluebutton.conference.IClientMessagingGateway
 
@@ -12,49 +12,54 @@ object Meeting {
 
 class Meeting(meetingVO : Meeting.MeetingVO, voiceGW : IVoiceGateway, recorderGW : IRecordingGateway, clientGW : IClientMessagingGateway) extends Actor {
   
-  private val users = new HashMap[String, User]
-  
+  private val users = new Users
+ 
   def act() = {
-	  loop {
-	    react {
-	        case endMeeting : EndMeeting => handleEndMeetingMessage(endMeeting)
-	        case joinUser : JoinUser => handleJoinUserMessage(joinUser)
-	        case leaveUser : LeaveUser => handleLeaveUserMessage(leaveUser)
-	        case assignPresenter : AssignPresenter => handleAssignPresenterMessage(assignPresenter)
-	        case sendUsers : SendUsers => handleSendUsersMessage(sendUsers)
-	        case setUserStatus : SetUserStatus => handleSetUserStatusMessage(setUserStatus)
-	        case sendPublicChatHistory : SendPublicChatHistory => handleSendPublicChatHistoryMessage(sendPublicChatHistory)
-	        case sendPublicMessage : SendPublicMessage => handleSendPublicMessageMessage(sendPublicMessage)
-	        case sendPrivateMessage : SendPrivateMessage => handleSendPrivateMessageMessage(sendPrivateMessage)
-	        case sendCurrentLayout : SendCurrentLayout => handleSendCurrentLayoutMessage(sendCurrentLayout)
-	        case unlockLayout : UnlockLayout => handleUnlockLayoutMessage(unlockLayout)
-	        case lockLayout : LockLayout => handleLockLayoutMessage(lockLayout)
-	        case removePresentation : RemovePresentation => handleRemovePresentationMessage(removePresentation)
-	        case sendPresentationInfo : SendPresentationInfo => handleSendPresentationInfoMessage(sendPresentationInfo)
-	        case gotoSlide : GotoSlide => handleGotoSlideMessage(gotoSlide)
-	        case sharePresentation: SharePresentation => handleSharePresentationMessage(sharePresentation)
-	        case sendCursorUpdate : SendCursorUpdate => handleSendCursorUpdateMessage(sendCursorUpdate)
-	        case resizeAndMoveSlide : ResizeAndMoveSlide => handleResizeAndMoveSlideMessage(resizeAndMoveSlide)
-	        case getCurrentPresenter : GetCurrentPresenter => handleGetCurrentPresenterMessage(getCurrentPresenter)
-	        case sendVoiceUsers : SendVoiceUsers => handleSendVoiceUsersMessage(sendVoiceUsers)
-	        case muteAll : MuteAll => handleMuteAllMessage(muteAll)
-	        case isRoomMuted : IsRoomMuted => handleIsRoomMutedMessage(isRoomMuted)
-	        case mute : Mute => handleMuteMessage(mute)
-	        case lock : Lock => handleLockMessage(lock)
-	        case eject : Eject => handleEjectMessage(eject)
-	        case sendAnnotation : SendAnnotation => handleSendAnnotationMessage(sendAnnotation)
-	        case changePage : ChangePage => handleChangePageMessage(changePage)
-	        case sendAnnotationHistory : SendAnnotationHistory => handleSendAnnotationHistoryMessage(sendAnnotationHistory)
-	        case clearAnnotations : ClearAnnotations => handleClearAnnotationsMessage(clearAnnotations)
-	        case undoAnnotation : UndoAnnotation => handleUndoAnnotationMessage(undoAnnotation)
-	        case toggleGrid : ToggleGrid => handleToggleGridMessage(toggleGrid)
-	        case setActivePresentation : SetActivePresentation => handleSetActivePresentationMessage(setActivePresentation)
-	        case enableWhiteboard : EnableWhiteboard => handleEnableWhiteboardMessage(enableWhiteboard)
-	        case isWhiteboardEnabled : IsWhiteboardEnabled => handleIsWhiteboardEnabledMessage(isWhiteboardEnabled)
-	    }
-	  }
-  	}
-  	  	
+    loop {
+      react {
+        case createMeeting : CreateMeeting => handleCreateMeetingMessage(createMeeting)
+        case endMeeting : EndMeeting => handleEndMeetingMessage(endMeeting)
+        case joinUser : JoinUser => handleJoinUserMessage(joinUser)
+        case leaveUser : LeaveUser => handleLeaveUserMessage(leaveUser)
+        case assignPresenter : AssignPresenter => handleAssignPresenterMessage(assignPresenter)
+        case sendUsers : SendUsers => handleSendUsersMessage(sendUsers)
+        case setUserStatus : SetUserStatus => handleSetUserStatusMessage(setUserStatus)
+        case sendPublicChatHistory : SendPublicChatHistory => handleSendPublicChatHistoryMessage(sendPublicChatHistory)
+        case sendPublicMessage : SendPublicMessage => handleSendPublicMessageMessage(sendPublicMessage)
+        case sendPrivateMessage : SendPrivateMessage => handleSendPrivateMessageMessage(sendPrivateMessage)
+        case sendCurrentLayout : SendCurrentLayout => handleSendCurrentLayoutMessage(sendCurrentLayout)
+        case unlockLayout : UnlockLayout => handleUnlockLayoutMessage(unlockLayout)
+        case lockLayout : LockLayout => handleLockLayoutMessage(lockLayout)
+        case removePresentation : RemovePresentation => handleRemovePresentationMessage(removePresentation)
+        case sendPresentationInfo : SendPresentationInfo => handleSendPresentationInfoMessage(sendPresentationInfo)
+        case gotoSlide : GotoSlide => handleGotoSlideMessage(gotoSlide)
+        case sharePresentation: SharePresentation => handleSharePresentationMessage(sharePresentation)
+        case sendCursorUpdate : SendCursorUpdate => handleSendCursorUpdateMessage(sendCursorUpdate)
+        case resizeAndMoveSlide : ResizeAndMoveSlide => handleResizeAndMoveSlideMessage(resizeAndMoveSlide)
+        case getCurrentPresenter : GetCurrentPresenter => handleGetCurrentPresenterMessage(getCurrentPresenter)
+        case sendVoiceUsers : SendVoiceUsers => handleSendVoiceUsersMessage(sendVoiceUsers)
+        case muteAll : MuteAll => handleMuteAllMessage(muteAll)
+        case isRoomMuted : IsRoomMuted => handleIsRoomMutedMessage(isRoomMuted)
+        case mute : Mute => handleMuteMessage(mute)
+        case lock : Lock => handleLockMessage(lock)
+        case eject : Eject => handleEjectMessage(eject)
+        case sendAnnotation : SendAnnotation => handleSendAnnotationMessage(sendAnnotation)
+        case changePage : ChangePage => handleChangePageMessage(changePage)
+        case sendAnnotationHistory : SendAnnotationHistory => handleSendAnnotationHistoryMessage(sendAnnotationHistory)
+        case clearAnnotations : ClearAnnotations => handleClearAnnotationsMessage(clearAnnotations)
+        case undoAnnotation : UndoAnnotation => handleUndoAnnotationMessage(undoAnnotation)
+        case toggleGrid : ToggleGrid => handleToggleGridMessage(toggleGrid)
+        case setActivePresentation : SetActivePresentation => handleSetActivePresentationMessage(setActivePresentation)
+        case enableWhiteboard : EnableWhiteboard => handleEnableWhiteboardMessage(enableWhiteboard)
+        case isWhiteboardEnabled : IsWhiteboardEnabled => handleIsWhiteboardEnabledMessage(isWhiteboardEnabled)
+      }
+	}
+  }
+  
+  private def handleCreateMeetingMessage(msg : CreateMeeting) : Unit = {
+	  voiceGW.getVoiceUsers(meetingVO.voiceBridge);
+  }
+  
   private def handleEndMeetingMessage(msg : EndMeeting) : Unit = {
 	  if (meetingVO.recorded) {
 	    recorderGW.stopRecording(meetingVO.meetingID);
@@ -62,12 +67,12 @@ class Meeting(meetingVO : Meeting.MeetingVO, voiceGW : IVoiceGateway, recorderGW
   }
 	
   private def handleJoinUserMessage(msg : JoinUser) : Unit = {
-	  val user = new User(msg.userID, msg.username, msg.role, msg.externUserID)
-	  users += user.userID -> user
+	  users.addUser(msg.userID, msg.username, msg.role, msg.externUserID)
+	  //clientGW 
   }
 	
   private def handleLeaveUserMessage(msg : LeaveUser) : Unit = {
-	  
+	  users.removeUser(msg.userID);
   }
 	
 	private def handleAssignPresenterMessage(msg : AssignPresenter) : Unit = {

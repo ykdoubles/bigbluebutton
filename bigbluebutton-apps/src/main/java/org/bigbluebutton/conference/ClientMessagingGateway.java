@@ -6,10 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.bigbluebutton.conference.messages.AddConnectionMessage;
 import org.bigbluebutton.conference.messages.IMessage;
 import org.bigbluebutton.conference.messages.UserMessage;
-import org.red5.server.api.IConnection;
 
 public class ClientMessagingGateway { //implements IClientMessagingGateway {
 	private static final int NTHREADS = 1;
