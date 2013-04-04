@@ -40,9 +40,8 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 			import org.bigbluebutton.common.Images;
 			import org.bigbluebutton.common.LogUtil;
 			import org.bigbluebutton.main.events.BBBEvent;
-			import org.bigbluebutton.util.i18n.ResourceUtil;
-			
 			import org.bigbluebutton.main.events.ShortcutEvent;
+			import org.bigbluebutton.util.i18n.ResourceUtil;
 			
 			[Embed(source="assets/audio-test.mp3")]
 			[Bindable] private var soundClass:Class;
@@ -65,8 +64,8 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 						Security.showSettings(SecurityPanel.PRIVACY);
 					} else {
 						// user has allowed access to the mic
-						mic.setLoopBack(true);
-            mic.setUseEchoSuppression(true);
+//						mic.setLoopBack(true);
+//            mic.setUseEchoSuppression(true);
 					}
 				} else {
 					LogUtil.warn("Microphone is used by another application.");
@@ -89,8 +88,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 						LogUtil.warn("Access to microphone has been denied.");
 						break;
 					case "Microphone.Unmuted":
-						mic.setLoopBack(true);
-            mic.setUseEchoSuppression(true);
+            recordAudio();
+//						mic.setLoopBack(true);
+//            mic.setUseEchoSuppression(true);
 						LogUtil.debug("Access to the microphone has been allowed.");
 						break;
 					default:
@@ -100,8 +100,8 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 			
 			private function updateMicLevel(e:TimerEvent):void{
 				if (mic != null) {
-					mic1Label.text = mic.name;
-					micLevel1.setProgress(mic.activityLevel, 100);					
+	//				mic1Label.text = mic.name;
+	//				micLevel1.setProgress(mic.activityLevel, 100);					
 				}
 			}
 			
@@ -148,6 +148,64 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 			private function onHelpButtonClicked():void {
 				navigateToURL(new URLRequest(DEFAULT_HELP_URL));
 			}
+      
+      
+      const DELAY_LENGTH:int = 10000; 
+      var soundBytes:ByteArray = new ByteArray();
+//      var mic:Microphone = Microphone.getMicrophone(); 
+      var recordTimer:Timer;
+      
+      private function recordAudio():void {
+        trace("Recording audio"); 
+        mic.setSilenceLevel(0, DELAY_LENGTH); 
+        mic.gain = 100; 
+        mic.rate = 44; 
+        mic.addEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler); 
+        
+        recordTimer = new Timer(DELAY_LENGTH); 
+        recordTimer.addEventListener(TimerEvent.TIMER, timerHandler); 
+        recordTimer.start();         
+      }
+
+      
+      function micSampleDataHandler(event:SampleDataEvent):void 
+      { 
+        trace("Storing audio samples");
+        while(event.data.bytesAvailable) 
+        { 
+          var sample:Number = event.data.readFloat(); 
+          soundBytes.writeFloat(sample); 
+        } 
+      } 
+      
+      var sound1:Sound = new Sound(); 
+      var channel:SoundChannel; 
+      function timerHandler(event:TimerEvent):void 
+      {
+        trace("Playing recorded audio");
+        mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler); 
+        recordTimer.stop(); 
+        soundBytes.position = 0; 
+        sound1.addEventListener(SampleDataEvent.SAMPLE_DATA, playbackSampleHandler); 
+        channel = sound1.play();
+        channel.addEventListener( Event.SOUND_COMPLETE, playbackComplete );          
+      } 
+      
+      function playbackSampleHandler(event:SampleDataEvent):void 
+      { 
+        for (var i:int = 0; i < 8192 && soundBytes.bytesAvailable > 0; i++) 
+        { 
+//          trace(sample); 
+          var sample:Number = soundBytes.readFloat(); 
+          event.data.writeFloat(sample); 
+          event.data.writeFloat(sample); 
+        } 
+      } 
+      
+      function playbackComplete( event:Event ):void 
+      { 
+        trace( "Playback finished."); 
+      }
 		]]>
 	</mx:Script>
 	<mx:VBox width="100%" height="100%"  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
@@ -192,15 +250,18 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 			<mx:VBox width="70%">
 				<mx:Text width="100%" text="{ResourceUtil.getInstance().getString('bbb.micSettings.speakIntoMic')}"
 						 styleName="micSettingsWindowSpeakIntoMicLabelStyle" />
-				<mx:HBox width="100%">
+				<mx:HBox width="100%" >
+          <!--	
 					<mx:Text id="mic1Label" text="Microphone Name" styleName="micSettingsWindowMicNameLabelStyle"/>
-					<mx:ProgressBar id="micLevel1" minimum="0" maximum="100"  
+				<mx:ProgressBar id="micLevel1" minimum="0" maximum="100"  
 									labelPlacement="right" label="" styleName="micSettingsWindowMicProgressBarStyle"
-									direction="right" mode="manual" visible="true" width="120"/>	          
+									direction="right" mode="manual" visible="true" width="120"/>	      -->    
+          <mx:Spacer width="100%"/>
+          <mx:Button id="settingBtn" label="{ResourceUtil.getInstance().getString('bbb.micSettings.testMic')}" 
+                     styleName="micSettingsWindowChangeMicButtonStyle"
+                     click="showMicSettingsPanel()"/>	
 				</mx:HBox>			
-				<mx:Button id="settingBtn" label="{ResourceUtil.getInstance().getString('bbb.micSettings.changeMic')}" 
-						   styleName="micSettingsWindowChangeMicButtonStyle"
-						   click="showMicSettingsPanel()"/>				
+			
 			</mx:VBox>
 		</mx:HBox>	
 		<mx:HBox width="100%">
