@@ -28,7 +28,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
+import org.red5.server.api.scope.ScopeType;
 import org.red5.server.api.service.ServiceUtils;
+import java.util.Set;
 
 public class ConnectionInvokerService {
 
@@ -41,12 +43,17 @@ public class ConnectionInvokerService {
 	private ConcurrentHashMap<String, IScope> scopes;
 	
 	private volatile boolean sendMessages = false;
+	private IScope bbbAppScope;
 	
 	public ConnectionInvokerService() {
 		messages = new LinkedBlockingQueue<ClientMessage>();
 
 		connections = new ConcurrentHashMap<String, IConnection>();
 		scopes = new ConcurrentHashMap<String, IScope>();
+	}
+	
+	public void setAppScope(IScope scope) {
+		bbbAppScope = scope;
 	}
 	
 	public void addConnection(String id, IConnection conn) {
@@ -105,7 +112,21 @@ public class ConnectionInvokerService {
 	}
 	
 	private void sendMessageToClient(ClientMessage message) {
+		
+		
 		if (message.getType().equals(ClientMessage.BROADCAST)) {
+			
+			IScope fooScope = bbbAppScope.getContext().resolveScope("bigbluebutton/" + message.getDest());
+			if (fooScope != null) {
+				System.out.println("***** Found scope [" + fooScope.getName() + "] meetingID=[" + message.getDest() + "]");
+				
+				getConnections(fooScope);
+				
+				if (fooScope.hasChildScope(ScopeType.SHARED_OBJECT, "presentationSO")) {
+					System.out.println("**** Meeting has Presentation shared object.");
+				}
+			}
+			
 			IScope scope = scopes.get(message.getDest());
 			if (scope != null) {
 				List<Object> params = new ArrayList<Object>();
@@ -123,6 +144,15 @@ public class ConnectionInvokerService {
 					ServiceUtils.invokeOnConnection(conn, "onMessageFromServer", params.toArray());
 				}
 			}
+		}
+	}
+	
+	private void getConnections(IScope scope) {
+		Set<IConnection> conns = scope.getClientConnections();
+		
+		for (IConnection conn : conns) {
+			String connID = (String) conn.getAttribute("INTERNAL_USER_ID");
+			System.out.println("**** ConnID=[" + connID + "]");
 		}
 	}
 	

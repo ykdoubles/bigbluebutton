@@ -89,6 +89,8 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         appCtx.registerShutdownHook();
         super.appStart(app);
         
+        connInvokerService.setAppScope(app);
+        
         connInvokerService.start();
         
         return true;
@@ -141,7 +143,8 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 			
     	BigBlueButtonSession bbbSession = new BigBlueButtonSession(room, internalUserID,  username, role, 
     			voiceBridge, record, externalUserID);
-        connection.setAttribute(Constants.SESSION, bbbSession);        
+        connection.setAttribute(Constants.SESSION, bbbSession);       
+        connection.setAttribute("INTERNAL_USER_ID", internalUserID);
         
         String debugInfo = "internalUserID=" + internalUserID + ",username=" + username + ",role=" +  role + "," + 
         					",voiceConf=" + voiceBridge + ",room=" + room + ",externalUserid=" + externalUserID;
