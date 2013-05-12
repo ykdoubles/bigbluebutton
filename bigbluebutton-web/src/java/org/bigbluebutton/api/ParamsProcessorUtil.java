@@ -58,6 +58,13 @@ public class ParamsProcessorUtil {
 	private String defaultConfigURL;
 	private int defaultMeetingDuration;
 	private boolean disableRecordingDefault;
+	private String bbbServerAddress;
+	
+	private static String BBB_HOST = "%%BBB_HOST%%";
+	
+	public String substituteBBBHost(String configXML) {
+		return configXML.replaceAll(BBB_HOST, bbbServerAddress);
+	}
 	
 	private String substituteKeywords(String message, String dialNumber, String telVoice, String meetingName) {
 	    String welcomeMessage = message;
@@ -319,7 +326,10 @@ public class ParamsProcessorUtil {
 	        .withMetadata(meetingInfo).withWelcomeMessage(welcomeMessage).build();
 	    
 	    String configXML = getDefaultConfigXML();
-	    meeting.storeConfig(true, configXML);
+	    
+	    String subsConfigXML = substituteBBBHost(configXML);
+	    
+	    meeting.storeConfig(true, subsConfigXML);
 	    
 	    return meeting;
 	}
@@ -583,6 +593,10 @@ public class ParamsProcessorUtil {
 	
 	public void setdefaultAvatarURL(String url) {
 		this.defaultAvatarURL = url;
+	}
+	
+	public void setBBBServerAddress(String host) {
+		this.bbbServerAddress = host;
 	}
 	
 	public ArrayList<String> decodeIds(String encodeid){

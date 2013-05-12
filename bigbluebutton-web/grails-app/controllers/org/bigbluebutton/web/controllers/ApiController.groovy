@@ -856,7 +856,10 @@ class ApiController {
 				}
 			}
 			
-			String token = meeting.storeConfig(defaultConfig, decodedConfigXML);
+			
+			String subsConfigXML = paramsProcessorUtil.substituteBBBHost(decodedConfigXML)
+			
+			String token = meeting.storeConfig(defaultConfig, subsConfigXML);
 			response.addHeader("Cache-Control", "no-cache")
 			withFormat {
 			  xml {
