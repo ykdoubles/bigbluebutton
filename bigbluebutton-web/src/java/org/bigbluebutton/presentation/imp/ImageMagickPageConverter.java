@@ -23,6 +23,7 @@ import java.io.File;
 import org.bigbluebutton.presentation.PageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
 
 public class ImageMagickPageConverter implements PageConverter {
 	private static Logger log = LoggerFactory.getLogger(ImageMagickPageConverter.class);
@@ -31,9 +32,13 @@ public class ImageMagickPageConverter implements PageConverter {
 
 	public boolean convert(File presentationFile, File output, int page){
 		
-        String COMMAND = IMAGEMAGICK_DIR + "/convert -depth 8 " + presentationFile.getAbsolutePath() + " " + output.getAbsolutePath();          
-		
-        boolean done = new ExternalProcessExecutor().exec(COMMAND, 60000);            
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(IMAGEMAGICK_DIR + "/convert");
+		command.add("-depth 8");
+		command.add(presentationFile.getAbsolutePath());
+		command.add(output.getAbsolutePath());
+
+        boolean done = new ExternalProcessExecutor().exec(command, 60000);            
 						
 		if (done && output.exists()) {
 			return true;		

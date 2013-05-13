@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.bigbluebutton.presentation.SupportedFileTypes;
@@ -70,22 +71,35 @@ public class ThumbnailCreatorImp implements ThumbnailCreator {
 	private boolean generateThumbnails(File thumbsDir, UploadedPresentation pres) throws InterruptedException {
 	 	String source = pres.getUploadedFile().getAbsolutePath();
 	 	String dest;
-	 	String COMMAND = "";
+	 	ArrayList<String> command = new ArrayList<String>();
 	 	
 	 	if(SupportedFileTypes.isImageFile(pres.getFileType())){
 	 		dest = thumbsDir.getAbsolutePath() + File.separator + TEMP_THUMB_NAME + ".png";
-	 		COMMAND = IMAGEMAGICK_DIR + "/convert -thumbnail 150x150 " + source + " " + dest;
+	 		command.add(IMAGEMAGICK_DIR + "/convert");
+	 		command.add("-thumbnail 150x150");
+	 		command.add(source);
+	 		command.add(dest);
 	 	}else{
 	 		dest = thumbsDir.getAbsolutePath() + File.separator + "thumb-";
-	 		COMMAND = IMAGEMAGICK_DIR + "/gs -q -sDEVICE=pngalpha -dBATCH -dNOPAUSE -dNOPROMPT -dDOINTERPOLATE -dPDFFitPage -r16 -sOutputFile=" + dest +"%d.png " + source;
+	 		command.add(IMAGEMAGICK_DIR + "/gs");
+	 		command.add("-q");
+	 		command.add("-sDEVICE=pngalpha");
+	 		command.add("-dBATCH");
+	 		command.add("-dNOPAUSE");
+	 		command.add("-dNOPROMPT");
+	 		command.add("-dDOINTERPOLATE");
+	 		command.add("-dPDFFitPage");
+	 		command.add("-r16");
+	 		command.add("-sOutputFile=" + dest +"%d.png");
+	 		command.add(source);
 	 	}
 	 	
-	 	boolean done = new ExternalProcessExecutor().exec(COMMAND, 60000);
+	 	boolean done = new ExternalProcessExecutor().exec(command, 60000);
 	 	
 	 	if (done) {
 	 		return true;
 	 	} else {			
-			log.warn("Failed to create thumbnails: " + COMMAND);	 		
+			log.warn("Failed to create thumbnails: " + command);	 		
 	 	}
 
 		return false;		

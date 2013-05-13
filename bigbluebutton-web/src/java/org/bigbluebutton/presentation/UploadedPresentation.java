@@ -22,6 +22,7 @@ package org.bigbluebutton.presentation;
 import java.io.File;
 
 public final class UploadedPresentation {
+	private final String presentationID;
 	private final String conference;
 	private final String room;
 	private final String name;

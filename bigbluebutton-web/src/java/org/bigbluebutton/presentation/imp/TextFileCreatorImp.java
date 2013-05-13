@@ -31,6 +31,8 @@ import org.bigbluebutton.presentation.UploadedPresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 public class TextFileCreatorImp implements TextFileCreator {
 	private static Logger log = LoggerFactory.getLogger(TextFileCreatorImp.class);
 	
@@ -62,7 +64,7 @@ public class TextFileCreatorImp implements TextFileCreator {
 	 	boolean success = true;
 		String source = pres.getUploadedFile().getAbsolutePath();
 	 	String dest;
-	 	String COMMAND = "";
+	 	//String COMMAND = "";
 	 	
 	 	if(SupportedFileTypes.isImageFile(pres.getFileType())){
 	 		dest = textfilesDir.getAbsolutePath() + File.separator + "slide-1.txt";
@@ -89,11 +91,22 @@ public class TextFileCreatorImp implements TextFileCreator {
 	 		dest = textfilesDir.getAbsolutePath() + File.separator + "slide-";
 	 		// sudo apt-get install xpdf-utils
 	 		for( int i=1; i<=pres.getNumberOfPages(); i++){
-	 			COMMAND = IMAGEMAGICK_DIR + "/pdftotext -raw -nopgbrk -f "+ i +" -l " + i + " " + source + " " + dest + i + ".txt";
-	 			boolean done = new ExternalProcessExecutor().exec(COMMAND, 60000);
+	 			ArrayList<String> command = new ArrayList<String>();
+
+	 			command.add(IMAGEMAGICK_DIR + "/pdftotext");
+	 			command.add("-raw");
+	 			command.add("-nopgbrk");
+	 			command.add("-f");
+	 			command.add(Integer.toString(i));
+	 			command.add("-l");
+	 			command.add(Integer.toString(i));
+	 			command.add(source);
+	 			command.add(dest + Integer.toString(i) + ".txt");
+
+	 			boolean done = new ExternalProcessExecutor().exec(command, 60000);
 	 			if (!done) {
 	 				success = false;
-	 		 		log.warn("Failed to create textfiles: " + COMMAND);
+	 		 		log.warn("Failed to create textfiles: " + command);
 	 		 		break;
 	 		 	}
 	 		}

@@ -27,6 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 import org.bigbluebutton.presentation.PageCounter;
 import org.bigbluebutton.presentation.imp.ExternalProcessExecutor.InterruptTimerTask;
@@ -42,7 +43,10 @@ public class Pdf2SwfPageCounter implements PageCounter {
 	public int countNumberOfPages(File presentationFile) {		
 		int numPages = 0; //total numbers of this pdf	
 
-		String COMMAND = SWFTOOLS_DIR + "/pdf2swf -I " + presentationFile.getAbsolutePath(); 
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(SWFTOOLS_DIR + "/pdf2swf"); 
+		command.add("-I");
+		command.add(presentationFile.getAbsolutePath());
    	
         Timer timer = null;
         Process p = null;
@@ -51,8 +55,8 @@ public class Pdf2SwfPageCounter implements PageCounter {
             InterruptTimerTask interrupter = new InterruptTimerTask(Thread.currentThread());
             timer.schedule(interrupter, 60000);
             
-            p = Runtime.getRuntime().exec(COMMAND); 
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            p = Runtime.getRuntime().exec(command.toArray(new String[command.size()]));
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			String info;
 			Matcher matcher;
@@ -71,7 +75,7 @@ public class Pdf2SwfPageCounter implements PageCounter {
 			stdError.close();
             p.waitFor();
         } catch(Exception e) {
-        	log.info("TIMEDOUT excuting : " + COMMAND);
+        	log.info("TIMEDOUT excuting : " + command.toArray(new String[command.size()]));
             p.destroy();
         } finally {
             timer.cancel();     // If the process returns within the timeout period, we have to stop the interrupter

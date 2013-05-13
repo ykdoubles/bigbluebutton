@@ -23,32 +23,40 @@ import java.io.File;
 import org.bigbluebutton.presentation.PageExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
 
 public class GhostscriptPageExtractor implements PageExtractor {
 	private static Logger log = LoggerFactory.getLogger(GhostscriptPageExtractor.class);
 	
-	private String GHOSTSCRIPT_EXEC;
+	private String ghostscript_exe;
 	private String noPdfMarkWorkaround;
-	private String SPACE = " ";
 	
 	public boolean extractPage(File presentationFile, File output, int page){		
-		String OPTIONS = "-sDEVICE=pdfwrite -dNOPAUSE -dQUIET -dBATCH";
-		String FIRST_PAGE = "-dFirstPage=" + page;
-		String LAST_PAGE = "-dLastPage=" + page;		
-		String DESTINATION = output.getAbsolutePath();
-		String OUTPUT_FILE = "-sOutputFile=" + DESTINATION;
+		String first_page = "-dFirstPage=" + page;
+		String last_page = "-dLastPage=" + page;		
+		String destination = output.getAbsolutePath();
+		String output_file = "-sOutputFile=" + destination;
 		
 		//extract that specific page and create a temp-pdf(only one page) with GhostScript
-		String COMMAND = GHOSTSCRIPT_EXEC + SPACE + OPTIONS + SPACE + FIRST_PAGE + SPACE + LAST_PAGE + SPACE 
-							+ OUTPUT_FILE + SPACE + noPdfMarkWorkaround + SPACE + presentationFile.getAbsolutePath();
-		
-        log.debug(COMMAND);
-        System.out.println(COMMAND);
-        return new ExternalProcessExecutor().exec(COMMAND, 60000);
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(ghostscript_exe);
+		command.add("-sDEVICE=pdfwrite");
+		command.add("-dNOPAUSE");
+		command.add("-dQUIET");
+		command.add("-dBATCH");
+		command.add(first_page);
+		command.add(last_page);
+		command.add(output_file);
+		command.add(noPdfMarkWorkaround);
+		command.add(presentationFile.getAbsolutePath());
+
+		log.debug("check command:" + command);
+        System.out.println(command);
+        return new ExternalProcessExecutor().exec(command, 60000);
 	}	
 	
 	public void setGhostscriptExec(String exec) {
-		GHOSTSCRIPT_EXEC = exec;
+		ghostscript_exe = exec;
 	}
 	
 	public void setNoPdfMarkWorkaround(String noPdfMarkWorkaround) {

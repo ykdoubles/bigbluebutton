@@ -813,7 +813,7 @@ if ($playback == "presentation")
 		BigBlueButton.logger.info("Removing published files.")
 		FileUtils.rm_r(Dir.glob("#{target_dir}/*"))
                 rescue  Exception => e
-                        BigBlueButton.logger.error(e.message)
+                        BigBlueButton.logger.error(e.message + " " + e.backtrace)
                 end
 	else
 		BigBlueButton.logger.info("#{target_dir} is already there")

@@ -20,6 +20,7 @@
 package org.bigbluebutton.presentation.imp;
 
 import java.io.File;
+import java.util.ArrayList;
 import org.bigbluebutton.presentation.PageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +36,20 @@ public class Pdf2SwfPageConverter implements PageConverter {
 	    String dest = output.getAbsolutePath();
 	    String AVM2SWF = "-T9";
 	    
-	    String COMMAND = SWFTOOLS_DIR + File.separator + "pdf2swf " + AVM2SWF + " -F " + fontsDir + " -p " + page + " " + source + " -o " + dest;    
-	    log.debug("Executing: " + COMMAND);
+	    ArrayList<String> command = new ArrayList<String>();
+	    command.add(SWFTOOLS_DIR + File.separator + "pdf2swf");
+	    command.add(AVM2SWF);
+	    command.add("-F"); 
+	    command.add(fontsDir);
+	    command.add("-p"); 
+	    command.add(Integer.toString(page));
+	    command.add("-o"); 
+	    command.add(dest);
+	    command.add(source);
+
+	    log.debug("Executing: " + command);
 	    
-	    boolean done = new ExternalProcessExecutor().exec(COMMAND, 60000);      
+	    boolean done = new ExternalProcessExecutor().exec(command, 60000);      
 		
 		File destFile = new File(dest);
 		if (done && destFile.exists()) {
