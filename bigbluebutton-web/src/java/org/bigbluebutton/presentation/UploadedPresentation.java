@@ -23,18 +23,38 @@ import java.io.File;
 
 public final class UploadedPresentation {
 	private final String presentationID;
-	private final String conference;
-	private final String room;
-	private final String name;
+	private final String meetingID;
+	private final String presentationName;
 	private File uploadedFile;
+	private String originalFilename;
 	private String fileType = "unknown";
 	private int numberOfPages = 0;
 	private boolean lastStepSuccessful = false;
 	
-	public UploadedPresentation(String conference, String room, String name) {
-		this.conference = conference;
-		this.room = room;
-		this.name = name;
+	public UploadedPresentation(String meetingID, String presentationName) {
+		this.presentationID = Long.toString(System.currentTimeMillis());
+		this.meetingID = meetingID;
+		this.presentationName = presentationName;
+	}
+
+	public String getPresentationID(){
+		return presentationID;
+	}
+
+	public String getMeetingID(){
+		return meetingID;
+	}
+
+	public String getPresentationName(){
+		return presentationName;
+	}
+
+	public void setOriginalFilename(String originalFilename){
+		this.originalFilename = originalFilename;
+	}
+
+	public String getOriginalFilename(){
+		return originalFilename;
 	}
 
 	public File getUploadedFile() {
@@ -43,18 +63,6 @@ public final class UploadedPresentation {
 
 	public void setUploadedFile(File uploadedFile) {
 		this.uploadedFile = uploadedFile;
-	}
-
-	public String getConference() {
-		return conference;
-	}
-
-	public String getRoom() {
-		return room;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public String getFileType() {

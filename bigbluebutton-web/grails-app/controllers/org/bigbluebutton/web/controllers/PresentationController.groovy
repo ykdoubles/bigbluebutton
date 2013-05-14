@@ -62,24 +62,20 @@ class PresentationController {
     redirect( action:list )
   }
 
+  /*
+  TODO: added new param meetingID
+  */
   def upload = {		
     println 'PresentationController:upload'
     def file = request.getFile('fileUpload')
 		if(file && !file.empty) {
 			flash.message = 'Your file has been uploaded'
-			// Replace any character other than a (A-Z, a-z, 0-9, _ or .) with a - (dash).
-			def notValidCharsRegExp = /[^0-9a-zA-Z_\.]/
-			log.debug "Uploaded presentation name : $params.presentation_name"
-			def presentationName = params.presentation_name//.replaceAll(notValidCharsRegExp, '-')
-			log.debug "Uploaded presentation name : $presentationName"
-			File uploadDir = presentationService.uploadedPresentationDirectory(params.conference, params.room, presentationName)
-	
-			def newFilename = file.getOriginalFilename()//.replaceAll(notValidCharsRegExp, '-')
-			def pres = new File( uploadDir.absolutePath + File.separatorChar + newFilename )
-			file.transferTo(pres)	
-	      
-			UploadedPresentation uploadedPres = new UploadedPresentation(params.conference, params.room, presentationName);
-			uploadedPres.setUploadedFile(pres);
+
+			def presentationName = params.presentation_name
+      def originalFilename = file.getOriginalFilename()
+      
+      log.debug "Uploaded presentation name : $presentationName"
+      UploadedPresentation uploadedPres = presentationService.storePresentation(params.meetingID, originalFilename, file.getBytes());
 			presentationService.processUploadedPresentation(uploadedPres)							             			     	
 		} else {
 			flash.message = 'file cannot be empty'

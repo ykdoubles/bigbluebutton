@@ -114,11 +114,11 @@ public class ImageToSwfSlidesGenerationService {
 				slide = future.get(timeLeft, TimeUnit.MILLISECONDS);
 				System.out.println("handleSlideGenerationResult " + slide.getPageNumber());
 			} catch (InterruptedException e) {
-				log.error("InterruptedException while creating slide " + pres.getName());
+				log.error("InterruptedException while creating slide " + pres.getPresentationName());
 			} catch (ExecutionException e) {
-				log.error("ExecutionException while creating slide " + pres.getName());
+				log.error("ExecutionException while creating slide " + pres.getPresentationName());
 			} catch (TimeoutException e) {
-				log.error("TimeoutException while converting " + pres.getName());				
+				log.error("TimeoutException while converting " + pres.getPresentationName());				
 			} finally {
 				if ((slide != null) && (! slide.isDone())){
 					log.warn("Creating blank slide for " + slide.getPageNumber());

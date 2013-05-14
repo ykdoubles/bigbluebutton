@@ -146,9 +146,9 @@ public class PdfToSwfSlidesGenerationService {
 					log.info("Timedout waiting for page to finish conversion.");
 				}
 			} catch (InterruptedException e) {
-				log.error("InterruptedException while creating slide " + pres.getName());
+				log.error("InterruptedException while creating slide " + pres.getPresentationName());
 			} catch (ExecutionException e) {
-				log.error("ExecutionException while creating slide " + pres.getName());
+				log.error("ExecutionException while creating slide " + pres.getPresentationName());
 			} 
 		}
 				

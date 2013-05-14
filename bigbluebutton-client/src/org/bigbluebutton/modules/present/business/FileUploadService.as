@@ -47,9 +47,8 @@ package org.bigbluebutton.modules.present.business
 		 * @param room - a room in the server we're connecting to
 		 * 
 		 */		
-		public function FileUploadService(url:String, conference:String, room:String):void {
-			sendVars.conference = conference;
-			sendVars.room = room;
+		public function FileUploadService(url:String, meetingID:String):void {
+			sendVars.meetingID = meetingID;
 			request.url = url;
 			request.data = sendVars;
 			dispatcher = new Dispatcher();

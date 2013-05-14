@@ -76,7 +76,7 @@ package org.bigbluebutton.modules.present.business
 		 * 
 		 */		
 		public function startUpload(e:UploadEvent):void{
-			if (uploadService == null) uploadService = new FileUploadService(host + "/bigbluebutton/presentation/upload", conference, room);
+			if (uploadService == null) uploadService = new FileUploadService(host + "/bigbluebutton/presentation/upload", room);
 			uploadService.upload(e.presentationName, e.fileToUpload);
 		}
 		
