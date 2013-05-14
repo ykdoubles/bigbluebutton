@@ -20,7 +20,8 @@ package org.bigbluebutton.conference.service.presentation;
 
 import java.util.ArrayList;
 import java.util.Map;
-import org.bigbluebutton.conference.service.recorder.Recorder;import org.red5.server.api.so.ISharedObject;
+import org.bigbluebutton.conference.service.recorder.Recorder;
+import org.red5.server.api.so.ISharedObject;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 
@@ -65,14 +66,15 @@ public class PresentationEventSender implements IPresentationRoomListener {
 	@SuppressWarnings("unchecked")
 	private void handleReceivedMessage(Map message){
     	String code = (String) message.get("returnCode");
-    	String room = (String) message.get("room");
+    	String meetingID = (String) message.get("meetingID");
+    	String presentationID = (String) message.get("presentationID");
     	String presentationName = (String) message.get("presentationName");
-    	String conference = (String) message.get("conference");
+    	
     	String messageKey = (String) message.get("messageKey");
     	
     	ArrayList<Object> list = new ArrayList<Object>();
-		list.add(conference);
-		list.add(room);
+		list.add(meetingID);
+		list.add(presentationID);
 		list.add(code);
 		list.add(presentationName);
 		list.add(messageKey);

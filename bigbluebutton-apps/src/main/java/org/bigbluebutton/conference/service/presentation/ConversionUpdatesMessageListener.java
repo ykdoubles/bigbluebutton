@@ -49,14 +49,15 @@ public class ConversionUpdatesMessageListener {
 	public void handleReceivedMessage(Map mapMessage) {
     	try{
 			String code = (String) mapMessage.get("returnCode");
-	    	String room = (String) mapMessage.get("room");
+	    	String meetingID = (String) mapMessage.get("meetingID");
+	    	String presentationID = (String) mapMessage.get("presentationID");
 	    	String presentationName = (String) mapMessage.get("presentationName");
-	    	String conference = (String) mapMessage.get("conference");
+	    	
 	    	String messageKey = (String) mapMessage.get("messageKey");
 	    	
 			Map message = new HashMap();
-	    	message.put("conference", conference);
-			message.put("room", room);
+	    	message.put("meetingID", meetingID);
+			message.put("presentationID", presentationID);
 			message.put("code", code);
 			message.put("presentationName", presentationName);
 			message.put("messageKey", messageKey);

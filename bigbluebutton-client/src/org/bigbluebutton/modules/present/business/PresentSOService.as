@@ -543,7 +543,7 @@ package org.bigbluebutton.modules.present.business {
 			dispatcher.dispatchEvent(e);
 		}
 		
-		public function pageCountExceededUpdateMessageCallback(conference:String, room:String, 
+		public function pageCountExceededUpdateMessageCallback(meetingID:String, presentationID:String, 
 				code:String, presentationName:String, messageKey:String, numberOfPages:Number, 
 				maxNumberOfPages:Number) : void {
 			LogUtil.debug("pageCountExceededUpdateMessageCallback:Received update message " + messageKey);
@@ -552,7 +552,7 @@ package org.bigbluebutton.modules.present.business {
 			dispatcher.dispatchEvent(uploadEvent);
 		}
 
-		public function generatedSlideUpdateMessageCallback(conference:String, room:String, 
+		public function generatedSlideUpdateMessageCallback(meetingID:String, presentationID:String, 
 				code:String, presentationName:String, messageKey:String, numberOfPages:Number, 
 				pagesCompleted:Number) : void {
 			LogUtil.debug( "CONVERTING = [" + pagesCompleted + " of " + numberOfPages + "]");					
@@ -562,20 +562,26 @@ package org.bigbluebutton.modules.present.business {
 			dispatcher.dispatchEvent(uploadEvent);	
 		}
 
-		public function conversionCompletedUpdateMessageCallback(conference:String, room:String, 
+		public function conversionCompletedUpdateMessageCallback(meetingID:String, presentationID:String, 
 				code:String, presentationName:String, messageKey:String, slidesInfo:String) : void {
 			LogUtil.debug("conversionCompletedUpdateMessageCallback:Received update message " + messageKey);
 			var uploadEvent:UploadEvent = new UploadEvent(UploadEvent.CONVERT_SUCCESS);
 			uploadEvent.data = messageKey;
-			uploadEvent.presentationName = presentationName;
+
+			/*
+			TODO: temporary workaround this need to be refactored
+			*/
+			var tempname:String = presentationID;
+
+			uploadEvent.presentationName = tempname;
 			dispatcher.dispatchEvent(uploadEvent);
 			dispatcher.dispatchEvent(new BBBEvent(BBBEvent.PRESENTATION_CONVERTED));
 			var readyEvent:UploadEvent = new UploadEvent(UploadEvent.PRESENTATION_READY);
-			readyEvent.presentationName = presentationName;
+			readyEvent.presentationName = tempname;
 			dispatcher.dispatchEvent(readyEvent);
 		}
 				
-		public function conversionUpdateMessageCallback(conference:String, room:String, 
+		public function conversionUpdateMessageCallback(meetingID:String, presentationID:String, 
 			code:String, presentationName:String, messageKey:String) : void {
 			LogUtil.debug("conversionUpdateMessageCallback:Received update message " + messageKey);
 			var totalSlides : Number;

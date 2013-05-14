@@ -19,6 +19,7 @@
 package org.bigbluebutton.web.services
 
 import java.util.concurrent.*;
+import java.io.FileOutputStream;
 import java.lang.InterruptedException
 import org.bigbluebutton.presentation.DocumentConversionService
 import org.bigbluebutton.presentation.UploadedPresentation
@@ -35,7 +36,7 @@ class PresentationService {
 	def defaultUploadedPresentation
 	
     def deletePresentation = {conf, room, filename ->
-    		def directory = new File(roomDirectory(conf, room).absolutePath + File.separatorChar + filename)
+    		def directory = new File(roomDirectory(room).absolutePath + File.separatorChar + filename)
     		deleteDirectory(directory) 
 	}
 	
@@ -60,7 +61,7 @@ class PresentationService {
 	
 	def listPresentations = {conf, room ->
 		def presentationsList = []
-		def directory = roomDirectory(conf, room)
+		def directory = roomDirectory(room)
 		log.debug "directory ${directory.absolutePath}"
 		if( directory.exists() ){
 			directory.eachFile(){ file->
@@ -72,17 +73,76 @@ class PresentationService {
 		return presentationsList
 	}
 	
-	public File uploadedPresentationDirectory(String conf, String room, String presentation_name) {
-		File dir = new File(roomDirectory(conf, room).absolutePath + File.separatorChar + presentation_name)
-		println "Uploaded presentation ${presentation_name} for conf ${conf} and room ${room} to dir ${dir.absolutePath}"
+	public File uploadedPresentationDirectory(String meetingID, String presentationID) {
+		File dir = new File(roomDirectory(meetingID).absolutePath + File.separatorChar + presentationID)
+		println "Uploaded presentation ${presentationID} for meeting ${meetingID} to dir ${dir.absolutePath}"
 
 		/* If the presentation name already exist, delete it. We should provide a check later on to notify user
 			that there is already a presentation with that name. */
 		if (dir.exists()) deleteDirectory(dir)		
+		
 		dir.mkdirs()
 
 		assert dir.exists()
 		return dir
+	}
+
+	/**
+	* meetingID: Internal MeetingID
+	* presentationName: Name of the presentation
+	*/
+	public UploadedPresentation storePresentation(String meetingID, String originalFilename, File uploadFile){
+		UploadedPresentation uploadedPres = createUploadedPresentation(meetingID, originalFilename);
+		uploadFile.transferTo(uploadedPres.getUploadedFile());
+		return uploadedPres;
+	}
+
+	public UploadedPresentation storePresentation(String meetingID, String originalFilename, byte[] rawData){
+		UploadedPresentation uploadedPres = createUploadedPresentation(meetingID, originalFilename);
+
+      	FileOutputStream fos = new FileOutputStream(uploadedPres.getUploadedFile());
+    	fos.write(rawData);
+    	fos.flush();
+    	fos.close();
+
+    	return uploadedPres;
+	}
+
+	public UploadedPresentation storePresentation(String meetingID, String originalFilename, String url){
+		UploadedPresentation uploadedPres = createUploadedPresentation(meetingID, originalFilename);
+
+      	BufferedOutputStream out = null;
+      	try {
+	      out = new BufferedOutputStream(new FileOutputStream(uploadedPres.getUploadedFile()));
+	      out << new URL(url).openStream();
+	    } finally {
+	      if (out != null) {
+	        out.close();
+	      }
+	    }
+
+    	return uploadedPres;
+	}
+
+	private UploadedPresentation createUploadedPresentation(String meetingID, String originalFilename){
+		String presentationName = getNameWithoutExtension(originalFilename);
+		String extension = getExtensionType(originalFilename);
+
+		UploadedPresentation uploadedPres = new UploadedPresentation(meetingID, presentationName);
+      	uploadedPres.setOriginalFilename(originalFilename);
+
+      	File uploadDir = uploadedPresentationDirectory(uploadedPres.getMeetingID(), uploadedPres.getPresentationID());
+      	File presFile = new File(uploadDir.absolutePath + File.separatorChar + uploadedPres.getPresentationID() + "." + extension);
+      	uploadedPres.setUploadedFile(presFile);
+      	return uploadedPres;
+	}
+
+	private String getNameWithoutExtension(String filename){
+		return filename.substring(0, filename.lastIndexOf("."));
+	}
+
+	private String getExtensionType(String filename){
+		return filename.substring(filename.lastIndexOf(".") + 1);
 	}
 	
 	def processUploadedPresentation = {uploadedPres ->	
@@ -94,16 +154,16 @@ class PresentationService {
 	}
  	
 	def showSlide(String conf, String room, String presentationName, String id) {
-		new File(roomDirectory(conf, room).absolutePath + File.separatorChar + presentationName + File.separatorChar + "slide-${id}.swf")
+		new File(roomDirectory(room).absolutePath + File.separatorChar + presentationName + File.separatorChar + "slide-${id}.swf")
 	}
 	
 	def showPresentation = {conf, room, filename ->
-		new File(roomDirectory(conf, room).absolutePath + File.separatorChar + filename + File.separatorChar + "slides.swf")
+		new File(roomDirectory(room).absolutePath + File.separatorChar + filename + File.separatorChar + "slides.swf")
 	}
 	
 	def showThumbnail = {conf, room, presentationName, thumb ->
 		println "Show thumbnails request for $presentationName $thumb"
-		def thumbFile = roomDirectory(conf, room).absolutePath + File.separatorChar + presentationName + File.separatorChar +
+		def thumbFile = roomDirectory(room).absolutePath + File.separatorChar + presentationName + File.separatorChar +
 					"thumbnails" + File.separatorChar + "thumb-${thumb}.png"
 		log.debug "showing $thumbFile"
 		
@@ -112,7 +172,7 @@ class PresentationService {
 	
 	def showTextfile = {conf, room, presentationName, textfile ->
 		println "Show textfiles request for $presentationName $textfile"
-		def txt = roomDirectory(conf, room).absolutePath + File.separatorChar + presentationName + File.separatorChar +
+		def txt = roomDirectory(room).absolutePath + File.separatorChar + presentationName + File.separatorChar +
 					"textfiles" + File.separatorChar + "slide-${textfile}.txt"
 		log.debug "showing $txt"
 		
@@ -120,22 +180,22 @@ class PresentationService {
 	}
 	
 	def numberOfThumbnails = {conf, room, name ->
-		def thumbDir = new File(roomDirectory(conf, room).absolutePath + File.separatorChar + name + File.separatorChar + "thumbnails")
+		def thumbDir = new File(roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "thumbnails")
 		thumbDir.listFiles().length
 	}
 	
 	def numberOfTextfiles = {conf, room, name ->
-		log.debug roomDirectory(conf, room).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles"
-		def textfilesDir = new File(roomDirectory(conf, room).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles")
+		log.debug roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles"
+		def textfilesDir = new File(roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles")
 		textfilesDir.listFiles().length
 	}
 	
-	def roomDirectory = {conf, room ->
-		return new File(presentationDir + File.separatorChar + conf + File.separatorChar + room)
+	def roomDirectory = { meetingID ->
+		return new File(presentationDir + File.separatorChar + meetingID + File.separatorChar + meetingID)
 	}
 
 	def testConversionProcess() {
-		File presDir = new File(roomDirectory(testConferenceMock, testRoomMock).absolutePath + File.separatorChar + testPresentationName)
+		File presDir = new File(roomDirectory(testRoomMock).absolutePath + File.separatorChar + testPresentationName)
 		
 		if (presDir.exists()) {
 			File pres = new File(presDir.getAbsolutePath() + File.separatorChar + testUploadedPresentation)

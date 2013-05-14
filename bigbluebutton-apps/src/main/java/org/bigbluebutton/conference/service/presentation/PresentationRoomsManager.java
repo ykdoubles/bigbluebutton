@@ -83,7 +83,7 @@ public class PresentationRoomsManager {
 	}*/
 	
 	public void sendUpdateMessage(Map message){
-		String room = (String) message.get("room");
+		String room = (String) message.get("meetingID");
 		PresentationRoom r = getRoom(room);
 		if (r != null) {
 			r.sendUpdateMessage(message);
