@@ -18,47 +18,78 @@
 */
 
 class UrlMappings {
-    static mappings = {
+  static mappings = {
 
-      "/presentation/upload"(controller:"presentation") {
-      		action = [GET:'show', POST:'upload', DELETE:'delete']
-      }
+    "/presentation/upload"(controller:"presentation") {
+      action = [GET:'show', POST:'upload', DELETE:'delete']
+    }
 
-      "/presentation/test-convert"(controller:"presentation") {
+    "/presentation/test-convert"(controller:"presentation") {
   		action = [GET:'testConversion']
-  }
+    }
+    
+    /*
+    * Backup Compability
+    */  
+    "/presentation/$conference/$room/$presentation_name/slides"(controller:"presentation") {
+      action = [GET:'numberOfSlides']
+    }
       
-      "/presentation/$conference/$room/$presentation_name/slides"(controller:"presentation") {
-      		action = [GET:'numberOfSlides']
-      }
+    "/presentation/$conference/$room/$presentation_name/slide/$id"(controller:"presentation") {
+      action = [GET:'showSlide']
+    }
       
-      "/presentation/$conference/$room/$presentation_name/slide/$id"(controller:"presentation") {
-      		action = [GET:'showSlide']
-      }
+    "/presentation/$conference/$room/$presentation_name/thumbnails"(controller:"presentation") {
+      action = [GET:'numberOfThumbnails']
+    }
       
-      "/presentation/$conference/$room/$presentation_name/thumbnails"(controller:"presentation") {
-      		action = [GET:'numberOfThumbnails']
-      }
-      
-      "/presentation/$conference/$room/$presentation_name/thumbnail/$id"(controller:"presentation") {
-      		action = [GET:'showThumbnail']
-      }
+    "/presentation/$conference/$room/$presentation_name/thumbnail/$id"(controller:"presentation") {
+      action = [GET:'showThumbnail']
+    }
 	  
 	  "/presentation/$conference/$room/$presentation_name/textfiles"(controller:"presentation") {
-		    action = [GET:'numberOfTextfiles']
+		  action = [GET:'numberOfTextfiles']
 	  }
   
 	  "/presentation/$conference/$room/$presentation_name/textfile/$id"(controller:"presentation") {
-		   action = [GET:'showTextfile']
-      }
+		  action = [GET:'showTextfile']
+    }
+
+    /*
+    * New URL form for the presentation API
+    */
+    "/presentation/$meeting_id/$presentation_id/slides"(controller:"presentation") {
+      action = [GET:'numberOfSlides']
+    }
+      
+    "/presentation/$meeting_id/$presentation_id/slide/$slide_number"(controller:"presentation") {
+      action = [GET:'showSlide']
+    }
+      
+    "/presentation/$meeting_id/$presentation_id/thumbnails"(controller:"presentation") {
+      action = [GET:'numberOfThumbnails']
+    }
+      
+    "/presentation/$meeting_id/$presentation_id/thumbnail/$slide_number"(controller:"presentation") {
+      action = [GET:'showThumbnail']
+    }
+    
+    "/presentation/$meeting_id/$presentation_id/textfiles"(controller:"presentation") {
+      action = [GET:'numberOfTextfiles']
+    }
+  
+    "/presentation/$meeting_id/$presentation_id/textfile/$slide_number"(controller:"presentation") {
+      action = [GET:'showTextfile']
+    }
+
       
 	  "/api/setConfigXML"(controller:"api") {
 		  action = [POST:'setConfigXML']
-	 }
+    }
 	  
-      "/$controller/$action?/$id?"{
-	      constraints {
-			 // apply constraints here
+    "/$controller/$action?/$id?"{
+      constraints {
+
 		  }
 	  }
 	  "500"(view:'/error')

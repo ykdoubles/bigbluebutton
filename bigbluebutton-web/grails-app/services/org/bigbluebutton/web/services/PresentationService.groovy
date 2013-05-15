@@ -34,9 +34,13 @@ class PresentationService {
 	def testPresentationName
 	def testUploadedPresentation
 	def defaultUploadedPresentation
+
+	public static String SLIDE_RESOURCE = "slide";
+	public static String THUMBNAIL_RESOURCE = "thumbnail";
+	public static String TEXTFILE_RESOURCE = "textfile";
 	
-    def deletePresentation = {conf, room, filename ->
-    		def directory = new File(roomDirectory(room).absolutePath + File.separatorChar + filename)
+    def deletePresentation = {meetingID, filename ->
+    		def directory = new File(roomDirectory(meetingID).absolutePath + File.separatorChar + filename)
     		deleteDirectory(directory) 
 	}
 	
@@ -59,9 +63,9 @@ class PresentationService {
 		directory.delete()	
 	}
 	
-	def listPresentations = {conf, room ->
+	def listPresentations = {meetingID ->
 		def presentationsList = []
-		def directory = roomDirectory(room)
+		def directory = roomDirectory(meetingID)
 		log.debug "directory ${directory.absolutePath}"
 		if( directory.exists() ){
 			directory.eachFile(){ file->
@@ -134,6 +138,8 @@ class PresentationService {
       	File uploadDir = uploadedPresentationDirectory(uploadedPres.getMeetingID(), uploadedPres.getPresentationID());
       	File presFile = new File(uploadDir.absolutePath + File.separatorChar + uploadedPres.getPresentationID() + "." + extension);
       	uploadedPres.setUploadedFile(presFile);
+
+      	presentationsByName.put(presentationName,presentationID);
       	return uploadedPres;
 	}
 
@@ -153,33 +159,24 @@ class PresentationService {
 		}
 	}
  	
-	def showSlide(String conf, String room, String presentationName, String id) {
-		new File(roomDirectory(room).absolutePath + File.separatorChar + presentationName + File.separatorChar + "slide-${id}.swf")
+
+	public File showResource(String meetingID, String presentationID, String slideNumber, String type){
+		String resourceURL = roomDirectory(meetingID).absolutePath + File.separatorChar + presentationID + File.separatorChar;
+		if(type.equalsIgnoreCase(SLIDE_RESOURCE)){
+			resourceURL = resourceURL + "slide-${slideNumber}.swf";
+		}else if(type.equalsIgnoreCase(THUMBNAIL_RESOURCE)){
+			resourceURL = resourceURL + "thumbnails" + File.separatorChar + "thumb-${slideNumber}.png";
+		}else if(type.equalsIgnoreCase(TEXTFILE_RESOURCE)){
+			resourceURL = resourceURL + "textfiles" + File.separatorChar + "slide-${slideNumber}.txt"
+		}else{
+			log.debug("Unknown resource type");
+			return null;
+		}
+
+		return new File(resourceURL);
 	}
 	
-	def showPresentation = {conf, room, filename ->
-		new File(roomDirectory(room).absolutePath + File.separatorChar + filename + File.separatorChar + "slides.swf")
-	}
-	
-	def showThumbnail = {conf, room, presentationName, thumb ->
-		println "Show thumbnails request for $presentationName $thumb"
-		def thumbFile = roomDirectory(room).absolutePath + File.separatorChar + presentationName + File.separatorChar +
-					"thumbnails" + File.separatorChar + "thumb-${thumb}.png"
-		log.debug "showing $thumbFile"
-		
-		new File(thumbFile)
-	}
-	
-	def showTextfile = {conf, room, presentationName, textfile ->
-		println "Show textfiles request for $presentationName $textfile"
-		def txt = roomDirectory(room).absolutePath + File.separatorChar + presentationName + File.separatorChar +
-					"textfiles" + File.separatorChar + "slide-${textfile}.txt"
-		log.debug "showing $txt"
-		
-		new File(txt)
-	}
-	
-	def numberOfThumbnails = {conf, room, name ->
+	def numberOfThumbnails = {meetingID, name ->
 		def thumbDir = new File(roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "thumbnails")
 		thumbDir.listFiles().length
 	}

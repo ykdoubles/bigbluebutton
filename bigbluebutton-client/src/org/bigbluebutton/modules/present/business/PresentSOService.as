@@ -571,13 +571,13 @@ package org.bigbluebutton.modules.present.business {
 			/*
 			TODO: temporary workaround this need to be refactored
 			*/
-			var tempname:String = presentationID;
-
-			uploadEvent.presentationName = tempname;
+			uploadEvent.presentationID = presentationID;
+			uploadEvent.presentationName = presentationName;
 			dispatcher.dispatchEvent(uploadEvent);
 			dispatcher.dispatchEvent(new BBBEvent(BBBEvent.PRESENTATION_CONVERTED));
 			var readyEvent:UploadEvent = new UploadEvent(UploadEvent.PRESENTATION_READY);
-			readyEvent.presentationName = tempname;
+			readyEvent.presentationID = presentationID;
+			readyEvent.presentationName = presentationName;
 			dispatcher.dispatchEvent(readyEvent);
 		}
 				
