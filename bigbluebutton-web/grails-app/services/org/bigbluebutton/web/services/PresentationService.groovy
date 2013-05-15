@@ -139,7 +139,6 @@ class PresentationService {
       	File presFile = new File(uploadDir.absolutePath + File.separatorChar + uploadedPres.getPresentationID() + "." + extension);
       	uploadedPres.setUploadedFile(presFile);
 
-      	presentationsByName.put(presentationName,presentationID);
       	return uploadedPres;
 	}
 
