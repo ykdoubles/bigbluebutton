@@ -53,14 +53,8 @@ public class FreeswitchHeartbeatMonitor implements Observer {
     private long maxHeartbeatInterval = 25 * 1000L;
     private int intervalLoopCount = 0;
     
-    private final ManagerConnection connection;
-    private final FreeswitchApplication eventListner;
-
-    public FreeswitchHeartbeatMonitor(ManagerConnection connection, FreeswitchApplication eventListner) {
-    	this.connection = connection;
-        this.eventListner = eventListner;
-    	log.info("Freeswitch HeartbeatMonitor Created");
-    }
+    private ManagerConnection connection;
+    private FreeswitchApplication hearbeatListener;
 
     public void start() {
         log.info("HeartbeatMonitor Starting");
@@ -94,27 +88,7 @@ public class FreeswitchHeartbeatMonitor implements Observer {
             //Check to see if update happened recently
             timeDiff = System.currentTimeMillis() - lastHeartbeat;
             if(timeDiff > maxHeartbeatInterval) {
-                //if not reconnect
-                try {
-                    Client c = connection.getESLClient();
-                    log.info("HeartbeatMonitor did not get a heartbeat event in time... reconnecting");
-                    if(c.canSend()) { //Otherwise disconnect will throw ISE
-                        log.info("Logging off fom [" + connection.toString() + "]");
-                        connection.disconnect();
-                    }
-                    log.info("Logging in as [" + connection.getPassword() + "] to [" + connection.getHostname() + ":" + connection.getPort() + "]");
-                    try {
-                        connection.connect();
-                        eventListner.startup(); //Re-call startup to setup eventListner and filters...
-                        lastHeartbeat = System.currentTimeMillis(); //Reset 
-                    } catch ( InboundConnectionFailure ce ) {
-                        log.error( "HeartbeatMonitor Connect to FreeSwitch ESL socket failed, will retry...", ce );
-                    }
-                } catch (IllegalStateException ise) {
-                    log.error( "HeartbeatMonitor Ex", ise);
-                } catch (Exception e) {
-                    log.error( "HeartbeatMonitor Ex", e);
-                }
+            	reconnect();
             }
 
             if(intervalLoopCount == 5) {
@@ -128,6 +102,29 @@ public class FreeswitchHeartbeatMonitor implements Observer {
         }
     }
 
+    private void reconnect() {
+        try {
+            Client c = connection.getESLClient();
+            log.info("HeartbeatMonitor did not get a heartbeat event in time... reconnecting");
+            if(c.canSend()) { //Otherwise disconnect will throw ISE
+                log.info("Logging off fom [" + connection.toString() + "]");
+                connection.disconnect();
+            }
+            log.info("Logging in as [" + connection.getPassword() + "] to [" + connection.getHostname() + ":" + connection.getPort() + "]");
+            try {
+                connection.connect();
+                hearbeatListener.startup(); //Re-call startup to setup eventListner and filters...
+                lastHeartbeat = System.currentTimeMillis(); //Reset 
+            } catch ( InboundConnectionFailure ce ) {
+                log.error( "HeartbeatMonitor Connect to FreeSwitch ESL socket failed, will retry...", ce );
+            }
+        } catch (IllegalStateException ise) {
+            log.error( "HeartbeatMonitor Ex", ise);
+        } catch (Exception e) {
+            log.error( "HeartbeatMonitor Ex", e);
+        }    	
+    }
+    
     public void update(Observable o, Object arg) {
         if (arg instanceof EslEvent) {
             //Heartbeat
@@ -175,5 +172,13 @@ public class FreeswitchHeartbeatMonitor implements Observer {
             return;
         }
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public void setManagerConnection(ManagerConnection connection) {
+        this.connection = connection;
+    }
+    
+    public void setFreeswitchApplication(FreeswitchApplication hearbeatListener) {
+    	this.hearbeatListener = hearbeatListener;
     }
 }

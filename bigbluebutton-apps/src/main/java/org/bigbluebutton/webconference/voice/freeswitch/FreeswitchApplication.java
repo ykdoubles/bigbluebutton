@@ -95,7 +95,7 @@ public class FreeswitchApplication extends Observable implements ConferenceServi
 
     private void startHeartbeatMonitor() {      
         if(heartbeatMonitor == null) { //Only startup once. as startup will be called for reconnect.
-            heartbeatMonitor = new FreeswitchHeartbeatMonitor(manager, this);
+            heartbeatMonitor = new FreeswitchHeartbeatMonitor();
             this.addObserver(heartbeatMonitor);
             heartbeatMonitor.start();
         }   	
