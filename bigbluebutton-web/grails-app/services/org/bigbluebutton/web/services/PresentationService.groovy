@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.lang.InterruptedException
 import org.bigbluebutton.presentation.DocumentConversionService
 import org.bigbluebutton.presentation.UploadedPresentation
+import java.util.Hashtable;
 
 class PresentationService {
 
@@ -34,6 +35,9 @@ class PresentationService {
 	def testPresentationName
 	def testUploadedPresentation
 	def defaultUploadedPresentation
+
+	// For backup compability
+    private Hashtable<String,String> presentationsByName = new Hashtable<String,String>();
 
 	public static String SLIDE_RESOURCE = "slide";
 	public static String THUMBNAIL_RESOURCE = "thumbnail";
@@ -139,8 +143,15 @@ class PresentationService {
       	File presFile = new File(uploadDir.absolutePath + File.separatorChar + uploadedPres.getPresentationID() + "." + extension);
       	uploadedPres.setUploadedFile(presFile);
 
+      	presentationsByName.put(uploadedPres.presentationName,uploadedPres.presentationID);
+
       	return uploadedPres;
 	}
+
+	public String getPresentationIDByName(String name){
+		return presentationsByName.get(name);
+	}
+
 
 	private String getNameWithoutExtension(String filename){
 		return filename.substring(0, filename.lastIndexOf("."));
@@ -176,13 +187,13 @@ class PresentationService {
 	}
 	
 	def numberOfThumbnails = {meetingID, name ->
-		def thumbDir = new File(roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "thumbnails")
+		def thumbDir = new File(roomDirectory(meetingID).absolutePath + File.separatorChar + name + File.separatorChar + "thumbnails")
 		thumbDir.listFiles().length
 	}
 	
-	def numberOfTextfiles = {conf, room, name ->
-		log.debug roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles"
-		def textfilesDir = new File(roomDirectory(room).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles")
+	def numberOfTextfiles = {meetingID, name ->
+		log.debug roomDirectory(meetingID).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles"
+		def textfilesDir = new File(roomDirectory(meetingID).absolutePath + File.separatorChar + name + File.separatorChar + "textfiles")
 		textfilesDir.listFiles().length
 	}
 	

@@ -21,12 +21,11 @@ package org.bigbluebutton.web.controllers
 import grails.converters.*
 import org.bigbluebutton.web.services.PresentationService
 import org.bigbluebutton.presentation.UploadedPresentation
-import java.util.HashTable;
+import java.util.Hashtable;
+import org.apache.commons.lang.StringUtils;
 
 class PresentationController {
   PresentationService presentationService
-  // For backup compability
-  private HashTable<String,String> presentationsByName = new HashTable<String,String>();
   
   def index = {
     println 'in PresentationController index'
@@ -77,8 +76,6 @@ class PresentationController {
       log.debug "Uploaded presentation name : $presentationName"
       UploadedPresentation uploadedPres = presentationService.storePresentation(params.meetingID, originalFilename, file.getBytes());
 			presentationService.processUploadedPresentation(uploadedPres)							             			     	
-
-      presentationsByName.put(uploadedPres.presentationName,uploadedPres.presentationID);
 		} else {
 			flash.message = 'file cannot be empty'
 		}
@@ -117,7 +114,7 @@ class PresentationController {
       slideNumber = params.slide_number
     }else if (!StringUtils.isEmpty(params.conference)&&!StringUtils.isEmpty(params.room)&&!StringUtils.isEmpty(params.id)&&!StringUtils.isEmpty(params.presentation_name)) {
       meetingID = params.room;
-      presentationID = presentationsByName.get(params.presentation_name);
+      presentationID = presentationService.getPresentationIDByName(params.presentation_name);
       slideNumber = params.id;
     }else {
       System.out.println("Incorrect parameters for getting slide");
@@ -151,7 +148,7 @@ class PresentationController {
       slideNumber = params.slide_number
     }else if (!StringUtils.isEmpty(params.conference)&&!StringUtils.isEmpty(params.room)&&!StringUtils.isEmpty(params.id)&&!StringUtils.isEmpty(params.presentation_name)) {
       meetingID = params.room;
-      presentationID = presentationsByName.get(params.presentation_name);
+      presentationID = presentationService.getPresentationIDByName(params.presentation_name);
       slideNumber = params.id;
     }else {
       System.out.println("Incorrect parameters for getting thumbnail");
@@ -187,7 +184,7 @@ class PresentationController {
       slideNumber = params.slide_number
     }else if (!StringUtils.isEmpty(params.conference)&&!StringUtils.isEmpty(params.room)&&!StringUtils.isEmpty(params.id)&&!StringUtils.isEmpty(params.presentation_name)) {
       meetingID = params.room;
-      presentationID = presentationsByName.get(params.presentation_name);
+      presentationID = presentationService.getPresentationIDByName(params.presentation_name);
       slideNumber = params.id;
     }else {
       System.out.println("Incorrect parameters for getting textfile");
@@ -221,24 +218,24 @@ class PresentationController {
     if (!StringUtils.isEmpty(params.presentation_id)&&!StringUtils.isEmpty(params.meeting_id)) {
       presentationID = params.presentation_id
       meetingID = params.meeting_id
-    }else if (!StringUtils.isEmpty(params.conference)&&!StringUtils.isEmpty(params.room)&&!StringUtils.isEmpty(params.presentationName)) {
+    }else if (!StringUtils.isEmpty(params.conference)&&!StringUtils.isEmpty(params.room)&&!StringUtils.isEmpty(params.presentation_name)) {
       meetingID = params.room;
-      presentationID = presentationsByName.get(params.presentation_name);
+      presentationID = presentationService.getPresentationIDByName(params.presentation_name);
       oldAPI = true;
     }else {
-      System.out.println("Incorrect parameters for getting textfile");
+      System.out.println("Incorrect parameters for getting slides");
       return null;
     }
     
     def numThumbs = presentationService.numberOfThumbnails(meetingID, presentationID)
 
     response.addHeader("Cache-Control", "no-cache")
-    withFormat {						
-      xml {
-        render(contentType:"text/xml") {
-          if(oldAPI)
+    if(oldAPI){
+      withFormat {						
+        xml {
+          render(contentType:"text/xml") {
             conference(id:meetingID, room:meetingID) {
-              presentation(name:presentationName) {
+              presentation(name:params.presentation_name) {
                 slides(count:numThumbs) {
                   for (def i = 1; i <= numThumbs; i++) {
                     slide(number:"${i}", name:"slide/${i}", thumb:"thumbnail/${i}", textfile:"textfile/${i}")
@@ -247,20 +244,27 @@ class PresentationController {
               }
             }
           }
-          else{
+        }
+      }
+    }else {
+      withFormat {            
+        xml {
+          render(contentType:"text/xml") {
             meeting(id:meetingID) {
-              presentation(id:presentationID,name:presentationName) {
+              presentation(id:presentationID) {
                 slides(count:numThumbs) {
                   for (def i = 1; i <= numThumbs; i++) {
                     slide(number:"${i}", name:"slide/${i}", thumb:"thumbnail/${i}", textfile:"textfile/${i}")
                   }
                 }
               }
-            } 
+            }
           }
         }
-      }
-    }		
+      } 
+    }
+
+
   }
     
   def numberOfThumbnails = {
