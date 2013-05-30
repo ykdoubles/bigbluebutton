@@ -43,8 +43,8 @@ package org.bigbluebutton.modules.present.business
 	{
 		private var url:String;
 		private var host:String;
-		private var conference:String;
-		private var room:String;
+		//private var conference:String;
+		private var meetingID:String;
 		private var userid:Number;
 		private var connection:NetConnection;
 		private var soService:PresentSOService;
@@ -63,8 +63,8 @@ package org.bigbluebutton.modules.present.business
 		
 		private function extractAttributes(a:Object):void{
 			host = a.host as String;
-			conference = a.conference as String;
-			room = a.room as String;
+			//conference = a.conference as String;
+			meetingID = a.room as String;
 			userid = a.userid as Number;
 			connection = a.connection;
 			url = connection.uri;
@@ -76,7 +76,7 @@ package org.bigbluebutton.modules.present.business
 		 * 
 		 */		
 		public function startUpload(e:UploadEvent):void{
-			if (uploadService == null) uploadService = new FileUploadService(host + "/bigbluebutton/presentation/upload", room);
+			if (uploadService == null) uploadService = new FileUploadService(host + "/bigbluebutton/presentation/upload", meetingID);
 			uploadService.upload(e.presentationName, e.fileToUpload);
 		}
 		
@@ -115,10 +115,11 @@ package org.bigbluebutton.modules.present.business
 		 */		
 		public function loadPresentation(e:UploadEvent) : void
 		{
-			var presentationName:String = e.presentationName;
-			LogUtil.debug("PresentProxy::loadPresentation: presentationName=" + presentationName);
-			var fullUri : String = host + "/bigbluebutton/presentation/" + conference + "/" + room + "/" + presentationName+"/slides";	
-			var slideUri:String = host + "/bigbluebutton/presentation/" + conference + "/" + room + "/" + presentationName;
+			//var presentationName:String = e.presentationName;
+			var presentationID:String = e.presentationID;
+			LogUtil.debug("PresentProxy::loadPresentation: presentationID=" + presentationID);
+			var fullUri : String = host + "/bigbluebutton/presentation/" + meetingID + "/" + presentationID+"/slides";	
+			var slideUri:String = host + "/bigbluebutton/presentation/" + meetingID + "/" + presentationID;
 			
 			LogUtil.debug("PresentationApplication::loadPresentation()... " + fullUri);
 			var service:PresentationService = new PresentationService();
@@ -142,7 +143,7 @@ package org.bigbluebutton.modules.present.business
 		
 		public function removePresentation(e:RemovePresentationEvent):void {
 			if (soService == null) return;
-			soService.removePresentation(e.presentationName);
+			soService.removePresentation(e.presentationID);
 		}
 		
 		private function sendViewerNotify(e:TimerEvent):void{

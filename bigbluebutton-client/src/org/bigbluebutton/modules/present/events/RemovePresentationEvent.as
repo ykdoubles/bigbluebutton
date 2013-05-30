@@ -28,7 +28,7 @@ package org.bigbluebutton.modules.present.events
 		// Presentation has been removed from server.
 		public static const PRESENTATION_REMOVED_EVENT:String = "Presentation Removed Event";
 		
-		public var presentationName:String;
+		public var presentationID:String;
 		
 		public function RemovePresentationEvent(type:String, bubbles:Boolean=true, cancelable:Boolean=false)
 		{

@@ -77,9 +77,9 @@ public class PresentationApplication {
         return null;
 	}
 	
-	public void removePresentation(String room, String name){
+	public void removePresentation(String room, String presentationID){
        if (roomsManager.hasRoom(room)){
-            roomsManager.removePresentation(room, name);           
+            roomsManager.removePresentation(room, presentationID);           
         } else {
         	log.warn("Removing presentation from a non-existant room " + room);
         }
@@ -152,10 +152,10 @@ public class PresentationApplication {
 		log.warn("Changing slide on a non-existant room " + room);	
 	}
 	
-	public void sharePresentation(String room, String presentationName, Boolean share){
+	public void sharePresentation(String room, String presentationID, Boolean share){
 		if (roomsManager.hasRoom(room)){
-			log.debug("Request to share presentation " + presentationName + " " + share + " for room " + room);
-			roomsManager.sharePresentation(room, presentationName, share);
+			log.debug("Request to share presentation " + presentationID + " " + share + " for room " + room);
+			roomsManager.sharePresentation(room, presentationID, share);
 			return;
 		}
 		log.warn("Sharing presentation on a non-existant room " + room);	

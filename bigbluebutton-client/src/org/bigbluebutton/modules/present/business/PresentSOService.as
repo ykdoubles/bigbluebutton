@@ -327,7 +327,7 @@ package org.bigbluebutton.modules.present.business {
 			_presentationSO.send("clearCallback");			
 		}
 		
-		public function removePresentation(name:String):void {
+		public function removePresentation(presentationID:String):void {
 			nc.call("presentation.removePresentation",// Remote function name
 				new Responder(
 					function(result:Boolean):void { 						 
@@ -343,7 +343,7 @@ package org.bigbluebutton.modules.present.business {
 							} 
 					}
 				), //new Responder
-				name
+				presentationID
 			); //_netConnection.call
 		}
 		
@@ -396,7 +396,7 @@ package org.bigbluebutton.modules.present.business {
 							currentSlide = Number(result.presentation.slide);
 							LogUtil.debug("The presenter has shared slides and showing slide " + currentSlide);
 							var shareEvent:UploadEvent = new UploadEvent(UploadEvent.PRESENTATION_READY);
-							shareEvent.presentationName = String(result.presentation.currentPresentation);
+							shareEvent.presentationID = String(result.presentation.currentPresentation);
 							dispatcher.dispatchEvent(shareEvent);
 						}
 					},	
@@ -448,9 +448,9 @@ package org.bigbluebutton.modules.present.business {
 			}
 		}
 		
-		private function sendPresentationName(presentationName:String):void {
+		private function sendPresentationName(presentationID:String):void {
 			var uploadEvent:UploadEvent = new UploadEvent(UploadEvent.CONVERT_SUCCESS);
-			uploadEvent.presentationName = presentationName;
+			uploadEvent.presentationID = presentationID;
 			dispatcher.dispatchEvent(uploadEvent)
 		}
 					
@@ -501,8 +501,8 @@ package org.bigbluebutton.modules.present.business {
 			}
 		}
 		
-		public function sharePresentation(share:Boolean, presentationName:String):void {
-			LogUtil.debug("PresentationSOService::sharePresentation()... presentationName=" + presentationName);
+		public function sharePresentation(share:Boolean, presentationID:String):void {
+			LogUtil.debug("PresentationSOService::sharePresentation()... presentationID=" + presentationID);
 			nc.call("presentation.sharePresentation",// Remote function name
 				new Responder(
 	        		// On successful result
@@ -520,26 +520,26 @@ package org.bigbluebutton.modules.present.business {
 							} 
 					}
 				), //new Responder
-				presentationName,
+				presentationID,
 				share
 			); //_netConnection.call
 		}
 
-		public function sharePresentationCallback(presentationName:String, share:Boolean):void {
-			LogUtil.debug("sharePresentationCallback " + presentationName + "," + share);
+		public function sharePresentationCallback(presentationID:String, share:Boolean):void {
+			LogUtil.debug("sharePresentationCallback " + presentationID + "," + share);
 			if (share) {
 				var e:UploadEvent = new UploadEvent(UploadEvent.PRESENTATION_READY);
-				e.presentationName = presentationName;
+				e.presentationID = presentationID;
 				dispatcher.dispatchEvent(e);
 			} else {
 				dispatcher.dispatchEvent(new UploadEvent(UploadEvent.CLEAR_PRESENTATION));
 			}
 		}
 		
-		public function removePresentationCallback(presentationName:String):void {
-			LogUtil.debug("removePresentationCallback " + presentationName);
+		public function removePresentationCallback(presentationID:String):void {
+			LogUtil.debug("removePresentationCallback " + presentationID);
 			var e:RemovePresentationEvent = new RemovePresentationEvent(RemovePresentationEvent.PRESENTATION_REMOVED_EVENT);
-			e.presentationName = presentationName;
+			e.presentationID = presentationID;
 			dispatcher.dispatchEvent(e);
 		}
 		
@@ -571,12 +571,12 @@ package org.bigbluebutton.modules.present.business {
 			/*
 			TODO: temporary workaround this need to be refactored
 			*/
-			uploadEvent.presentationID = presentationName;//presentationID;
+			uploadEvent.presentationID = presentationID;
 			uploadEvent.presentationName = presentationName;
 			dispatcher.dispatchEvent(uploadEvent);
 			dispatcher.dispatchEvent(new BBBEvent(BBBEvent.PRESENTATION_CONVERTED));
 			var readyEvent:UploadEvent = new UploadEvent(UploadEvent.PRESENTATION_READY);
-			readyEvent.presentationID = presentationName;
+			readyEvent.presentationID = presentationID;
 			readyEvent.presentationName = presentationName;
 			dispatcher.dispatchEvent(readyEvent);
 		}

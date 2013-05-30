@@ -146,11 +146,11 @@ public class PresentationRoomsManager {
 		log.warn("Changing slide on a non-existing room " + room);	
 	}
 	
-	public void sharePresentation(String room, String presentationName, Boolean share){
+	public void sharePresentation(String room, String presentationID, Boolean share){
 		PresentationRoom r = getRoom(room);
 		if (r != null) {
-			log.debug("Request share presentation " + presentationName + " " + share + " for room " + room);
-			r.sharePresentation(presentationName, share);
+			log.debug("Request share presentation " + presentationID + " " + share + " for room " + room);
+			r.sharePresentation(presentationID, share);
 			return;
 		}	
 		log.warn("Sharing presentation on a non-existing room " + room);	
@@ -177,16 +177,16 @@ public class PresentationRoomsManager {
 	public ArrayList<String> getPresentations(String room){
         PresentationRoom r = getRoom(room);
         if (r != null) {
-            return r.getPresentationNames();
+            return r.getPresentationIDs();
         }   
         log.warn("Getting current presentation on a non-existing room " + room);
         return null;
     }
     
-    public void removePresentation (String room, String name){
+    public void removePresentation (String room, String presentationID){
         PresentationRoom r = getRoom(room);
         if (r != null) {
-            r.removePresentation(name);
+            r.removePresentation(presentationID);
         } else {  
         	log.warn("Removing presentation from a non-existing room " + room);
         }

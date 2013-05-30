@@ -43,7 +43,7 @@ package org.bigbluebutton.modules.present.managers
 		private var presentWindow:PresentationWindow;
 		
 		//format: presentationNames = [{label:"00"}, {label:"11"}, {label:"22"} ];
-		[Bindable] public var presentationNames:ArrayCollection = new ArrayCollection();
+		[Bindable] public var presentationIDs:ArrayCollection = new ArrayCollection();
 		
 		public function PresentManager() {
 			globalDispatcher = new Dispatcher();
@@ -73,7 +73,8 @@ package org.bigbluebutton.modules.present.managers
 			if (uploadWindow != null) return;
 			
 			uploadWindow = new FileUploadWindow();
-			uploadWindow.presentationNamesAC = presentationNames;
+			//Here we could load the presentation Names so they can be seen...
+			uploadWindow.presentationNamesAC = presentationIDs;
 			uploadWindow.maxFileSize = e.maxFileSize;
 			mx.managers.PopUpManager.addPopUp(uploadWindow, presentWindow, true);
 		}
@@ -84,21 +85,21 @@ package org.bigbluebutton.modules.present.managers
 		}
 		
 		public function updatePresentationNames(e:UploadEvent):void{
-			LogUtil.debug("Adding presentation " + e.presentationName);
-			for (var i:int = 0; i < presentationNames.length; i++) {
-				if (presentationNames[i] == e.presentationName) return;
+			LogUtil.debug("Adding presentation " + e.presentationID);
+			for (var i:int = 0; i < presentationIDs.length; i++) {
+				if (presentationIDs[i] == e.presentationID) return;
 			}
-			presentationNames.addItem(e.presentationName);
+			presentationIDs.addItem(e.presentationID);
 		}
 
 		public function removePresentation(e:RemovePresentationEvent):void {
-			LogUtil.debug("Removing presentation " + e.presentationName);
+			LogUtil.debug("Removing presentation " + e.presentationID);
       var p:String;
       
-      for (var i:int = 0; i < presentationNames.length; i++) {
-        p = presentationNames.getItemAt(i) as String;
-        if (p == e.presentationName) {
-          presentationNames.removeItemAt(i);
+      for (var i:int = 0; i < presentationIDs.length; i++) {
+        p = presentationIDs.getItemAt(i) as String;
+        if (p == e.presentationID) {
+          presentationIDs.removeItemAt(i);
         }
       }
 		}

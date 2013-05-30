@@ -12,7 +12,7 @@
       private function showPresentation():void {
         trace("FileUploadWindow::showPresentation() " + data);   
         var readyEvent:UploadEvent = new UploadEvent(UploadEvent.PRESENTATION_READY);
-        readyEvent.presentationName = data as String;
+        readyEvent.presentationID = data as String;
         globalDispatch.dispatchEvent(readyEvent);
         
         globalDispatch.dispatchEvent(new UploadEvent(UploadEvent.CLOSE_UPLOAD_WINDOW));
@@ -22,7 +22,7 @@
         trace("FileUploadWindow.mxml::deletePresentation() " + data);
 
         var rEvent:RemovePresentationEvent = new RemovePresentationEvent(RemovePresentationEvent.REMOVE_PRESENTATION_EVENT);
-        rEvent.presentationName = data as String;
+        rEvent.presentationID = data as String;
         dispatchEvent(rEvent);
       }
     ]]>

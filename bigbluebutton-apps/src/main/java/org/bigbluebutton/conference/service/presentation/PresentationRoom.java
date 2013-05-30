@@ -22,8 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.red5.logging.Red5LoggerFactory;
 
-import net.jcip.annotations.ThreadSafe;import java.util.concurrent.ConcurrentHashMap;import java.util.concurrent.CopyOnWriteArrayList;import java.util.ArrayList;
-import java.util.Collections;import java.util.Iterator;
+import net.jcip.annotations.ThreadSafe;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 /**
@@ -38,6 +42,9 @@ public class PresentationRoom {
 	
 	int currentSlide = 0;
 	Boolean sharing = false;
+	/*
+		TODO: We could have an object that represent the Presentation.
+	*/
 	String currentPresentation = "";
 	Double xOffset = 0D;
 	Double yOffset = 0D;
@@ -48,7 +55,7 @@ public class PresentationRoom {
 	Double xPercent = 0D;
 	Double yPercent = 0D;
 	
-	ArrayList<String> presentationNames = new ArrayList<String>();
+	ArrayList<String> presentationIDs = new ArrayList<String>();
 	
 	public PresentationRoom(String name) {
 		this.name = name;
@@ -85,12 +92,13 @@ public class PresentationRoom {
 
 	@SuppressWarnings("unchecked")
 	private void storePresentationNames(Map message){
+        String presentationID = (String) message.get("presentationID");
         String presentationName = (String) message.get("presentationName");
         String messageKey = (String) message.get("messageKey");
              
         if (messageKey.equalsIgnoreCase("CONVERSION_COMPLETED")) {            
             log.debug(messageKey + "[" + presentationName + "]");
-            presentationNames.add(presentationName);                                
+            presentationIDs.add(presentationID);                                
         }           
     }
 	
@@ -133,12 +141,12 @@ public class PresentationRoom {
 	}	
 	
 	@SuppressWarnings("unchecked")
-	public void sharePresentation(String presentationName, Boolean share){
-		log.debug("Request share presentation " + presentationName + " " + share + " for room " + name);
+	public void sharePresentation(String presentationID, Boolean share){
+		log.debug("Request share presentation " + presentationID + " " + share + " for room " + name);
 		sharing = share;
 		if (share) {
-		  currentPresentation = presentationName;
-		  presentationNames.add(presentationName);   
+		  currentPresentation = presentationID;
+		  presentationIDs.add(presentationID);   
 		} else {
 		  currentPresentation = "";
 		}
@@ -147,30 +155,30 @@ public class PresentationRoom {
 			log.debug("calling on listener");
 			IPresentationRoomListener listener = (IPresentationRoomListener) iter.next();
 			log.debug("calling sharePresentation on listener " + listener.getName());
-			listener.sharePresentation(presentationName, share);
+			listener.sharePresentation(presentationID, share);
 		}			
 	}
 	    
-    public void removePresentation(String presentationName){
-        log.debug("Request remove presentation " + presentationName);
-        int index = presentationNames.indexOf(presentationName);
+    public void removePresentation(String presentationID){
+        log.debug("Request remove presentation " + presentationID);
+        int index = presentationIDs.indexOf(presentationID);
         
         if (index < 0) {
-            log.warn("Request remove presentation " + presentationName + ". Presentation not found.");
+            log.warn("Request remove presentation " + presentationID + ". Presentation not found.");
             return;
         }
         
-        presentationNames.remove(index);
+        presentationIDs.remove(index);
         
         for (Iterator iter = listeners.values().iterator(); iter.hasNext();) {
             log.debug("calling on listener");
             IPresentationRoomListener listener = (IPresentationRoomListener) iter.next();
             log.debug("calling removePresentation on listener " + listener.getName());
-            listener.removePresentation(presentationName);
+            listener.removePresentation(presentationID);
         }   
         
-        if (currentPresentation == presentationName) {
-            sharePresentation(presentationName, false);
+        if (currentPresentation == presentationID) {
+            sharePresentation(presentationID, false);
         }        
     }
     
@@ -186,8 +194,8 @@ public class PresentationRoom {
 		return sharing;
 	}
 
-	public ArrayList<String> getPresentationNames() {
-		return presentationNames;
+	public ArrayList<String> getPresentationIDs() {
+		return presentationIDs;
 	}
 
 	public Double getxOffset() {

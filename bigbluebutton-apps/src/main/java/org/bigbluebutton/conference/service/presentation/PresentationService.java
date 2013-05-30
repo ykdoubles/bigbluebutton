@@ -17,11 +17,13 @@
 *
 */
 package org.bigbluebutton.conference.service.presentation;
-import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
-import org.red5.logging.Red5LoggerFactory;import org.red5.server.api.Red5;import org.red5.server.api.scope.IScope;
+import org.red5.logging.Red5LoggerFactory;
+import org.red5.server.api.Red5;
+import org.red5.server.api.scope.IScope;
 import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
 
 public class PresentationService {	
@@ -63,6 +65,7 @@ public class PresentationService {
 			presentation.put("sharing", true);
 			presentation.put("slide", curSlide);
 			presentation.put("currentPresentation", currentPresentation);
+			
 			if (presentersSettings!=null) {
 				presentation.put("xOffset", presentersSettings.get("xOffset"));
 				presentation.put("yOffset", presentersSettings.get("yOffset"));
