@@ -56,6 +56,7 @@ public class PresentationRoom {
 	Double yPercent = 0D;
 	
 	ArrayList<String> presentationIDs = new ArrayList<String>();
+	ArrayList<String> presentationNames = new ArrayList<String>();
 	
 	public PresentationRoom(String name) {
 		this.name = name;
@@ -98,7 +99,8 @@ public class PresentationRoom {
              
         if (messageKey.equalsIgnoreCase("CONVERSION_COMPLETED")) {            
             log.debug(messageKey + "[" + presentationName + "]");
-            presentationIDs.add(presentationID);                                
+            presentationIDs.add(presentationID);
+            presentationNames.add(presentationName);                                
         }           
     }
 	
@@ -146,7 +148,8 @@ public class PresentationRoom {
 		sharing = share;
 		if (share) {
 		  currentPresentation = presentationID;
-		  presentationIDs.add(presentationID);   
+		  //TODO: Why we have an add Presentation here?
+		  //presentationIDs.add(presentationID);   
 		} else {
 		  currentPresentation = "";
 		}
@@ -169,6 +172,7 @@ public class PresentationRoom {
         }
         
         presentationIDs.remove(index);
+        presentationNames.remove(index);
         
         for (Iterator iter = listeners.values().iterator(); iter.hasNext();) {
             log.debug("calling on listener");
@@ -196,6 +200,10 @@ public class PresentationRoom {
 
 	public ArrayList<String> getPresentationIDs() {
 		return presentationIDs;
+	}
+
+	public ArrayList<String> getPresentationNames(){
+		return presentationNames;
 	}
 
 	public Double getxOffset() {

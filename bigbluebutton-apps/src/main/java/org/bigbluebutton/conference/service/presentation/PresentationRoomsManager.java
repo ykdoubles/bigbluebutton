@@ -182,6 +182,15 @@ public class PresentationRoomsManager {
         log.warn("Getting current presentation on a non-existing room " + room);
         return null;
     }
+
+    public ArrayList<String> getPresentationNames(String room){
+    	PresentationRoom r = getRoom(room);
+        if (r != null) {
+            return r.getPresentationNames();
+        }   
+        log.warn("Getting current presentation on a non-existing room " + room);
+        return null;
+    }
     
     public void removePresentation (String room, String presentationID){
         PresentationRoom r = getRoom(room);

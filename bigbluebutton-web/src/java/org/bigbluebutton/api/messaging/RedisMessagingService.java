@@ -71,6 +71,22 @@ public class RedisMessagingService implements MessagingService {
 		}		
 	}
 
+	public void recordPresentationInfo(String meetingId, String presentationID, String presentationName, int slides){
+		Jedis jedis = redisPool.getResource();
+		try {
+			log.debug("Saving presentationInfo for {}", meetingId);
+			HashMap<String,String> info = new HashMap<String,String>();
+			info.put("presentationID",presentationID);
+			info.put("presentationName",presentationName);
+			info.put("slides",Integer.toString(slides));
+			jedis.hmset("meeting:" + meetingId + ":presentation:" + presentationID, info);
+		} catch (Exception e){
+			log.warn("Cannot record the info meeting:"+meetingId,e);
+		} finally {
+			redisPool.returnResource(jedis);
+		}	
+	}
+
 	public void endMeeting(String meetingId) {
 		HashMap<String,String> map = new HashMap<String, String>();
 		map.put("messageId", MessagingConstants.END_MEETING_REQUEST_EVENT);

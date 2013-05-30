@@ -135,7 +135,7 @@ package org.bigbluebutton.modules.present.business
 		 */		
 		public function sharePresentation(e:PresenterCommands):void{
 			if (soService == null) return;
-			soService.sharePresentation(e.share, e.presentationName);
+			soService.sharePresentation(e.share, e.presentationID);
 			var timer:Timer = new Timer(3000, 1);
 			timer.addEventListener(TimerEvent.TIMER, sendViewerNotify);
 			timer.start();

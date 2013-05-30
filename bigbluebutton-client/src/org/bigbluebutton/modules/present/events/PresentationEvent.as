@@ -27,6 +27,7 @@ package org.bigbluebutton.modules.present.events
 		public static const PRESENTATION_LOADED:String = "Presentation Loaded";
 		public static const PRESENTATION_NOT_LOADED:String = "Presentation Not Loaded";
 		
+		public var presentationID:String;
 		public var presentationName:String;
 		private var _slides:PresentationSlides;
 		public var numberOfPages:int;

@@ -38,7 +38,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 	creationComplete="onCreationComplete()" 
 	width="{DEFAULT_WINDOW_WIDTH}" height="{DEFAULT_WINDOW_HEIGHT}" 
 	x="{DEFAULT_X_POSITION}" y="{DEFAULT_Y_POSITION}"
-	title="{currentPresentation}"
+	title="{currentPresentationName}"
 	xmlns:views="org.bigbluebutton.modules.present.ui.views.*"
 	>
 	
@@ -139,7 +139,8 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 			private var mouseDown:Boolean = false;
 			[Bindable] private var isPresenter:Boolean = false;
 			[Bindable] private var presentationLoaded:Boolean = false;
-			[Bindable] private var currentPresentation:String = "";
+			[Bindable] private var currentPresentationID:String = "";
+			[Bindable] private var currentPresentationName:String = "";
 			
 			[Bindable] private var baseIndex:int; 
 			[Bindable] private var presentOptions:PresentOptions;
@@ -368,8 +369,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 			}
 					
 			private function handlePresentationLoadedEvent(e:PresentationEvent):void {	
-				if (e.presentationName == currentPresentation) return;			
-				currentPresentation = e.presentationName;
+				if (e.presentationID == currentPresentationID) return;			
+				currentPresentationID = e.presentationID;
+				currentPresentationName = e.presentationName;
 				presentationLoaded = true;
 				slideView.setSlides(e.slides.slides);    		            		
 				slideView.visible = true;		
@@ -378,7 +380,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 				displaySlideNumber(slideView.selectedSlide + 1);	
 				if (isPresenter) {
 					displaySlideNavigationControls(true);					
-					notifyOthersOfSharingPresentation(e.presentationName);
+					notifyOthersOfSharingPresentation(e.presentationID);
 				} else {
 					dispatchEvent(new SlideEvent(SlideEvent.LOAD_CURRENT_SLIDE));
 				}
@@ -438,11 +440,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 				PopUpManager.addPopUp(pageDialog, this, false);
 			}
 			
-			private function notifyOthersOfSharingPresentation(presentationName:String):void {
+			private function notifyOthersOfSharingPresentation(presentationID:String):void {
 				var shareEvent:PresenterCommands = new PresenterCommands(PresenterCommands.SHARE_PRESENTATION_COMMAND);
-					shareEvent.presentationName = presentationName;
-					shareEvent.share = true;
-					dispatchEvent(shareEvent);
+				shareEvent.presentationID = presentationID;
+				shareEvent.share = true;
+				dispatchEvent(shareEvent);
 			}
 			
 			private function gotoPage(e:NavigationEvent):void{
@@ -496,8 +498,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 				btnSlideNum.label = "";
 				displaySlideNavigationControls(false);
 
+				currentPresentationID = "-1";
 				// Change the title of the window.
-				currentPresentation = ResourceUtil.getInstance().getString('bbb.presentation.title');				
+				currentPresentationName = ResourceUtil.getInstance().getString('bbb.presentation.title');				
 			}
 			
 			private function gotoPreviousSlide():void {

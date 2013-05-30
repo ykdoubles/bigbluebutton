@@ -57,7 +57,7 @@ package org.bigbluebutton.modules.present.events
 		public var slideToCanvasHeightRatio:Number;
 		
 		//Parameters for the share event
-		public var presentationName:String;
+		public var presentationID:String;
 		public var share:Boolean;
 		
 		public function PresenterCommands(type:String, slideNumber:Number = 0)

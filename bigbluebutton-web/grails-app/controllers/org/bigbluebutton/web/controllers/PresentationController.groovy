@@ -210,17 +210,21 @@ class PresentationController {
   }
 
   def numberOfSlides = {
-    def presentationID;
     def meetingID;
+    def presentationID;
+    def presentationName;
+    
     //for backup compability
     boolean oldAPI = false;
     
     if (!StringUtils.isEmpty(params.presentation_id)&&!StringUtils.isEmpty(params.meeting_id)) {
-      presentationID = params.presentation_id
       meetingID = params.meeting_id
+      presentationID = params.presentation_id
+      presentationName = presentationService.getPresentationByID(presentationID);
     }else if (!StringUtils.isEmpty(params.conference)&&!StringUtils.isEmpty(params.room)&&!StringUtils.isEmpty(params.presentation_name)) {
       meetingID = params.room;
-      presentationID = presentationService.getPresentationIDByName(params.presentation_name);
+      presentationName = params.presentation_name;
+      presentationID = presentationService.getPresentationIDByName(params.presentationName);
       oldAPI = true;
     }else {
       System.out.println("Incorrect parameters for getting slides");
@@ -235,7 +239,7 @@ class PresentationController {
         xml {
           render(contentType:"text/xml") {
             conference(id:meetingID, room:meetingID) {
-              presentation(name:params.presentation_name) {
+              presentation(name:presentationName) {
                 slides(count:numThumbs) {
                   for (def i = 1; i <= numThumbs; i++) {
                     slide(number:"${i}", name:"slide/${i}", thumb:"thumbnail/${i}", textfile:"textfile/${i}")
@@ -251,7 +255,7 @@ class PresentationController {
         xml {
           render(contentType:"text/xml") {
             meeting(id:meetingID) {
-              presentation(id:presentationID) {
+              presentation(id:presentationID,name:presentationName) {
                 slides(count:numThumbs) {
                   for (def i = 1; i <= numThumbs; i++) {
                     slide(number:"${i}", name:"slide/${i}", thumb:"thumbnail/${i}", textfile:"textfile/${i}")

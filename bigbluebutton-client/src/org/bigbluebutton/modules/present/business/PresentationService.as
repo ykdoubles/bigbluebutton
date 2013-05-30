@@ -92,7 +92,9 @@ package org.bigbluebutton.modules.present.business
 			LogUtil.debug("Slides: " + xml);
 		
 			var presentationID:String = xml.presentation[0].@id;
-			LogUtil.debug("PresentationService::parse()...  presentationName=" + presentationID);
+			var presentationName:String = xml.presentation[0].@name;
+
+			LogUtil.debug("PresentationService::parse()...  presentationName=" + presentationName);
 			
 			// Make sure we start with a clean set.
 			_slides.clear();			
@@ -112,8 +114,8 @@ package org.bigbluebutton.modules.present.business
 			}		
 			
 			//LogUtil.debug("number of slide=" + _slides.size());
-			if (_slides.size() > 0) loadPresentationListener(true, presentationID);
-			else loadPresentationListener(false, presentationID);
+			if (_slides.size() > 0) loadPresentationListener(true, presentationID, presentationName);
+			else loadPresentationListener(false, presentationID, presentationName);
 				
 		}
 
@@ -146,11 +148,12 @@ package org.bigbluebutton.modules.present.business
 			LogUtil.debug("Got fault [" + event.fault.toString() + "]");		
 		}		
 		
-		public function loadPresentationListener(loaded:Boolean, presentationID:String):void {
+		public function loadPresentationListener(loaded:Boolean, presentationID:String, presentationName:String):void {
 			if (loaded) {
-				LogUtil.debug('presentation has been loaded  presentationName=' + presentationID);
+				LogUtil.debug('presentation has been loaded  presentationName=' + presentationName);
 				var e:PresentationEvent = new PresentationEvent(PresentationEvent.PRESENTATION_LOADED);
-				e.presentationName = presentationID;
+				e.presentationID = presentationID;
+				e.presentationName = presentationName;
 				e.slides = _slides;
 				dispatcher.dispatchEvent(e);
 			} else {

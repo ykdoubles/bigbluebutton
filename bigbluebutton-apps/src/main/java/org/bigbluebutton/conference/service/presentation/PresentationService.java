@@ -47,7 +47,11 @@ public class PresentationService {
 		Boolean isSharing = presentationApplication.getSharingPresentation(scope.getName());
 		String currentPresentation = presentationApplication.getCurrentPresentation(scope.getName());
 		Map<String, Object> presentersSettings = presentationApplication.getPresenterSettings(scope.getName());
-		ArrayList<String> presentationNames = presentationApplication.getPresentations(scope.getName());
+		
+		//TODO: Probably we could send an arraylist of Presentations Objects
+		ArrayList<String> presentationIDs = presentationApplication.getPresentations(scope.getName());
+		//ArrayList<String> presentationNames = presentationApplication.getPresentationNames(scope.getName());
+
 		
 		Map<String, Object> presenter = new HashMap<String, Object>();		
 		if (curPresenter != null) {
@@ -80,7 +84,8 @@ public class PresentationService {
 		Map<String, Object> presentationInfo = new HashMap<String, Object>();
 		presentationInfo.put("presenter", presenter);
 		presentationInfo.put("presentation", presentation);
-		presentationInfo.put("presentations", presentationNames);
+		presentationInfo.put("presentations", presentationIDs);
+		//presentationInfo.put("presentationNames", presentationNames);
 		
 		log.info("getPresentationInfo::service - Sending presentation information...");
 		return presentationInfo;

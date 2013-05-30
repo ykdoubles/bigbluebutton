@@ -85,7 +85,7 @@ package org.bigbluebutton.modules.whiteboard.services
         sender.setActivePresentation(e);
       } else {
  //               LogUtil.debug("Switch to presentation [" + e.presentationName + "," + e.numberOfPages + "]");
-        whiteboardModel.changePresentation(e.presentationName, e.numberOfPages);
+        whiteboardModel.changePresentation(e.presentationID, e.numberOfPages);
       }
     }
 

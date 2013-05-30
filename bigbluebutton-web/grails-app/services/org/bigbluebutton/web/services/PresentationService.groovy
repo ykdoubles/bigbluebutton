@@ -23,18 +23,21 @@ import java.io.FileOutputStream;
 import java.lang.InterruptedException
 import org.bigbluebutton.presentation.DocumentConversionService
 import org.bigbluebutton.presentation.UploadedPresentation
+import org.bigbluebutton.api.messaging.RedisMessagingService
 import java.util.Hashtable;
 
 class PresentationService {
 
     static transactional = false
 	DocumentConversionService documentConversionService
+	RedisMessagingService messagingService
 	def presentationDir
 	def testConferenceMock
 	def testRoomMock
 	def testPresentationName
 	def testUploadedPresentation
 	def defaultUploadedPresentation
+	private Hashtable<String,String> presentationsByID = new Hashtable<String,String>();
 
 	// For backup compability
     private Hashtable<String,String> presentationsByName = new Hashtable<String,String>();
@@ -143,9 +146,18 @@ class PresentationService {
       	File presFile = new File(uploadDir.absolutePath + File.separatorChar + uploadedPres.getPresentationID() + "." + extension);
       	uploadedPres.setUploadedFile(presFile);
 
+      	presentationsByID.put(uploadedPres.presentationID,uploadedPres.presentationName);
+
+      	//for backup compatibility
       	presentationsByName.put(uploadedPres.presentationName,uploadedPres.presentationID);
 
+      	//messagingService.recordPresentationInfo(uploadedPres.meetingID,uploadedPres.presentationID,uploadedPres.presentationName)
+
       	return uploadedPres;
+	}
+
+	public String getPresentationByID(String id){
+		return presentationsByID.get(id);
 	}
 
 	public String getPresentationIDByName(String name){

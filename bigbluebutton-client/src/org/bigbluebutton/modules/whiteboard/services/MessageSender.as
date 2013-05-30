@@ -192,7 +192,7 @@ package org.bigbluebutton.modules.whiteboard.services
 //			LogUtil.debug("Sending [whiteboard.isWhiteboardEnabled] to server.");
 			
 			var message:Object = new Object();
-			message["presentationID"] = e.presentationName;
+			message["presentationID"] = e.presentationID;
 			message["numberOfSlides"] = e.numberOfPages;
 			
 			var _nc:ConnectionManager = BBB.initConnectionManager();
