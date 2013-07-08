@@ -58,7 +58,8 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     		</set>
   		</property>	  
   		<property name="recorderApplication"> <ref bean="recorderApplication"/></property>	
-  		<property name="connInvokerService"> <ref bean="connInvokerService"/></property>		
+  		<property name="connInvokerService"> <ref bean="connInvokerService"/></property>
+  		<property name="bigBlueButtonService"> <ref bean="bigbluebutton.service"/></property>		
 	</bean>
 	
 	<bean id="connInvokerService" class="org.bigbluebutton.conference.ConnectionInvokerService"/>

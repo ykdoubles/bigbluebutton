@@ -25,8 +25,12 @@ import java.util.Map;
 
 import org.red5.server.api.Red5;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 public class BigBlueButtonService {
 	private ConnectionInvokerService connInvokerService;
+	private JedisPool redisPool;
 	
 	public void sendMessage(HashMap<String, Object> params) {
 		
@@ -47,6 +51,24 @@ public class BigBlueButtonService {
 	
 	public void setConnInvokerService(ConnectionInvokerService connInvokerService) {
 		this.connInvokerService = connInvokerService;
+	}
+
+	public boolean isValidMeeting(String meetingId){
+		Jedis jedis = redisPool.getResource();
+		boolean valid = false;
+		try{
+			valid = jedis.sismember("meetings:running",meetingId);
+		}catch(Exception e){
+			System.out.println("Errooooooor: "+ e.getMessage());
+		}finally{
+			redisPool.returnResource(jedis);
+		}
+
+		return valid;
+	}
+
+	public void setRedisPool(JedisPool pool){
+		this.redisPool = pool;
 	}
 	
 }

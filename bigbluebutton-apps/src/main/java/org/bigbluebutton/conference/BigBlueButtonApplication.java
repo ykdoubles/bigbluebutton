@@ -20,7 +20,8 @@ package org.bigbluebutton.conference;
 
 import java.util.Iterator;
 import java.util.Set;
-import org.red5.server.api.Red5;import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
+import org.red5.server.api.Red5;
+import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
 import org.bigbluebutton.conference.service.recorder.RecorderApplication;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.IApplication;
@@ -41,6 +42,7 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	private RecorderApplication recorderApplication;
 	private AbstractApplicationContext appCtx;
 	private ConnectionInvokerService connInvokerService;
+	private BigBlueButtonService bigbluebuttonService;
 	
 	private static final String APP = "BBB";
 	
@@ -127,6 +129,10 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         String username = ((String) params[0]).toString();
         String role = ((String) params[1]).toString();
         String room = ((String)params[2]).toString();
+
+        if(!bigbluebuttonService.isValidMeeting(room)){
+        	return false;
+        }
                
         String voiceBridge = ((String) params[3]).toString();
 		
@@ -152,6 +158,10 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         
         return super.roomConnect(connection, params);
         
+	}
+
+	private boolean isValidMeeting(String meetingId){
+		return false;
 	}
 
 	@Override
@@ -182,6 +192,10 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	
 	public void setRecorderApplication(RecorderApplication a) {
 		recorderApplication = a;
+	}
+
+	public void setBigBlueButtonService(BigBlueButtonService bs){
+		this.bigbluebuttonService = bs;
 	}
 	
 	public void setApplicationListeners(Set<IApplication> listeners) {

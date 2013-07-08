@@ -34,6 +34,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 	
 	<bean id="bigbluebutton.service" class="org.bigbluebutton.conference.BigBlueButtonService">
       <property name="connInvokerService"> <ref bean="connInvokerService"/></property>
+      <property name="redisPool"><ref local="redisPool" /> </property>
     </bean>
   		
 	<bean id="participantsHandler" class="org.bigbluebutton.conference.service.participants.ParticipantsHandler">

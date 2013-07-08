@@ -71,6 +71,30 @@ public class RedisMessagingService implements MessagingService {
 		}		
 	}
 
+	public void storeMeeting(String meetingId){
+		Jedis jedis = redisPool.getResource();
+		try{
+
+			jedis.sadd("meetings:running", meetingId);
+
+		} catch(Exception e){
+
+		} finally{
+			redisPool.returnResource(jedis);
+		}
+	}
+
+	public void removeMeeting(String meetingId){
+		Jedis jedis = redisPool.getResource();
+		try{
+			jedis.srem("meetings:running", meetingId);
+		} catch(Exception e){
+
+		} finally{
+			redisPool.returnResource(jedis);
+		}
+	}
+
 	public void endMeeting(String meetingId) {
 		HashMap<String,String> map = new HashMap<String, String>();
 		map.put("messageId", MessagingConstants.END_MEETING_REQUEST_EVENT);

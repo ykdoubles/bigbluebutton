@@ -83,12 +83,14 @@ public class MeetingService {
 		  			processRecording(m.getInternalId());
 		  		}
 				meetings.remove(m.getInternalId());
+				messagingService.removeMeeting(m.getInternalId());
 				continue;
 			}
 			
 			if (m.wasNeverStarted(defaultMeetingCreateJoinDuration)) {
 				log.info("Removing non-joined meeting [{} - {}]", m.getInternalId(), m.getName());
 				meetings.remove(m.getInternalId());
+				messagingService.removeMeeting(m.getInternalId());
 				continue;
 			}
 			
@@ -107,6 +109,10 @@ public class MeetingService {
 	public void createMeeting(Meeting m) {
 		log.debug("Storing Meeting with internal id:" + m.getInternalId());
 		meetings.put(m.getInternalId(), m);
+
+		//Store Meeting in redis
+		messagingService.storeMeeting(m.getInternalId());
+
 		if (m.isRecord()) {
 			Map<String,String> metadata=new LinkedHashMap<String,String>();
 			metadata.putAll(m.getMetadata());
@@ -224,6 +230,7 @@ public class MeetingService {
 					processRecording(m.getInternalId());
 				}
 				meetings.remove(m.getInternalId());
+				messagingService.removeMeeting(m.getInternalId());
 			}
 		}else{
 			log.debug("endMeeting - meeting doesn't exist: " + meetingId);
