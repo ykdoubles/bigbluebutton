@@ -59,11 +59,103 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
   		</property>	  
   		<property name="recorderApplication"> <ref bean="recorderApplication"/></property>	
   		<property name="connInvokerService"> <ref bean="connInvokerService"/></property>		
+  		<property name="bigBlueButtonInGW"> <ref bean="bbbInGW"/></property>
 	</bean>
 	
-	<bean id="connInvokerService" class="org.bigbluebutton.conference.ConnectionInvokerService"/>
+	<bean id="connInvokerService" class="org.bigbluebutton.conference.meeting.messaging.red5.ConnectionInvokerService" init-method="start" destroy-method="stop"/>
 	
-	<import resource="bbb-apps.xml" />
+	<bean id="outMessageGateway" class="org.bigbluebutton.conference.meeting.messaging.OutMessageGateway">
+        <property name="outMessageListeners">
+            <set>
+                <ref bean="meetingMessagePublisher" />
+                <ref bean="layoutClientSender" />            
+            </set>
+        </property>  	
+	</bean>
+	
+	<bean id="meetingMessagePublisher" class="org.bigbluebutton.conference.meeting.messaging.redis.MeetingMessagePublisher">
+      <property name="messageService"> <ref bean="redisMessageSender"/></property>
+    </bean>
+
+    <bean id="bbbInGW" class="org.bigbluebutton.core.BigBlueButtonInGW">
+        <constructor-arg index="0" ref="bbbGW"/>
+    </bean>
+              
+    <bean id="bbbGW" class="org.bigbluebutton.core.BigBlueButtonGateway">
+        <constructor-arg index="0" ref="outMsgGW"/>
+    </bean>
+    
+    <bean id="outMsgGW" class="org.bigbluebutton.core.api.MessageOutGateway">
+        <property name="listeners">
+            <set>
+                <ref bean="presentationRed5ClientSender" />  
+                <ref bean="usersRed5ClientSender" />   
+                <ref bean="presentationRedisRecorder" /> 
+                <ref bean="usersRedisRecorder" />
+                <ref bean="meetingEventRedisPublisher" />   
+                <ref bean="pollRed5ClientSender" />
+                <ref bean="usersRedisPublisher" />
+                <ref bean="pollRedisRecorder" />  
+                <ref bean="pollRedisPublisher"/>                        
+            </set>        
+         </property> 
+    </bean>
+    
+    <bean id="presentationRedisRecorder" class="org.bigbluebutton.core.apps.presentation.redis.PresentationEventRedisRecorder">
+        <constructor-arg index="0" ref="recorderApplication"/>
+    </bean>
+
+    <bean id="usersRedisRecorder" class="org.bigbluebutton.core.apps.users.redis.UsersEventRedisRecorder">
+        <constructor-arg index="0" ref="recorderApplication"/>
+    </bean>
+        
+    <bean id="usersRed5ClientSender" class="org.bigbluebutton.core.apps.users.red5.UsersClientMessageSender">
+      <constructor-arg index="0" ref="connInvokerService"/>
+    </bean>
+
+    <bean id="presentationRed5ClientSender" class="org.bigbluebutton.core.apps.presentation.red5.PresentationClientMessageSender">
+      <constructor-arg index="0" ref="connInvokerService"/>
+    </bean>
+
+    <bean id="pollRed5ClientSender" class="org.bigbluebutton.core.apps.poll.red5.PollClientMessageSender">
+      <constructor-arg index="0" ref="connInvokerService"/>
+    </bean>
+
+    <bean id="meetingEventRedisPublisher" class="org.bigbluebutton.core.meeting.MeetingEventRedisPublisher">
+      <constructor-arg ref="redisMessageSender" />
+    </bean>
+
+    <bean id="usersRedisPublisher" class="org.bigbluebutton.core.apps.users.redis.UsersEventRedisPublisher">
+        <constructor-arg index="0" ref="redisMessageSender"/>
+    </bean>
+
+    <bean id="pollRedisPublisher" class="org.bigbluebutton.core.apps.poll.redis.PollEventRedisPublisher">
+        <constructor-arg index="0" ref="redisMessageSender"/>
+    </bean>
+    
+    <bean id="pollRedisRecorder" class="org.bigbluebutton.core.apps.poll.redis.PollEventRedisRecorder">
+        <constructor-arg index="0" ref="recorderApplication"/>
+    </bean>
+
+    <bean id="pollMessageHandler" class="org.bigbluebutton.conference.service.poll.messaging.redis.PollRedisMessageHandler">
+      <property name="bigBlueButtonInGW"> <ref bean="bbbInGW"/></property>
+    </bean>
+            
+    <bean id="meetingMessageHandler" class="org.bigbluebutton.conference.meeting.messaging.redis.MeetingMessageHandler">
+      <property name="bigBlueButtonInGW"> <ref bean="bbbInGW"/></property>
+    </bean>
+        
+	<import resource="bbb-redis-pool.xml"/>
+	<import resource="bbb-redis-recorder.xml"/>
+	<import resource="bbb-app-chat.xml" />
+	<import resource="bbb-app-layout.xml" />
+	<import resource="bbb-app-poll.xml" />
+	<import resource="bbb-app-presentation.xml" />
+	<import resource="bbb-app-whiteboard.xml" />
+	<import resource="bbb-app-users.xml" />
 	<import resource="bbb-voice-app.xml" />
-  <import resource="bbb-voice-freeswitch.xml" />
+  	<import resource="bbb-voice-freeswitch.xml" />
+  	
+  	<import resource="bbb-redis-messaging.xml"/>
+  	
 </beans>

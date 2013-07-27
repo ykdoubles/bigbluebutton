@@ -37,6 +37,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
       import org.bigbluebutton.modules.present.events.UploadEvent;
       import org.bigbluebutton.modules.present.managers.PresentManager;
       import org.bigbluebutton.modules.present.ui.views.PresentationWindow;
+      import org.bigbluebutton.modules.whiteboard.events.GetCurrentPresentationInfo;
 
 			private var apiInstance:PresentationAPI;
 			
@@ -54,7 +55,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 	
 	<EventHandlers type="{PresentModuleEvent.START_MODULE}" >
 		<MethodInvoker generator="{PresentManager}" method="handleStartModuleEvent" arguments="{event}"/>
-		<MethodInvoker generator="{PresentProxy}" method="connect" arguments="{event}" />
+    <MethodInvoker generator="{PresentProxy}" method="connect" arguments="{event}" />
 	</EventHandlers>
 	
 	<EventHandlers type="{PresentModuleEvent.STOP_MODULE}" >
@@ -92,7 +93,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 	<EventHandlers type="{PresenterCommands.ZOOM}" >
 		<MethodInvoker generator="{PresentProxy}" method="zoomSlide" arguments="{event}" />
 	</EventHandlers>
-	
+
+  <EventHandlers type="{GetCurrentPresentationInfo.GET_CURRENT_PRESENTATION_INFO}" >
+    <MethodInvoker generator="{PresentProxy}" method="getCurrentPresentationInfo" />
+  </EventHandlers>
+  
 	<EventHandlers type="{PresenterCommands.SEND_CURSOR_UPDATE}" >
 		<MethodInvoker generator="{PresentProxy}" method="sendCursorUpdate" arguments="{event}" />
 	</EventHandlers>

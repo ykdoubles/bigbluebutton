@@ -42,6 +42,7 @@ package org.bigbluebutton.main.model.users {
 	import org.bigbluebutton.main.model.ConferenceParameters;
 	import org.bigbluebutton.main.model.users.events.ConnectionFailedEvent;
 	import org.bigbluebutton.main.model.users.events.RoleChangeEvent;
+	import org.bigbluebutton.modules.users.services.MessageSender;
 	import org.bigbluebutton.util.i18n.ResourceUtil;
 	import flash.external.ExternalInterface;
 	import org.bigbluebutton.main.model.users.BBBUser;
@@ -60,7 +61,8 @@ package org.bigbluebutton.main.model.users {
 		private var _applicationURI:String;
 		
 		private var dispatcher:Dispatcher;
-				
+		private var sender:MessageSender = new MessageSender();
+    
 		public function UsersSOService(uri:String) {			
 			_applicationURI = uri;
       _connectionManager = BBB.initConnectionManager();
@@ -87,59 +89,15 @@ package org.bigbluebutton.main.model.users {
 			_participantsSO.client = this;
 			_participantsSO.connect(_connectionManager.connection);
       LogUtil.debug("In UserSOService:join - Setting my userid to [" + userid + "]");
-      UserManager.getInstance().getConference().setMyUserid(userid);
+      
 			queryForParticipants();					
 			
 		}
 		
 		private function queryForParticipants():void {
-			var nc:NetConnection = _connectionManager.connection;
-			nc.call(
-				"participants.getParticipants",// Remote function name
-				new Responder(
-	        		// participants - On successful result
-					function(result:Object):void { 
-						LogUtil.debug("Successfully queried participants: " + result.count); 
-						if (result.count > 0) {
-							for(var p:Object in result.participants) {
-								participantJoined(result.participants[p]);
-							}
-						}	
-						becomePresenterIfLoneModerator();
-					},	
-					// status - On error occurred
-					function(status:Object):void { 
-						LogUtil.error("Error occurred:"); 
-						for (var x:Object in status) { 
-							LogUtil.error(x + " : " + status[x]); 
-						} 
-						sendConnectionFailedEvent(ConnectionFailedEvent.UNKNOWN_REASON);
-					}
-				)//new Responder
-			); //_netConnection.call
+      sender.queryForParticipants();
 		}
-		
-		private function becomePresenterIfLoneModerator():void {
-      LogUtil.debug("Checking if I need to become presenter.");
-			var participants:Conference = UserManager.getInstance().getConference();
-			if (participants.hasOnlyOneModerator()) {
-        LogUtil.debug("There is only one moderator in the meeting. Is it me? ");
-				var user:BBBUser = participants.getTheOnlyModerator();
-				if (user.me) {
-          LogUtil.debug("Setting me as presenter because I'm the only moderator. My userid is [" + user.userID + "]");
-					var presenterEvent:RoleChangeEvent = new RoleChangeEvent(RoleChangeEvent.ASSIGN_PRESENTER);
-					presenterEvent.userid = user.userID;
-					presenterEvent.username = user.name;
-					var dispatcher:Dispatcher = new Dispatcher();
-					dispatcher.dispatchEvent(presenterEvent);
-				} else {
-          LogUtil.debug("No. It is not me. It is [" + user.userID + ", " + user.name + "]");
-        }
-			} else {
-        LogUtil.debug("No. There are more than one moderator.");
-      }
-		}
-		
+				
 		public function assignPresenter(userid:String, name:String, assignedBy:Number):void {
 			var nc:NetConnection = _connectionManager.connection;
 			nc.call("participants.assignPresenter",// Remote function name
@@ -258,9 +216,9 @@ package org.bigbluebutton.main.model.users {
 
 			LogUtil.info("Joined as [" + user.userID + "," + user.name + "," + user.role + "]");
 			UserManager.getInstance().getConference().addUser(user);
-			participantStatusChange(user.userID, "hasStream", joinedUser.status.hasStream);
-			participantStatusChange(user.userID, "presenter", joinedUser.status.presenter);
-			participantStatusChange(user.userID, "raiseHand", joinedUser.status.raiseHand);
+			participantStatusChange(user.userID, "hasStream", joinedUser.hasStream);
+			participantStatusChange(user.userID, "presenter", joinedUser.presenter);
+			participantStatusChange(user.userID, "raiseHand", joinedUser.raiseHand);
 			
 
 			var joinEvent:UserJoinedEvent = new UserJoinedEvent(UserJoinedEvent.JOINED);
@@ -283,7 +241,7 @@ package org.bigbluebutton.main.model.users {
 		 * Callback from the server from many of the bellow nc.call methods
 		 */
 		public function participantStatusChange(userID:String, status:String, value:Object):void {
-			LogUtil.debug("Received status change [" + userID + "," + status + "," + value + "]")			
+			trace("Received status change [" + userID + "," + status + "," + value + "]")			
 			UserManager.getInstance().getConference().newUserStatus(userID, status, value);
 			
 			if (status == "presenter"){

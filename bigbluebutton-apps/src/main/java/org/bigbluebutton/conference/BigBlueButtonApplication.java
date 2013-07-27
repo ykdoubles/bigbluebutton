@@ -20,8 +20,11 @@ package org.bigbluebutton.conference;
 
 import java.util.Iterator;
 import java.util.Set;
-import org.red5.server.api.Red5;import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
+import org.red5.server.api.Red5;
+import org.bigbluebutton.conference.meeting.messaging.red5.ConnectionInvokerService;
+import org.bigbluebutton.conference.service.participants.ParticipantsApplication;
 import org.bigbluebutton.conference.service.recorder.RecorderApplication;
+import org.bigbluebutton.core.api.IBigBlueButtonInGW;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.IApplication;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
@@ -41,6 +44,7 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 	private RecorderApplication recorderApplication;
 	private AbstractApplicationContext appCtx;
 	private ConnectionInvokerService connInvokerService;
+	private IBigBlueButtonInGW bbbGW;
 	
 	private static final String APP = "BBB";
 	
@@ -89,15 +93,14 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
         appCtx.registerShutdownHook();
         super.appStart(app);
         
-        connInvokerService.start();
-        
+        connInvokerService.setAppScope(app);
+
         return true;
     }
     
 	@Override
     public void appStop(IScope app) {
 		log.debug("***** " + APP + " [ " + " appStop [ " + scope.getName() + "] *********");
-        connInvokerService.stop();
         super.appStop(app);
     }
     
@@ -113,7 +116,8 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
     public void roomStop(IScope room) {
 		log.debug("***** " + APP + " [ " + " roomStop [ " + scope.getName() + "] *********");
 		
-    	participantsApplication.destroyRoom(room.getName());
+//    	bbbGW.destroyMeeting(room.getName());
+    	
 		recorderApplication.destroyRecordSession(room.getName());
 		connInvokerService.removeScope(room.getName());
 		
@@ -142,11 +146,13 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
     	BigBlueButtonSession bbbSession = new BigBlueButtonSession(room, internalUserID,  username, role, 
     			voiceBridge, record, externalUserID);
         connection.setAttribute(Constants.SESSION, bbbSession);        
+        connection.setAttribute("INTERNAL_USER_ID", internalUserID);
         
         String debugInfo = "internalUserID=" + internalUserID + ",username=" + username + ",role=" +  role + "," + 
         					",voiceConf=" + voiceBridge + ",room=" + room + ",externalUserid=" + externalUserID;
 		log.debug("User [{}] connected to room [{}]", debugInfo, room); 
-		participantsApplication.createRoom(room);
+		
+//		bbbGW.createMeeting2(room, record, voiceBridge);
 		
         connInvokerService.addConnection(bbbSession.getInternalUserID(), connection);
         
@@ -167,6 +173,9 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
     	
 		BigBlueButtonSession bbbSession = (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
 		log.info("User [" + bbbSession.getUsername() + "] disconnected from room [" + bbbSession.getRoom() +"]");
+		
+		bbbGW.userLeft(bbbSession.getRoom(), getBbbSession().getInternalUserID());
+		
 		super.roomDisconnect(conn);
 	}
 	
@@ -199,13 +208,16 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
 		this.connInvokerService = connInvokerService;
 	}
 	
+	public void setBigBlueButtonInGW(IBigBlueButtonInGW bbbGW) {
+		this.bbbGW = bbbGW;
+	}
+	
 	private class ShutdownHookListener implements ApplicationListener<ApplicationEvent> {
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			if (event instanceof org.springframework.context.event.ContextStoppedEvent) {
 				log.info("Received shutdown event. Red5 is shutting down. Destroying all rooms.");
-				participantsApplication.destroyAllRooms();
 			}			
 		}
 		

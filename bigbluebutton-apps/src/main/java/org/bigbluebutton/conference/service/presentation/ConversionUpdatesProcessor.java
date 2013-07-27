@@ -26,12 +26,11 @@ public class ConversionUpdatesProcessor {
 
 	private PresentationApplication presentationApplication;
 	
-	public void process(Map message) {
+	public void process(Map<String, Object> message) {
 		presentationApplication.sendUpdateMessage(message);
 	}
 	
 	public void setPresentationApplication(PresentationApplication a) {
-		log.debug("Setting presentation application");
 		presentationApplication = a;
 	}	
 }

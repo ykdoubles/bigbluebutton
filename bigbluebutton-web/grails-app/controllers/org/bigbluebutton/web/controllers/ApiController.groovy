@@ -798,6 +798,107 @@ class ApiController {
   }
 
   /***********************************************
+  * POLL API
+  ***********************************************/
+  def setPollXML = {
+    String API_CALL = "setPollXML"
+    log.debug CONTROLLER_NAME + "#${API_CALL}"
+
+    println CONTROLLER_NAME + "#${API_CALL}"
+
+    if (StringUtils.isEmpty(params.checksum)) {
+        invalid("checksumError", "You did not pass the checksum security check")
+        return
+    }
+    
+    if (StringUtils.isEmpty(params.pollXML)) {
+        invalid("configXMLError", "You did not pass a poll XML")
+        return
+    }
+
+    if (StringUtils.isEmpty(params.meetingID)) {
+        invalid("missingParamMeetingID", "You must specify a meeting ID for the meeting.");
+        return
+    }
+    
+    // Translate the external meeting id into an internal meeting id.
+    String internalMeetingId = paramsProcessorUtil.convertToInternalMeetingId(params.meetingID);
+    Meeting meeting = meetingService.getMeeting(internalMeetingId);
+    if (meeting == null) {
+      // BEGIN - backward compatibility
+      invalid("invalidMeetingIdentifier", "The meeting ID that you supplied did not match any existing meetings");
+      return;
+      // END - backward compatibility
+        
+       errors.invalidMeetingIdError();
+       respondWithErrors(errors)
+       return;
+    }
+    
+    Map<String, String[]> reqParams = getParameters(request)
+    
+    String pollXML = params.pollXML
+    
+    String decodedPollXML;
+        
+    try {
+      decodedPollXML = URLDecoder.decode(pollXML, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      log.error("Couldn't decode poll XML.");
+      invalid("pollXMLError", "Cannot decode poll XML")
+      return;
+    }
+    
+    println "decodedPollXML [" + decodedPollXML + "]"
+         
+    if (! paramsProcessorUtil.isPostChecksumSame(API_CALL, reqParams)) {       
+      response.addHeader("Cache-Control", "no-cache")
+      withFormat {
+        xml {
+          render(contentType:"text/xml") {
+            response() {
+              returncode("FAILED")
+              messageKey("pollXMLChecksumError")
+              message("pollXMLChecksumError: request did not pass the checksum security check.")
+            }
+          }
+        }
+      }       
+    } else {
+      println "**************** CHECKSUM PASSED **************************"
+        
+      //println "[" + decodedPollXML + "]";
+
+      def pollxml = new XmlSlurper().parseText(decodedPollXML);
+        
+      pollxml.children().each { poll ->
+        String title = poll.title.text();
+        String question = poll.question.text();
+        String questionType = poll.questionType.text();
+        
+        ArrayList<String> answers = new ArrayList<String>();
+        poll.answers.children().each { answer ->
+          answers.add(answer.text());
+        }
+              
+        //send poll to BigBlueButton Apps
+        meetingService.createdPolls(meeting.getInternalId(), title, question, questionType, answers);
+      }
+            
+      response.addHeader("Cache-Control", "no-cache")
+      withFormat {
+        xml {
+          render(contentType:"text/xml") {
+            response() {
+              returncode("SUCCESS")
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /***********************************************
   * CONFIG API
   ***********************************************/
   def setConfigXML = {
@@ -888,6 +989,241 @@ class ApiController {
 			  }
 		  }
 		}
+  }
+
+  /***********************************************
+  * CALLBACK API
+  ***********************************************/
+  def subscribeEvent = {
+    String API_CALL = "subscribeEvent"
+    log.debug CONTROLLER_NAME + "#${API_CALL}"
+
+    if (StringUtils.isEmpty(params.checksum)) {
+      invalid("checksumError", "You did not pass the checksum security check")
+      return
+    }
+    
+    if (StringUtils.isEmpty(params.callbackURL)) {
+      invalid("missingParamCallbackURL", "You must specify a callbackURL for subscribing");
+      return
+    }
+
+    if (StringUtils.isEmpty(params.meetingID)) {
+      invalid("missingParamMeetingID", "You must specify a meeting ID for the meeting.");
+      return
+    }
+
+    String internalMeetingId = paramsProcessorUtil.convertToInternalMeetingId(params.meetingID);
+    Meeting meeting = meetingService.getMeeting(internalMeetingId);
+    if (meeting == null) {
+      // BEGIN - backward compatibility
+      invalid("invalidMeetingIdentifier", "The meeting ID that you supplied did not match any existing meetings");
+      return;
+      // END - backward compatibility
+    
+     errors.invalidMeetingIdError();
+     respondWithErrors(errors)
+     return;
+    }
+    
+    if (! paramsProcessorUtil.isChecksumSame(API_CALL, params.checksum, request.getQueryString())) {     
+      response.addHeader("Cache-Control", "no-cache")
+      withFormat {
+        xml {
+          render(contentType:"text/xml") {
+            response() {
+              returncode("FAILED")
+              messageKey("subscribeEventChecksumError")
+              message("subscribeEventChecksumError: request did not pass the checksum security check.")
+            }
+          }
+        }
+      }     
+    } else {
+      //println "**************** CHECKSUM PASSED **************************"
+      String sid = meetingService.addSubscription(meeting.getInternalId(), meeting.getExternalId(), params.callbackURL);
+
+      if(sid.isEmpty()){
+        response.addHeader("Cache-Control", "no-cache")
+        withFormat {
+          xml {
+            //println "**************** CHECKSUM PASSED - XML RESPONSE **************************"
+            render(contentType:"text/xml") {
+              response() {
+                returncode("FAILED")
+                messageKey("subscribeEventError")
+                message("subscribeEventError: An error happen while storing your subscription. Check the logs.")
+              }
+            }
+          }
+        }
+
+      }else{
+        response.addHeader("Cache-Control", "no-cache")
+        withFormat {
+          xml {
+            //println "**************** CHECKSUM PASSED - XML RESPONSE **************************"
+            render(contentType:"text/xml") {
+              response() {
+                returncode("SUCCESS")
+                subscriptionID(sid)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  def unsubscribeEvent = {
+    String API_CALL = "unsubscribeEvent"
+    log.debug CONTROLLER_NAME + "#${API_CALL}"
+
+    if (StringUtils.isEmpty(params.checksum)) {
+      invalid("checksumError", "You did not pass the checksum security check")
+      return
+    }
+    
+    if (StringUtils.isEmpty(params.subscriptionID)) {
+      invalid("missingParamSubscriptionID", "You must pass a subscriptionID for unsubscribing")
+      return
+    }
+
+    if (StringUtils.isEmpty(params.meetingID)) {
+      invalid("missingParamMeetingID", "You must specify a meeting ID for the meeting.");
+      return
+    }
+
+    String internalMeetingId = paramsProcessorUtil.convertToInternalMeetingId(params.meetingID);
+    Meeting meeting = meetingService.getMeeting(internalMeetingId);
+    if (meeting == null) {
+      // BEGIN - backward compatibility
+      invalid("invalidMeetingIdentifier", "The meeting ID that you supplied did not match any existing meetings");
+      return;
+      // END - backward compatibility
+    
+     errors.invalidMeetingIdError();
+     respondWithErrors(errors)
+     return;
+    }
+  
+    
+    if (! paramsProcessorUtil.isChecksumSame(API_CALL, params.checksum, request.getQueryString())) {     
+      response.addHeader("Cache-Control", "no-cache")
+      withFormat {
+        xml {
+          render(contentType:"text/xml") {
+            response() {
+              returncode("FAILED")
+              messageKey("unsubscribeEventChecksumError")
+              message("unsubscribeEventChecksumError: request did not pass the checksum security check.")
+            }
+          }
+        }
+      }     
+    } else {
+      //println "**************** CHECKSUM PASSED **************************"
+      boolean status = meetingService.removeSubscription(meeting.getInternalId(), params.subscriptionID);
+
+      if(!status){
+        response.addHeader("Cache-Control", "no-cache")
+        withFormat {
+          xml {
+            //println "**************** CHECKSUM PASSED - XML RESPONSE **************************"
+            render(contentType:"text/xml") {
+              response() {
+                returncode("FAILED")
+                messageKey("unsubscribeEventError")
+                message("unsubscribeEventError: An error happen while unsubscribing. Check the logs.")
+              }
+            }
+          }
+        }
+
+      }else{
+        response.addHeader("Cache-Control", "no-cache")
+        withFormat {
+          xml {
+            //println "**************** CHECKSUM PASSED - XML RESPONSE **************************"
+            render(contentType:"text/xml") {
+              response() {
+                returncode("SUCCESS")
+                unsubscribed(status)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  def listSubscriptions = {
+    String API_CALL = "listSubscriptions"
+    log.debug CONTROLLER_NAME + "#${API_CALL}"
+
+    if (StringUtils.isEmpty(params.checksum)) {
+      invalid("checksumError", "You did not pass the checksum security check")
+      return
+    }
+
+    if (StringUtils.isEmpty(params.meetingID)) {
+      invalid("missingParamMeetingID", "You must specify a meeting ID for the meeting.");
+      return
+    }
+
+    String internalMeetingId = paramsProcessorUtil.convertToInternalMeetingId(params.meetingID);
+    Meeting meeting = meetingService.getMeeting(internalMeetingId);
+    if (meeting == null) {
+      // BEGIN - backward compatibility
+      invalid("invalidMeetingIdentifier", "The meeting ID that you supplied did not match any existing meetings");
+      return;
+      // END - backward compatibility
+    
+     errors.invalidMeetingIdError();
+     respondWithErrors(errors)
+     return;
+    }
+    
+    if (! paramsProcessorUtil.isChecksumSame(API_CALL, params.checksum, request.getQueryString())) {     
+      response.addHeader("Cache-Control", "no-cache")
+      withFormat {
+        xml {
+          render(contentType:"text/xml") {
+            response() {
+              returncode("FAILED")
+              messageKey("listSubscriptionsChecksumError")
+              message("listSubscriptionsChecksumError: request did not pass the checksum security check.")
+            }
+          }
+        }
+      }     
+    } else {
+      //println "**************** CHECKSUM PASSED **************************"
+      List<Map<String,String>> list = meetingService.listSubscriptions(meeting.getInternalId());
+
+      response.addHeader("Cache-Control", "no-cache")
+      withFormat {
+        xml {
+          //println "**************** CHECKSUM PASSED - XML RESPONSE **************************"
+          render(contentType:"text/xml") {
+            response() {
+              returncode("SUCCESS")
+              subscriptions() {
+                list.each{ item ->
+                  subscription(){
+                    subscriptionID(item.get("subscriptionID"))
+                    event(item.get("event"))
+                    callbackURL(item.get("callbackURL"))
+                    active(item.get("active"))  
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+    }
   }
   
   /***********************************************
@@ -1352,32 +1688,31 @@ class ApiController {
     requestBody = StringUtils.isEmpty(requestBody) ? null : requestBody;
 
     if (requestBody == null) {
-		System.out.println("No pre-uploaded presentation. Downloading default presentation.");
-		downloadAndProcessDocument(presentationService.defaultUploadedPresentation, conf);
+		  System.out.println("No pre-uploaded presentation. Downloading default presentation.");
+		  downloadAndProcessDocument(presentationService.defaultUploadedPresentation, conf);
     } else {
-		System.out.println("Request body: \n" + requestBody);
-		log.debug "Request body: \n" + requestBody;
-	
-		def xml = new XmlSlurper().parseText(requestBody);
-		xml.children().each { module ->
-		  log.debug("module config found: [${module.@name}]");
-		  if ("presentation".equals(module.@name.toString())) {
-			// need to iterate over presentation files and process them
-			module.children().each { document ->
-			  if (!StringUtils.isEmpty(document.@url.toString())) {
-				downloadAndProcessDocument(document.@url.toString(), conf);
-			  } else if (!StringUtils.isEmpty(document.@name.toString())) {
-				def b64 = new Base64()
-				def decodedBytes = b64.decode(document.text().getBytes())
-				processDocumentFromRawBytes(decodedBytes, document.@name.toString(), conf);
-			  } else {
-				log.debug("presentation module config found, but it did not contain url or name attributes");
-			  }
-			}
-		  }
-		}
-	}
+		  System.out.println("Request body: \n" + requestBody);
+		  log.debug "Request body: \n" + requestBody;
+	    def xml = new XmlSlurper().parseText(requestBody);
+		  xml.children().each { module ->
+		    log.debug("module config found: [${module.@name}]");
 
+		    if ("presentation".equals(module.@name.toString())) {
+          // need to iterate over presentation files and process them
+          module.children().each { document ->
+            if (!StringUtils.isEmpty(document.@url.toString())) {
+				      downloadAndProcessDocument(document.@url.toString(), conf);
+            } else if (!StringUtils.isEmpty(document.@name.toString())) {
+				      def b64 = new Base64()
+				      def decodedBytes = b64.decode(document.text().getBytes())
+				      processDocumentFromRawBytes(decodedBytes, document.@name.toString(), conf);
+			     } else {
+				     log.debug("presentation module config found, but it did not contain url or name attributes");
+           }
+          }
+		    }
+		  }
+	  }
   }
   def cleanFilename(filename) {
     String fname = URLDecoder.decode(filename).trim()

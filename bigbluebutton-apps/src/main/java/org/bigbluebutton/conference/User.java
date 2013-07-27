@@ -36,7 +36,7 @@ public class User implements Serializable {
 	private String role = "VIEWER";
 	private String externalUserID;
 	
-	private final Map status;
+	private final Map<String, Object> status;
 	private Map<String, Object> unmodifiableStatus;
 	
 	public User(String internalUserID, String name, String role, String externalUserID, Map<String, Object> status) {
@@ -72,7 +72,7 @@ public class User implements Serializable {
 	 * Returns that status for this participant. However, the status cannot
 	 * be modified. To do that, setStatus(...) must be used.
 	 */
-	public Map getStatus() {
+	public Map<String, Object> getStatus() {
 		return unmodifiableStatus;
 	}
 	
@@ -102,8 +102,8 @@ public class User implements Serializable {
 		}
 	}
 	
-	public Map toMap() {
-		Map m = new HashMap();
+	public Map<String, Object> toMap() {
+		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("userid", internalUserID);
 		m.put("externUserID", externalUserID);
 		m.put("name", name);
@@ -113,7 +113,7 @@ public class User implements Serializable {
 		 * unmodifiableMap. This way callers can still manipulate it
 		 * for their own purpose but our copy still remains unmodified.
 		 */
-		m.put("status", new HashMap(unmodifiableStatus));
+		m.put("status", new HashMap<String, Object>(unmodifiableStatus));
 		return m;
 	}
 }

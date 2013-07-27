@@ -33,6 +33,7 @@ import org.bigbluebutton.api.domain.UserSession;
 import org.bigbluebutton.api.messaging.MessageListener;
 import org.bigbluebutton.api.messaging.MessagingService;
 import org.bigbluebutton.web.services.ExpiredMeetingCleanupTimerTask;
+import org.bigbluebutton.web.services.KeepAliveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ public class MeetingService {
 	private MessagingService messagingService;
 	private ExpiredMeetingCleanupTimerTask cleaner;
 	private boolean removeMeetingWhenEnded = false;
+	private KeepAliveService keepAliveService;
 	
 	public MeetingService() {
 		meetings = new ConcurrentHashMap<String, Meeting>();	
@@ -82,12 +84,18 @@ public class MeetingService {
 		  			log.debug("[" + m.getInternalId() + "] is recorded. Process it.");		  			
 		  			processRecording(m.getInternalId());
 		  		}
+		  		
+		  		destroyMeeting(m.getInternalId());
+		  		
 				meetings.remove(m.getInternalId());
+				
 				continue;
 			}
 			
 			if (m.wasNeverStarted(defaultMeetingCreateJoinDuration)) {
 				log.info("Removing non-joined meeting [{} - {}]", m.getInternalId(), m.getName());
+				destroyMeeting(m.getInternalId());
+				
 				meetings.remove(m.getInternalId());
 				continue;
 			}
@@ -99,6 +107,10 @@ public class MeetingService {
 		}
 	}
 	
+	private void destroyMeeting(String meetingID) {
+		messagingService.destroyMeeting(meetingID);
+	}
+	
 	public Collection<Meeting> getMeetings() {
 		log.debug("The number of meetings are: " + meetings.size());
 		return meetings.isEmpty() ? Collections.<Meeting>emptySet() : Collections.unmodifiableCollection(meetings.values());
@@ -108,7 +120,7 @@ public class MeetingService {
 		log.debug("Storing Meeting with internal id:" + m.getInternalId());
 		meetings.put(m.getInternalId(), m);
 		if (m.isRecord()) {
-			Map<String,String> metadata=new LinkedHashMap<String,String>();
+			Map<String,String> metadata = new LinkedHashMap<String,String>();
 			metadata.putAll(m.getMetadata());
 			//TODO: Need a better way to store these values for recordings
 			metadata.put("meetingId", m.getExternalId());
@@ -116,7 +128,24 @@ public class MeetingService {
 			
 			messagingService.recordMeetingInfo(m.getInternalId(), metadata);
 		}
+		
+		messagingService.createMeeting(m.getInternalId(), m.isRecord(), m.getTelVoice());
 	}
+
+	public String addSubscription(String meetingId, String event, String callbackURL){
+		log.debug("Add a new subscriber");
+		String sid = messagingService.storeSubscription(meetingId, event, callbackURL);
+		return sid;
+	}
+
+	public boolean removeSubscription(String meetingId, String subscriptionId){
+		return messagingService.removeSubscription(meetingId, subscriptionId);
+	}
+
+	public List<Map<String,String>> listSubscriptions(String meetingId){
+		return messagingService.listSubscriptions(meetingId);
+	}
+
 
 	public Meeting getMeeting(String meetingId) {
 		if(meetingId == null)
@@ -211,13 +240,18 @@ public class MeetingService {
 	public void send(String channel, String message) {
 		messagingService.send(channel, message);
 	}
+
+	public void createdPolls(String meetingId, String title, String question, String questionType, ArrayList<String> answers){
+		messagingService.sendPolls(meetingId, title, question, questionType, answers);
+	}
 	
 	public void endMeeting(String meetingId) {		
 		messagingService.endMeeting(meetingId);
+		
 		Meeting m = getMeeting(meetingId);
-		if(m != null){
+		if (m != null) {
 			m.setForciblyEnded(true);
-			if(removeMeetingWhenEnded)
+			if (removeMeetingWhenEnded)
 			{
 				if (m.isRecord()) {
 					log.debug("[" + m.getInternalId() + "] is recorded. Process it.");		  			
@@ -259,6 +293,10 @@ public class MeetingService {
 		cleaner = c;
 		cleaner.setMeetingService(this);
 		cleaner.start();
+	}
+
+	public void setKeepAliveService(KeepAliveService keepAlive){
+		this.keepAliveService = keepAlive;
 	}
 	
 	/**
@@ -335,6 +373,11 @@ public class MeetingService {
 				return;
 			}
 			log.warn("The meeting " + meetingId + " doesn't exist");
+		}
+
+		@Override
+		public void keepAliveReply(String aliveId){
+			keepAliveService.keepAliveReply(aliveId);
 		}
 	}
 	

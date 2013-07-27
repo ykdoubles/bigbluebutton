@@ -29,8 +29,7 @@ import org.red5.server.api.so.ISharedObject;
 import org.red5.server.adapter.ApplicationAdapter;
 import org.red5.server.api.Red5;
 import java.util.HashMap;
-import java.util.Map;import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;import org.bigbluebutton.conference.service.recorder.RecorderApplication;
-import org.bigbluebutton.conference.service.recorder.participants.ParticipantsEventRecorder;
+import java.util.Map;import org.bigbluebutton.conference.BigBlueButtonSession;import org.bigbluebutton.conference.Constants;
 
 public class ParticipantsHandler extends ApplicationAdapter implements IApplication{
 	private static Logger log = Red5LoggerFactory.getLogger( ParticipantsHandler.class, "bigbluebutton" );
@@ -39,7 +38,6 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 	private static final String APP = "USERS";
 
 	private ParticipantsApplication participantsApplication;
-	private RecorderApplication recorderApplication;
 	
 	@Override
 	public boolean appConnect(IConnection conn, Object[] params) {
@@ -90,14 +88,6 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 		log.debug("***** " + APP + " [ " + " roomConnect [ " + connection.getScope().getName() + "] *********");
 		 
 		ISharedObject so = getSharedObject(connection.getScope(), PARTICIPANTS_SO, false);
-    	ParticipantsEventSender sender = new ParticipantsEventSender(so);
-    	ParticipantsEventRecorder recorder = new ParticipantsEventRecorder(connection.getScope().getName(), recorderApplication);
-    			
-    	log.debug("Adding room listener " + connection.getScope().getName());
-    	participantsApplication.addRoomListener(connection.getScope().getName(), recorder);
-    	participantsApplication.addRoomListener(connection.getScope().getName(), sender);
-    	log.debug("Done setting up recorder and listener");	
-	
 		return true;
 	}
 
@@ -151,9 +141,6 @@ public class ParticipantsHandler extends ApplicationAdapter implements IApplicat
 		participantsApplication = a;
 	}
 	
-	public void setRecorderApplication(RecorderApplication a) {
-		recorderApplication = a;
-	}
 	
 	private BigBlueButtonSession getBbbSession() {
 		return (BigBlueButtonSession) Red5.getConnectionLocal().getAttribute(Constants.SESSION);
