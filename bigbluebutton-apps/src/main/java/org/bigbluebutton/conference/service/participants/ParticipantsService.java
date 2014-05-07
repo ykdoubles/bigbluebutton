@@ -89,6 +89,11 @@ public class ParticipantsService {
 		}
 		return participants;
 	}
+	//Modified by gaodun.com
+	public Boolean destroyRoom(){
+		String roomName = Red5.getConnectionLocal().getScope().getName();
+		return application.destroyRoom(roomName);
+	}
 	
 	public void setParticipantStatus(String userid, String status, Object value) {
 		String roomName = Red5.getConnectionLocal().getScope().getName();
