@@ -28,6 +28,7 @@ public class ChatMessageVO {
     // The sender
     public String fromUserID;    
     public String fromUsername;
+    public String fromUserRole;
     public String fromColor;
     
     // Stores the UTC time (milliseconds) when the message was sent.
@@ -49,6 +50,7 @@ public class ChatMessageVO {
 		Map<String, Object> msg = new HashMap<String, Object>();
 		msg.put("fromUserID", fromUserID);
 		msg.put("fromUsername", fromUsername);
+		msg.put("fromUserRole", fromUserRole);
 		msg.put("fromColor", fromColor);
 		msg.put("fromTime", fromTime);
 		msg.put("fromLang", fromLang);
