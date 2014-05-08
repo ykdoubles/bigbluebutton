@@ -43,8 +43,8 @@ public class MeetingService {
 	private final ConcurrentMap<String, UserSession> sessions;
 	
 	
-	private int defaultMeetingExpireDuration = 1;	
-	private int defaultMeetingCreateJoinDuration = 5;
+	private int defaultMeetingExpireDuration = 1440;	
+	private int defaultMeetingCreateJoinDuration = 1440;
 	private RecordingService recordingService;
 	private MessagingService messagingService;
 	private ExpiredMeetingCleanupTimerTask cleaner;
