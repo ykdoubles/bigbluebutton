@@ -75,8 +75,31 @@ public class Room implements Serializable {
 		listeners.remove(listener);		
 	}
 
+	//added by gaodun.com
+	public String userExist(User user){
+		log.debug("userExist:"+user.getRole()+"     "+user.getName());
+		Iterator iter = participants.entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry e = (Map.Entry) iter.next();
+			User us = (User)e.getValue();
+			log.debug(us.getRole()+"     "+us.getName()+"     "+e.getKey());
+			if(us.getRole() != "MODERATOR" && us.getName().equals(user.getName()))
+			{
+				log.debug("getKey:"+e.getKey());
+				return (String)e.getKey();	
+			}
+		}
+		return "";
+	}
+
 	public void addParticipant(User participant) {
 		synchronized (this) {
+			String tk = userExist(participant);
+			log.debug("kick participant:"+tk);
+			if(tk != "")
+			{
+				removeParticipant(tk);	
+			}
 			log.debug("adding participant " + participant.getInternalUserID());
 			participants.put(participant.getInternalUserID(), participant);
 //			unmodifiableMap = Collections.unmodifiableMap(participants)
