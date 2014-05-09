@@ -83,7 +83,7 @@ public class Room implements Serializable {
 			Map.Entry e = (Map.Entry) iter.next();
 			User us = (User)e.getValue();
 			log.debug(us.getRole()+"     "+us.getName()+"     "+e.getKey());
-			if(us.getRole() != "MODERATOR" && us.getName().equals(user.getName()))
+			if(!us.getRole().equals("MODERATOR") && !user.getRole().equals("MODERATOR") && us.getName().equals(user.getName()))
 			{
 				log.debug("getKey:"+e.getKey());
 				return (String)e.getKey();	
