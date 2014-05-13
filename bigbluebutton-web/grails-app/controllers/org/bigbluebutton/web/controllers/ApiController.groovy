@@ -61,6 +61,7 @@ class ApiController {
   def index = {
     log.debug CONTROLLER_NAME + "#index"
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
     withFormat {	
       xml {
         render(contentType:"text/xml") {
@@ -161,9 +162,11 @@ class ApiController {
    *********************************************/
   def join = {
     String API_CALL = 'join'
-    log.debug CONTROLLER_NAME + "#${API_CALL}"
+    log.debug CONTROLLER_NAME + "#${API_CALL}" + "-----------------------------------"
   	ApiErrors errors = new ApiErrors()
-  	  
+  	
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+      
 	// BEGIN - backward compatibility
     if (StringUtils.isEmpty(params.checksum)) {
 		invalid("checksumError", "You did not pass the checksum security check")
@@ -398,6 +401,8 @@ class ApiController {
 	else{
 		log.info("Successfully joined. Sending XML response.");
 		response.addHeader("Cache-Control", "no-cache")
+		response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 		withFormat {
 		  xml {
 			render(contentType:"text/xml") {
@@ -469,6 +474,8 @@ class ApiController {
 	boolean isRunning = meeting != null && meeting.isRunning();
    
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {	
       xml {
         render(contentType:"text/xml") {
@@ -572,6 +579,8 @@ class ApiController {
     meetingService.endMeeting(meeting.getInternalId());
     
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {	
       xml {
         render(contentType:"text/xml") {
@@ -717,6 +726,8 @@ class ApiController {
     
     if (mtgs == null || mtgs.isEmpty()) {
       response.addHeader("Cache-Control", "no-cache")
+      response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
       withFormat {	
         xml {
           render(contentType:"text/xml") {
@@ -733,6 +744,8 @@ class ApiController {
     }
     
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {	
       xml {
         render(contentType:"text/xml") {
@@ -778,6 +791,8 @@ class ApiController {
     String defConfigXML = paramsProcessorUtil.getDefaultConfigXML();
     
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     render text: defConfigXML, contentType: 'text/xml'
       
   }
@@ -849,6 +864,8 @@ class ApiController {
          
 	  if (! paramsProcessorUtil.isPostChecksumSame(API_CALL, reqParams)) {		 
 		  response.addHeader("Cache-Control", "no-cache")
+		  response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 		  withFormat {
   			xml {
   			  render(contentType:"text/xml") {
@@ -876,6 +893,8 @@ class ApiController {
 
 			String token = meeting.storeConfig(defaultConfig, decodedConfigXML);
 			response.addHeader("Cache-Control", "no-cache")
+			response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 			withFormat {
 			  xml {
 				  //println "**************** CHECKSUM PASSED - XML RESPONSE **************************"
@@ -895,7 +914,7 @@ class ApiController {
   ***********************************************/
   def configXML = {
 	  println "Getting config xml"
-	  	  
+	  log.info("--------------------------configXML") 	  
 	  if (! session["user-token"] || (meetingService.getUserSession(session['user-token']) == null)) {
 		  log.info("No session for user in conference.")
 		  
@@ -920,6 +939,8 @@ class ApiController {
 			  logoutUrl = paramsProcessorUtil.getDefaultLogoutUrl()
 		  
 		  response.addHeader("Cache-Control", "no-cache")
+		  response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 		  withFormat {
 			xml {
 			  render(contentType:"text/xml") {
@@ -938,6 +959,8 @@ class ApiController {
 			println us.configXML
 			
 			response.addHeader("Cache-Control", "no-cache")
+			response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 			render text: us.configXML, contentType: 'text/xml'
 		}
 
@@ -988,6 +1011,8 @@ class ApiController {
         logoutUrl = paramsProcessorUtil.getDefaultLogoutUrl()
 
       response.addHeader("Cache-Control", "no-cache")
+      response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
       withFormat {        
         xml {
           render(contentType:"text/xml") {
@@ -1002,6 +1027,8 @@ class ApiController {
     } else {
       log.info("Found conference for " + us.fullname)
       response.addHeader("Cache-Control", "no-cache")
+      response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
       withFormat {        
         xml {
           render(contentType:"text/xml") {
@@ -1065,6 +1092,8 @@ class ApiController {
    
   	log.debug("Signing out. Redirecting to " + logoutUrl)
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {	
       xml {
         render(contentType:"text/xml") {
@@ -1119,9 +1148,12 @@ class ApiController {
     // Everything is good so far. Translate the external meeting ids to an internal meeting ids.             
     ArrayList<String> internalMeetingIds = paramsProcessorUtil.convertToInternalMeetingId(externalMeetingIds);        
 	HashMap<String,Recording> recs = meetingService.getRecordings(internalMeetingIds);
-	
+
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     if (recs.isEmpty()) {
       response.addHeader("Cache-Control", "no-cache")
+      
       withFormat {  
         xml {
           render(contentType:"text/xml") {
@@ -1186,6 +1218,8 @@ class ApiController {
 	  String API_CALL = "publishRecordings"
 	  log.debug CONTROLLER_NAME + "#${API_CALL}"
 	  
+	  response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 	  // BEGIN - backward compatibility
 	  if (StringUtils.isEmpty(params.checksum)) {
 		  invalid("checksumError", "You did not pass the checksum security check")
@@ -1274,6 +1308,8 @@ class ApiController {
 	  String API_CALL = "deleteRecordings"
 	  log.debug CONTROLLER_NAME + "#${API_CALL}"
 	  
+	  response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 	  // BEGIN - backward compatibility
 	  if (StringUtils.isEmpty(params.checksum)) {
 		  invalid("checksumError", "You did not pass the checksum security check")
@@ -1438,6 +1474,8 @@ class ApiController {
 
   def respondWithConferenceDetails(meeting, room, msgKey, msg) {
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {				
       xml {
         render(contentType:"text/xml") {
@@ -1487,6 +1525,8 @@ class ApiController {
   
   def respondWithConference(meeting, msgKey, msg) {
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {	
       xml {
         log.debug "Rendering as xml"
@@ -1509,6 +1549,8 @@ class ApiController {
   def respondWithErrors(errorList) {
     log.debug CONTROLLER_NAME + "#invalid"
     response.addHeader("Cache-Control", "no-cache")
+    response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
     withFormat {				
       xml {
         render(contentType:"text/xml") {
@@ -1541,6 +1583,8 @@ class ApiController {
 	  String deprecatedMsg=" Note: This xml scheme will be DEPRECATED."
 	  log.debug CONTROLLER_NAME + "#invalid"
 	  response.addHeader("Cache-Control", "no-cache")
+	  response.addHeader("P3P", "CP='CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR'")
+
 	  withFormat {
 		  xml {
 			  render(contentType:"text/xml") {
