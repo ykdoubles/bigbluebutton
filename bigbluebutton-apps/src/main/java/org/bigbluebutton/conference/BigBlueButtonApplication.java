@@ -125,7 +125,7 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
     	
 	@Override
 	public boolean roomConnect(IConnection connection, Object[] params) {
-		log.debug("***** " + APP + " [ " + " roomConnect [ " + connection.getScope().getName() + "] *********");
+		log.debug("***** " + APP + " [ " + " roomConnect [ " + connection.getScope().getName() + "] *********" + params.length);
 		
         String username = ((String) params[0]).toString();
         String role = ((String) params[1]).toString();
@@ -139,17 +139,17 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
     	String internalUserID = ((String) params[6]).toString();
     	
     	Boolean locked = false;
-    	if(params.length >= 7 && ((Boolean) params[7])) {
+    	if(params.length > 7 && ((Boolean) params[7])) {
     		locked = true;
     	}
     	
     	Boolean muted  = false;
-    	if(params.length >= 8 && ((Boolean) params[8])) {
+    	if(params.length > 8 && ((Boolean) params[8])) {
     		muted = true;
     	}
     	
     	Map<String, Boolean> lsMap = null;
-    	if(params.length >= 9) {
+    	if(params.length > 9) {
     		try{
     			lsMap = (Map<String, Boolean> ) params[9];
     		}catch(Exception e){
