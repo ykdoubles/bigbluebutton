@@ -77,7 +77,7 @@ public class ThumbnailCreatorImp implements ThumbnailCreator {
 	 		COMMAND = IMAGEMAGICK_DIR + "/convert -thumbnail 150x150 " + source + " " + dest;
 	 	}else{
 	 		dest = thumbsDir.getAbsolutePath() + File.separator + "thumb-";
-	 		COMMAND = IMAGEMAGICK_DIR + "/gs -q -sDEVICE=pngalpha -dBATCH -dNOPAUSE -dNOPROMPT -dDOINTERPOLATE -dPDFFitPage -r16 -sOutputFile=" + dest +"%d.png " + source;
+	 		COMMAND = IMAGEMAGICK_DIR + "/gs -q -sDEVICE=pngalpha -dBATCH -dNOPAUSE -dNOPROMPT -dDOINTERPOLATE -dPDFFitPage -r64 -sOutputFile=" + dest +"%d.png " + source;
 	 	}
 	 	
 	 	boolean done = new ExternalProcessExecutor().exec(COMMAND, 60000);

@@ -156,7 +156,9 @@ public class BigBlueButtonApplication extends MultiThreadedApplicationAdapter {
     			lsMap = new HashMap<String, Boolean>();
     		}
     	}
-    	
+        else{
+            lsMap = new HashMap<String, Boolean>();
+        }
     	
     	    	
 		if (record == true) {
