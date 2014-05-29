@@ -81,7 +81,12 @@ public class ChatApplication {
 		ClientMessage m = new ClientMessage(ClientMessage.DIRECT, getBbbSession().getInternalUserID(), "ChatRequestMessageHistoryReply", messageToSend);
 		connInvokerService.sendMessage(m);
 	}
-	
+	public void deleteMessage(String room, Map<String, Object> message)
+	{
+		roomsManager.deleteMessage(room, message);
+		ClientMessage m = new ClientMessage(ClientMessage.BROADCAST, getMeetingId(), "ChatDeleteMessageCommand", message);
+		connInvokerService.sendMessage(m);
+	}
 	public void sendPublicMessage(String room, ChatMessageVO chatobj) {
 		roomsManager.sendMessage(room, chatobj);
 		

@@ -74,4 +74,9 @@ public class ChatService {
 		application.sendPrivateMessage(chatObj);
 
 	}
+
+	public void deleteMessage(Map<String, Object> msg) {
+		String meetingID = Red5.getConnectionLocal().getScope().getName();	
+		application.deleteMessage(meetingID, msg);
+	}
 }

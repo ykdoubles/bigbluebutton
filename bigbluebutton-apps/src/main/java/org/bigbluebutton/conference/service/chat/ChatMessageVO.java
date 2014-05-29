@@ -28,7 +28,7 @@ public class ChatMessageVO {
     // The sender
     public String fromUserID;    
     public String fromUsername;
-    public String fromUserRole;
+	public String fromUserRole;
     public String fromColor;
     
     // Stores the UTC time (milliseconds) when the message was sent.

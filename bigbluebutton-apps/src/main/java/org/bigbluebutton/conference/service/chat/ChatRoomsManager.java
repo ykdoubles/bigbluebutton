@@ -83,6 +83,15 @@ public class ChatRoomsManager {
 		}
 	} 
 	
+	public void deleteMessage(String room, Map<String, Object> message) {
+		ChatRoom r = getRoom(room);
+		if (r != null) {
+			r.deleteMessage(message);
+		} else {
+			log.warn("deleting message to a non-existing room " + room);
+		}
+	} 
+
 	public void addRoomListener(String roomName, IChatRoomListener listener) {
 		ChatRoom r = getRoom(roomName);
 		if (r != null) {

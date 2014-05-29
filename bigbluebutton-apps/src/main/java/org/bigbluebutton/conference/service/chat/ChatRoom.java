@@ -73,5 +73,18 @@ public class ChatRoom {
 			listener.newChatMessage(chatobj);
 		}
 	}
+
+	public void deleteMessage(Map<String, Object> message){
+		String userID = message.get("userID").toString(); 
+		Double time = Double.valueOf(message.get("time").toString());
+		for (ChatMessageVO v : messages) {
+			if(userID.equals(v.fromUserID) && time.equals(v.fromTime))
+			{
+				messages.remove(v);
+				break;
+			}
+		}
+		
+	}
 		
 }
