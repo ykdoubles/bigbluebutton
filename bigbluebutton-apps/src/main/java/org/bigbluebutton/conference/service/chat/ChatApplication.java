@@ -94,7 +94,8 @@ public class ChatApplication {
 		connInvokerService.sendMessage(m);
 	}
 
-	public void sendPrivateMessage(ChatMessageVO chatobj) {
+	public void sendPrivateMessage(String room,ChatMessageVO chatobj) {
+        roomsManager.sendMessage(room, chatobj);
 		ClientMessage m = new ClientMessage(ClientMessage.DIRECT, chatobj.toUserID, "ChatReceivePrivateMessageCommand", chatobj.toMap());
 		connInvokerService.sendMessage(m);
 		

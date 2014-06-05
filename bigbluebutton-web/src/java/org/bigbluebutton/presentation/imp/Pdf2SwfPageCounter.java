@@ -27,7 +27,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.List;
+import java.util.ArrayList;
 import org.bigbluebutton.presentation.PageCounter;
 import org.bigbluebutton.presentation.imp.ExternalProcessExecutor.InterruptTimerTask;
 import org.slf4j.Logger;
@@ -43,14 +44,20 @@ public class Pdf2SwfPageCounter implements PageCounter {
 		int numPages = 0; //total numbers of this pdf	
 
 		String COMMAND = SWFTOOLS_DIR + "/pdf2swf -I " + presentationFile.getAbsolutePath(); 
-   	
+   	    log.debug("Executing: " + COMMAND);
+
         Timer timer = null;
         Process p = null;
         try {
             timer = new Timer(true);
             InterruptTimerTask interrupter = new InterruptTimerTask(Thread.currentThread());
             timer.schedule(interrupter, 60000);
-            
+
+            //List command=new ArrayList();
+            //command.add(SWFTOOLS_DIR + "/pdf2swf -I ");
+            //command.add("\""+ presentationFile.getAbsolutePath()+"\"");
+            //p = new ProcessBuilder(command).start();
+                                                            
             p = Runtime.getRuntime().exec(COMMAND); 
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));

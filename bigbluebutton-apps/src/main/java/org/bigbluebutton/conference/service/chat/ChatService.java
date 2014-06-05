@@ -58,7 +58,8 @@ public class ChatService {
 	}
 	
 	public void sendPrivateMessage(Map<String, Object> msg){
-		ChatMessageVO chatObj = new ChatMessageVO();
+		String meetingID = Red5.getConnectionLocal().getScope().getName();
+        ChatMessageVO chatObj = new ChatMessageVO();
 		chatObj.chatType = msg.get("chatType").toString();  
 		chatObj.fromUserID = msg.get("fromUserID").toString();
 		chatObj.fromUsername = msg.get("fromUsername").toString();
@@ -71,7 +72,7 @@ public class ChatService {
 		chatObj.toUsername = msg.get("toUsername").toString();
 		chatObj.message = msg.get("message").toString();
 	
-		application.sendPrivateMessage(chatObj);
+		application.sendPrivateMessage(meetingID,chatObj);
 
 	}
 
