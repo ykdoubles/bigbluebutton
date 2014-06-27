@@ -26,10 +26,12 @@ import org.red5.server.api.Red5;
 import org.red5.server.api.scope.IScope;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;import org.bigbluebutton.conference.User;
+import java.util.Map;
+import org.bigbluebutton.conference.User;
 
 public class ParticipantsService {
 
@@ -90,6 +92,21 @@ public class ParticipantsService {
 		return participants;
 	}
 	//Modified by gaodun.com
+
+    public List<String> getBlackList(){
+        String roomName = Red5.getConnectionLocal().getScope().getName();
+        List<String> list = application.getBlackList(roomName);
+        return list;
+    }
+
+    public void addBlackList(String uid){
+        String roomName = Red5.getConnectionLocal().getScope().getName();
+        application.addBlackList(roomName,uid);
+    }
+    public void removeBlackUser(String uid){
+        String roomName = Red5.getConnectionLocal().getScope().getName();
+        application.removeBlackUser(roomName,uid);
+    }
 	public Boolean destroyRoom(){
 		String roomName = Red5.getConnectionLocal().getScope().getName();
 		return application.destroyRoom(roomName);

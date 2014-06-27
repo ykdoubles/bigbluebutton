@@ -37,14 +37,14 @@ public class VideoApplication extends MultiThreadedApplicationAdapter {
 	private IScope appScope;
 	private IServerStream serverStream;
 	
-	private boolean recordVideoStream = false;
+	private boolean recordVideoStream = true;
 	private EventRecordingService recordingService;
 	private final Map<String, IStreamListener> streamListeners = new HashMap<String, IStreamListener>();
 	
     @Override
 	public boolean appStart(IScope app) {
 	    super.appStart(app);
-		log.info("oflaDemo appStart");
+		log.info("oflaDemo appStart:"+app.getName());
 		System.out.println("oflaDemo appStart");    	
 		appScope = app;
 		return true;
@@ -52,7 +52,7 @@ public class VideoApplication extends MultiThreadedApplicationAdapter {
 
     @Override
 	public boolean appConnect(IConnection conn, Object[] params) {
-		log.info("oflaDemo appConnect"); 
+		log.info("oflaDemo appConnect:"+conn.getScope().getName()); 
 		return super.appConnect(conn, params);
 	}
 
@@ -64,7 +64,7 @@ public class VideoApplication extends MultiThreadedApplicationAdapter {
 		}
 		super.appDisconnect(conn);
 	}
-    
+
     @Override
     public void streamPublishStart(IBroadcastStream stream) {
     	super.streamPublishStart(stream);
@@ -74,7 +74,7 @@ public class VideoApplication extends MultiThreadedApplicationAdapter {
     public void streamBroadcastStart(IBroadcastStream stream) {
     	IConnection conn = Red5.getConnectionLocal();  
     	super.streamBroadcastStart(stream);
-    	log.info("streamBroadcastStart " + stream.getPublishedName() + " " + System.currentTimeMillis() + " " + conn.getScope().getName());
+    	log.info("streamBroadcastStart " + stream.getPublishedName() + " " + System.currentTimeMillis() + " " + conn.getScope().getName()+" "+stream.getScope().getName());
 
         if (recordVideoStream) {
 	    	recordStream(stream);
@@ -82,6 +82,7 @@ public class VideoApplication extends MultiThreadedApplicationAdapter {
 	        listener.setEventRecordingService(recordingService);
 	        stream.addStreamListener(listener); 
 	        streamListeners.put(conn.getScope().getName() + "-" + stream.getPublishedName(), listener);
+            log.info("------------------videoStart:"+conn.getScope().getName());
         }
     }
 

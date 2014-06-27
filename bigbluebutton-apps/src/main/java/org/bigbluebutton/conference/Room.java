@@ -21,6 +21,7 @@ package org.bigbluebutton.conference;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,7 +42,8 @@ public class Room implements Serializable {
 	ArrayList<String> currentPresenter = null;
 	private String name;
 	private Map <String, User> participants;
-	private Boolean locked;
+	private List<String> blacklist;
+    private Boolean locked;
 	private LockSettings lockSettings = null;
 	private Boolean recording = false;
 
@@ -55,6 +57,7 @@ public class Room implements Serializable {
 		this.lockSettings = lockSettings;
 		
 		participants = new ConcurrentHashMap<String, User>();
+        blacklist = new ArrayList<String>();
 		//unmodifiableMap = Collections.unmodifiableMap(participants);
 		listeners   = new ConcurrentHashMap<String, IRoomListener>();
 	}
@@ -91,7 +94,19 @@ public class Room implements Serializable {
 		}
 		return "";
 	}
-
+    public void addBlackList(String uid){
+        blacklist.add(uid);
+    }
+    public void removeBlackUser(String uid){
+         for (int i = 0; i < blacklist.size(); i++) {
+            String id = blacklist.get(i);
+            if(uid.equals(id))
+            {
+                blacklist.remove(i);
+                break;
+            }
+         }
+    }
 	public void addParticipant(User participant) {
 		synchronized (this) {
 			String tk = userExist(participant);
@@ -170,7 +185,9 @@ public class Room implements Serializable {
 			listener.endAndKickAll();
 		}
 	}
-
+    public List<String> getBlackList(){
+        return blacklist;
+    }
 	public Map<String, User> getParticipants() {
 		return participants;//unmodifiableMap;
 	}	

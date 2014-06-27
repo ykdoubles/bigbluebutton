@@ -21,11 +21,14 @@ package org.bigbluebutton.conference.service.participants;
 import org.slf4j.Logger;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
-import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.bigbluebutton.conference.ConnectionInvokerService;
 import org.bigbluebutton.conference.RoomsManager;
-import org.bigbluebutton.conference.Room;import org.bigbluebutton.conference.User;import org.bigbluebutton.conference.IRoomListener;
+import org.bigbluebutton.conference.Room;
+import org.bigbluebutton.conference.User;
+import org.bigbluebutton.conference.IRoomListener;
 import org.bigbluebutton.conference.service.lock.LockSettings;
 
 public class ParticipantsApplication {
@@ -83,7 +86,31 @@ public class ParticipantsApplication {
 
 		return roomsManager.getParticipants(roomName);
 	}
-	
+    //added by gaodun.com
+    public List<String> getBlackList(String roomName){
+        if (roomsManager.hasRoom(roomName)) {
+          Room room = roomsManager.getRoom(roomName);
+          return room.getBlackList();
+        }                           
+        return null;
+   }
+                                            
+    public boolean addBlackList(String roomName, String uid){
+        if (roomsManager.hasRoom(roomName)) {
+           Room room = roomsManager.getRoom(roomName);
+           room.addBlackList(uid);
+           return true;
+        }                                                                                                                     
+        return false;
+   }
+    public boolean removeBlackUser(String roomName, String uid){
+          if (roomsManager.hasRoom(roomName)) {
+               Room room = roomsManager.getRoom(roomName);
+               room.removeBlackUser(uid);
+               return true;
+          }                                                           
+          return false;
+    }	
 	public boolean participantLeft(String roomName, String userid) {
 		log.debug("Participant " + userid + " leaving room " + roomName);
 		if (roomsManager.hasRoom(roomName)) {
